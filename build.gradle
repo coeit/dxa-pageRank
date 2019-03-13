@@ -1,0 +1,44 @@
+apply plugin: 'java'
+
+group 'de.hhu.bsinfo'
+version '1.0'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+repositories {
+    mavenCentral()
+
+    maven() {
+        url "https://dl.bintray.com/hhu-bsinfo/dxram"
+    }
+
+    maven {
+        url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
+    }
+}
+
+configurations {
+    providedImplementation
+}
+
+compileJava {
+    sourceSets.main.compileClasspath += configurations.providedImplementation
+}
+
+dependencies {
+    providedImplementation 'de.hhu.bsinfo:dxram:0.8.0' + (Boolean.valueOf(System.getProperty("release")) ? "" : "-SNAPSHOT")
+
+    testImplementation 'junit:junit:4.12'
+}
+
+jar {
+    archiveName 'dxa-helloworld.jar'
+    from {
+        configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = "4.10"
+}
