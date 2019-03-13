@@ -5,8 +5,8 @@ import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxram.boot.BootService;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
 import de.hhu.bsinfo.dxapp.chunk.*;
-import de.hhu.bsinfo.dxram.job.AbstractJob;
-//import de.hhu.bsinfo.dxram.job.Job;
+//import de.hhu.bsinfo.dxram.job.AbstractJob;
+import de.hhu.bsinfo.dxram.job.Job;
 import de.hhu.bsinfo.dxram.ms.ComputeRole;
 import de.hhu.bsinfo.dxram.ms.MasterSlaveComputeService;
 import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class InputJob extends AbstractJob {
+public class InputJob extends Job {
 
     //public static final short MS_TYPE_ID = 3;
 
