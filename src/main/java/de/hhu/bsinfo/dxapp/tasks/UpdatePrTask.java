@@ -1,12 +1,15 @@
 package de.hhu.bsinfo.dxapp.tasks;
 
+import de.hhu.bsinfo.dxapp.chunk.IntegerChunk;
 import de.hhu.bsinfo.dxram.boot.BootService;
+import de.hhu.bsinfo.dxram.chunk.ChunkLocalService;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
 import de.hhu.bsinfo.dxapp.chunk.PageRankInVertex;
 import de.hhu.bsinfo.dxram.ms.Signal;
 import de.hhu.bsinfo.dxram.ms.Task;
 import de.hhu.bsinfo.dxram.ms.TaskContext;
 import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
+import de.hhu.bsinfo.dxutils.NodeID;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
 
@@ -38,17 +41,19 @@ public class UpdatePrTask implements Task {
         //Iterable<Long> iterable = () -> localchunks;
         /**Spliterator size known?**/
         StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0).trySplit(),true).forEach(p_cid -> voteCnt.getAndAdd(updatePR(p_cid, p_ctx)));
-        int ret = voteCnt.get();
-        System.out.println("VOTES: " + voteCnt);
+        /*IntegerChunk chunk = new IntegerChunk(nameService.getChunkID(NodeID.toHexString(bootService.getNodeID()).substring(2,6),333));
+        chunk.set_value(voteCnt.get());
+        chunkService.put().put(chunk);
+        System.out.println(NodeID.toHexString(bootService.getNodeID()) + " VOTES: " + voteCnt);*/
         return 0;
     }
 
     public int updatePR(Long p_cid, TaskContext p_ctx){
         ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
-        //ChunkLocalService chunkLocalService = p_ctx.getDXRAMServiceAccessor().getService(ChunkLocalService.class);
+        ChunkLocalService chunkLocalService = p_ctx.getDXRAMServiceAccessor().getService(ChunkLocalService.class);
         PageRankInVertex vertex = new PageRankInVertex(p_cid);
-        chunkService.get().get(vertex);
-        //chunkLocalService.getLocal().get(vertex);
+        //chunkService.get().get(vertex);
+        chunkLocalService.getLocal().get(vertex);
         double err = vertex.getM_currPR() - vertex.getM_tmpPR();
         int ret = 0;
         if(Math.abs(err) < 0.02){ ret = 1;}

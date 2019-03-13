@@ -11,6 +11,7 @@ import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
 import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxram.app.AbstractApplication;
+//import de.hhu.bsinfo.dxram.app.Application;
 import de.hhu.bsinfo.dxram.app.ApplicationService;
 import de.hhu.bsinfo.dxram.boot.BootService;
 import de.hhu.bsinfo.dxram.chunk.ChunkLocalService;
@@ -61,15 +62,21 @@ public class MainPR extends AbstractApplication {
         ApplicationService applicationService = getService(ApplicationService.class);
         FunctionService functionService = getService(FunctionService.class);
 
-        short input_nid = computeService.getStatusMaster().getConnectedSlaves().get(0);
+        short input_nid = computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0);
 
         InputJob inputJob = new InputJob(p_args[0]);
-        jobService.pushJobRemote(inputJob, computeService.getStatusMaster().getConnectedSlaves().get(0));
+        jobService.pushJobRemote(inputJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();
+
+        /*for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
+            IntegerChunk chunk = new IntegerChunk();
+            chunkService.create().create(nodeID,chunk);
+            nameService.register(chunk,NodeID.toHexString(nodeID).substring(2,6));
+        }*/
 
         IntegerChunk vCnt = new IntegerChunk(nameService.getChunkID("vCnt",333));
         chunkService.get().get(vCnt);
-        int N = vCnt.getM_value();
+        int N = vCnt.get_value();
         System.out.println("nid: " + bootService.getNodeID() + " VERTEX COUNT: " + N);
 
         TaskListener listener = new TaskListener() {
@@ -88,31 +95,44 @@ public class MainPR extends AbstractApplication {
         SendPrTask SendPRpar = new SendPrTask(N,DAMPING_FACTOR);
         UpdatePrTask updatePR = new UpdatePrTask();
 
+
+        //TaskScript taskScriptSend = new TaskScript(SendPRpar);
+        //TaskScript taskScriptUpdate = new TaskScript(updatePR);
+
         TaskScript taskScript = new TaskScript(SendPRpar,updatePR);
         //TaskScript taskScript = new TaskScript(PRInfo,SendPRpar,updatePR,PRInfo,SendPRpar,updatePR,PRInfo,SendPRpar,updatePR,PRInfo);
         //TaskScript taskScript = new TaskScript(SendPR,updatePR,SendPR,updatePR,SendPR,updatePR,PRInfo);
         // TaskScript taskScript = new TaskScript(PRInfo,SendPRpar,updatePR,SendPRpar,updatePR,SendPRpar,updatePR,SendPRpar,updatePR,SendPRpar,updatePR,PRInfo);
-
         for (int i = 0; i < 10; i++) {
             int votes = 0;
             TaskScriptState state = computeService.submitTaskScript(taskScript, (short) 0, listener);
-            while (!state.hasTaskCompleted()) {
+            while (!state.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0) {
                 try {
                     Thread.sleep(100);
                 } catch (final InterruptedException ignore) {
 
                 }
             }
-            for (int nodeVoteCnt : state.getExecutionReturnCodes()){
-                votes += nodeVoteCnt;
+            /*TaskScriptState state1 = computeService.submitTaskScript(taskScriptUpdate,(short) 0,listener);
+            while (!state1.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0) {
+                try {
+                    Thread.sleep(100);
+                } catch (final InterruptedException ignore) {
+
+                }
+            }*/
+            /*for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
+                IntegerChunk integerChunk = new IntegerChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
+                System.out.println(NodeID.toHexString(nodeID) + " votes: " + integerChunk.get_value());
+                votes += integerChunk.get_value();
             }
             if((double) votes / (double) N >= 0.8){
                 break;
-            }
+            }*/
         }
 	    TaskScript PRInfoTaskScript = new TaskScript(PRInfo);
-	    computeService.submitTaskScript(PRInfoTaskScript, (short) 0, listener);
-        while (computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0) {
+	    TaskScriptState PRInfoTaskScriptState = computeService.submitTaskScript(PRInfoTaskScript, (short) 0, listener);
+        while (!PRInfoTaskScriptState.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0) {
             try {
                 Thread.sleep(100);
             } catch (final InterruptedException ignore) {

@@ -9,6 +9,11 @@ public class IntegerChunk extends AbstractChunk {
 
     private int m_value;
 
+    public IntegerChunk(){
+        super();
+        this.m_value = 0;
+    }
+
     public IntegerChunk(int m_value) {
         super();
         this.m_value = m_value;
@@ -18,8 +23,12 @@ public class IntegerChunk extends AbstractChunk {
         super(p_chunkID);
     }
 
-    public int getM_value() {
+    public int get_value() {
         return m_value;
+    }
+
+    public void set_value(int m_value) {
+        this.m_value = m_value;
     }
 
     @Override
