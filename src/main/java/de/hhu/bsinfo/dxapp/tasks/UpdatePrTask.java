@@ -59,7 +59,7 @@ public class UpdatePrTask implements Task {
         if(Math.abs(err) < 0.02){ ret = 1;}
         vertex.updatePR();
         chunkService.put().put(vertex);
-        System.out.println(vertex.get_name() + " VOTE: " + ret);
+        //System.out.println(vertex.get_name() + " VOTE: " + ret);
         return ret;
     }
 

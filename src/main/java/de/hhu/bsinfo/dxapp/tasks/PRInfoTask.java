@@ -2,6 +2,7 @@ package de.hhu.bsinfo.dxapp.tasks;
 
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxram.boot.BootService;
+import de.hhu.bsinfo.dxram.chunk.ChunkLocalService;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
 import de.hhu.bsinfo.dxapp.chunk.PageRankInVertex;
 import de.hhu.bsinfo.dxram.ms.MasterSlaveComputeService;
@@ -16,6 +17,8 @@ import de.hhu.bsinfo.dxutils.serialization.Importer;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Spliterators;
+import java.util.stream.StreamSupport;
 
 public class PRInfoTask implements Task {
 
@@ -24,14 +27,19 @@ public class PRInfoTask implements Task {
 
     @Override
     public int execute(TaskContext p_ctx) {
-        ChunkService m_chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
-        NameserviceService m_nameService = p_ctx.getDXRAMServiceAccessor().getService(NameserviceService.class);
-        BootService m_bootService = p_ctx.getDXRAMServiceAccessor().getService(BootService.class);
-        MasterSlaveComputeService m_computeService = p_ctx.getDXRAMServiceAccessor().getService(MasterSlaveComputeService.class);
-
+        ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
+        BootService bootService = p_ctx.getDXRAMServiceAccessor().getService(BootService.class);
+        //MasterSlaveComputeService computeService = p_ctx.getDXRAMServiceAccessor().getService(MasterSlaveComputeService.class);
         ArrayList<String> nids = new ArrayList<>();
 
-        for (short nid : m_bootService.getOnlinePeerNodeIDs()){
+
+        Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
+        localchunks.next();
+        StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0),false).forEach(p_cid -> printInfo(p_cid,p_ctx));
+
+
+
+        /*for (short nid : m_bootService.getOnlinePeerNodeIDs()){
             String n_id = NodeID.toHexString(nid).substring(2,6);
             nids.add(n_id);
         }
@@ -59,30 +67,18 @@ public class PRInfoTask implements Task {
                 System.out.println("=====");
             }
 
-        }
-
-
-
-        /*for (NameserviceEntryStr vertexPR : m_nameService.getAllEntries()){
-
-            //if (!vertexPR.getName().equals(NodeID.toHexString(m_bootService.getNodeID()).substring(2,6))) {
-            if(!nids.contains(vertexPR.getName())){
-                PageRankInVertex vert = new PageRankInVertex(m_nameService.getChunkID(vertexPR.getName(),100));
-                m_chunkService.get().get(vert);
-                //System.out.print(vertexPR.getName() + ": " + vert.getM_currPR());
-                //System.out.print(vertexPR.getName() + ": " + ChunkID.toHexString(m_nameService.getChunkID(vertexPR.getName(),100)) + ": ");
-                for (Long i : vert.getM_inEdges()){
-                    System.out.print(i + " ");
-                }
-                System.out.println("\noutdeg: " + vert.getM_outDeg());// + " " + vert.get_indegAlt());
-                System.out.println("PR: " + vert.getM_currPR());
-                System.out.println("size: " + vert.sizeofObject());
-                System.out.println("=====");
-            }
-
         }*/
-
         return 0;
+    }
+
+    public void printInfo(Long p_cid, TaskContext p_ctx){
+        ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
+        ChunkLocalService chunkLocalService = p_ctx.getDXRAMServiceAccessor().getService(ChunkLocalService.class);
+
+        PageRankInVertex vert = new PageRankInVertex(p_cid);
+        chunkLocalService.getLocal().get(vert);
+
+        System.out.println(vert.get_name() + " * " + vert.getM_currPR());
     }
 
     @Override

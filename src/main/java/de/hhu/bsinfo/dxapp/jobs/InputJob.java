@@ -62,13 +62,13 @@ public class InputJob extends AbstractJob {
                 if(!chunkMap.containsKey(Integer.parseInt(split[0]))){
                     PageRankInVertex tmp = new PageRankInVertex(Integer.parseInt(split[0]));
                     chunkMap.put(Integer.parseInt(split[0]), tmp);
-                    System.out.println(split[0] + " : " + ChunkID.toHexString(correspondingChunkID(Integer.parseInt(split[0]),slaveIDs)));
+                    //System.out.println(split[0] + " : " + ChunkID.toHexString(correspondingChunkID(Integer.parseInt(split[0]),slaveIDs)));
                     vertexCnt++;
                 }
                 if(!chunkMap.containsKey(Integer.parseInt(split[1]))){
                     PageRankInVertex tmp = new PageRankInVertex(Integer.parseInt(split[1]));
                     chunkMap.put(Integer.parseInt(split[1]), tmp);
-                    System.out.println(split[1] + " : " + ChunkID.toHexString(correspondingChunkID(Integer.parseInt(split[1]),slaveIDs)));
+                    //System.out.println(split[1] + " : " + ChunkID.toHexString(correspondingChunkID(Integer.parseInt(split[1]),slaveIDs)));
                     vertexCnt++;
                 }
                 //increase outdeg with writelockpreop
@@ -93,7 +93,7 @@ public class InputJob extends AbstractJob {
             //chunkMap.get(vertexPR).invokeVertexPR(chunkMap.keySet().size());
             chunkMap.get(vertexPR).invokeVertexPR(chunkCnt);
             chunkService.create().create(slaveIDs.get(slaveIndex % slaveIDs.size()),chunkMap.get(vertexPR));
-            System.out.println(vertexPR + " :: " + ChunkID.toHexString(chunkMap.get(vertexPR).getID()));
+            //System.out.println(vertexPR + " :: " + ChunkID.toHexString(chunkMap.get(vertexPR).getID()));
             //m_nameService.register(chunkMap.get(vertexPR), vertexPR.toString());
             slaveIndex++;
             chunkService.put().put(chunkMap.get(vertexPR));
