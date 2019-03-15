@@ -81,7 +81,7 @@ public class PRInfoTask implements Task {
         chunkLocalService.getLocal().get(vert);
 
         BigDecimal b = new BigDecimal(vert.getM_currPR());
-        System.out.println(vert.get_name() + " * " + BigDecimal.valueOf(vert.getM_currPR()).toPlainString());
+        //System.out.println(vert.get_name() + " * " + BigDecimal.valueOf(vert.getM_currPR()).toPlainString());
         System.out.println(vert.get_name() + " * " + b.toString());
     }
 
