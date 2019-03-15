@@ -41,10 +41,10 @@ public class UpdatePrTask implements Task {
         //Iterable<Long> iterable = () -> localchunks;
         /**Spliterator size known?**/
         StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0).trySplit(),true).forEach(p_cid -> voteCnt.getAndAdd(updatePR(p_cid, p_ctx)));
-        /*IntegerChunk chunk = new IntegerChunk(nameService.getChunkID(NodeID.toHexString(bootService.getNodeID()).substring(2,6),333));
+        IntegerChunk chunk = new IntegerChunk(nameService.getChunkID(NodeID.toHexString(bootService.getNodeID()).substring(2,6),333));
         chunk.set_value(voteCnt.get());
         chunkService.put().put(chunk);
-        System.out.println(NodeID.toHexString(bootService.getNodeID()) + " VOTES: " + voteCnt);*/
+        System.out.println(NodeID.toHexString(bootService.getNodeID()) + " VOTES: " + voteCnt);
         return 0;
     }
 

@@ -49,12 +49,11 @@ public class SendPrTask implements Task {
     }
 
     public void getIncomingPR(Long p_cid, TaskContext p_ctx, int vertexCount, double damping){
-
         ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
+        ChunkLocalService chunkLocalService = p_ctx.getDXRAMServiceAccessor().getService(ChunkLocalService.class);
         PageRankInVertex vertex = new PageRankInVertex(p_cid);
 
-
-        chunkService.get().get(vertex);
+        chunkLocalService.getLocal().get(vertex);
         //System.out.println(ChunkID.toHexString(m_vertex.getID()));
         long incidenceList[] = vertex.getM_inEdges();
         for (int i = 0; i < incidenceList.length; i++) {

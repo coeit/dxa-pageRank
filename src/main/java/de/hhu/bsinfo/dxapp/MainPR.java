@@ -68,11 +68,11 @@ public class MainPR extends AbstractApplication {
         jobService.pushJobRemote(inputJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();
 
-        /*for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
+        for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
             IntegerChunk chunk = new IntegerChunk();
-            chunkService.create().create(nodeID,chunk);
+            chunkService.create().create(bootService.getNodeID(),chunk);
             nameService.register(chunk,NodeID.toHexString(nodeID).substring(2,6));
-        }*/
+        }
 
         IntegerChunk vCnt = new IntegerChunk(nameService.getChunkID("vCnt",333));
         chunkService.get().get(vCnt);
@@ -121,14 +121,15 @@ public class MainPR extends AbstractApplication {
 
                 }
             }*/
-            /*for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
+            for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
                 IntegerChunk integerChunk = new IntegerChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
                 System.out.println(NodeID.toHexString(nodeID) + " votes: " + integerChunk.get_value());
                 votes += integerChunk.get_value();
             }
             if((double) votes / (double) N >= 0.8){
+                System.out.println(">>Reached vote halting limit in round " + i);
                 break;
-            }*/
+            }
         }
 	    TaskScript PRInfoTaskScript = new TaskScript(PRInfo);
 	    TaskScriptState PRInfoTaskScriptState = computeService.submitTaskScript(PRInfoTaskScript, (short) 0, listener);
