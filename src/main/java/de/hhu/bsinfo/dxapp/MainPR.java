@@ -64,9 +64,14 @@ public class MainPR extends AbstractApplication {
 
         short input_nid = computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0);
 
+        long startTime = System.nanoTime();
+
         InputJob inputJob = new InputJob(p_args[0]);
         jobService.pushJobRemote(inputJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();
+
+        long diffTime = System.nanoTime() - startTime;
+        System.out.println("Timer InputJob: " + diffTime);
 
         for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
             IntegerChunk chunk = new IntegerChunk();
@@ -103,6 +108,7 @@ public class MainPR extends AbstractApplication {
         //TaskScript taskScript = new TaskScript(PRInfo,SendPRpar,updatePR,PRInfo,SendPRpar,updatePR,PRInfo,SendPRpar,updatePR,PRInfo);
         //TaskScript taskScript = new TaskScript(SendPR,updatePR,SendPR,updatePR,SendPR,updatePR,PRInfo);
         // TaskScript taskScript = new TaskScript(PRInfo,SendPRpar,updatePR,SendPRpar,updatePR,SendPRpar,updatePR,SendPRpar,updatePR,SendPRpar,updatePR,PRInfo);
+        startTime = System.nanoTime();
         for (int i = 0; i < 10; i++) {
             int votes = 0;
             TaskScriptState state = computeService.submitTaskScript(taskScript, (short) 0, listener);
@@ -132,6 +138,8 @@ public class MainPR extends AbstractApplication {
                 break;
             }
         }
+        diffTime = System.nanoTime() - startTime;
+        System.out.printf("Timer Computation: " + diffTime);
 	    TaskScript PRInfoTaskScript = new TaskScript(PRInfo);
 	    TaskScriptState PRInfoTaskScriptState = computeService.submitTaskScript(PRInfoTaskScript, (short) 0, listener);
         while (!PRInfoTaskScriptState.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0) {

@@ -56,7 +56,7 @@ public class UpdatePrTask implements Task {
         chunkLocalService.getLocal().get(vertex);
         double err = vertex.getM_currPR() - vertex.getM_tmpPR();
         int ret = 0;
-        if(Math.abs(err) < 0.02){ ret = 1;}
+        if(Math.abs(err) < 0.001){ ret = 1;}
         vertex.updatePR();
         chunkService.put().put(vertex);
         //System.out.println(vertex.get_name() + " VOTE: " + ret);
