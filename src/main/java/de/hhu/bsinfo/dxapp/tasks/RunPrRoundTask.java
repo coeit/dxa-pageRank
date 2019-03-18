@@ -17,6 +17,7 @@ import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
 import de.hhu.bsinfo.dxutils.NodeID;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
+import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -95,6 +96,7 @@ public class RunPrRoundTask implements Task {
         //p_exporter.writeInt(NUM_THREADS);
         p_exporter.writeInt(N);
         p_exporter.writeDouble(DAMP);
+        p_exporter.writeBoolean(m_flag);
     }
 
     @Override
@@ -102,10 +104,11 @@ public class RunPrRoundTask implements Task {
         //NUM_THREADS = p_importer.readInt(NUM_THREADS);
         N = p_importer.readInt(N);
         DAMP = p_importer.readDouble(DAMP);
+        m_flag = p_importer.readBoolean(m_flag);
     }
 
     @Override
     public int sizeofObject() {
-        return Integer.BYTES + Double.BYTES;
+        return Integer.BYTES + Double.BYTES + ObjectSizeUtil.sizeofBoolean();
     }
 }
