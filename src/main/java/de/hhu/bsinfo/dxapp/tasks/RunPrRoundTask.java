@@ -70,6 +70,7 @@ public class RunPrRoundTask implements Task {
                 tmpPR += tmpChunk.getPR1()/(double)tmpChunk.getOutDeg();
             }
             vertex.calcPR2(N,DAMP,tmpPR);
+            System.out.println("# " + vertex.getPR2());
         } else {
             for (int i = 0; i < incidenceList.length; i++) {
                 //System.out.print("---" + ChunkID.toHexString(incidenceList[i]) + "---");
@@ -78,6 +79,7 @@ public class RunPrRoundTask implements Task {
                 tmpPR += tmpChunk.getPR2()/(double)tmpChunk.getOutDeg();
             }
             vertex.calcPR1(N,DAMP,tmpPR);
+            System.out.println("# " + vertex.getPR1());
         }
         //System.out.println("# " + vertex.getM_tmpPR());
         chunkService.put().put(vertex);
