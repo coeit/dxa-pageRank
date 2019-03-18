@@ -11,6 +11,7 @@ import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
 import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxram.app.AbstractApplication;
+import de.hhu.bsinfo.dxram.app.AbstractApplication;
 //import de.hhu.bsinfo.dxram.app.Application;
 import de.hhu.bsinfo.dxram.app.ApplicationService;
 import de.hhu.bsinfo.dxram.boot.BootService;
@@ -53,7 +54,6 @@ public class MainPR extends AbstractApplication {
     @Override
     public void main(final String[] p_args) {
         double DAMPING_FACTOR = 0.85;
-
         BootService bootService = getService(BootService.class);
         ChunkService chunkService = getService(ChunkService.class);
         NameserviceService nameService = getService(NameserviceService.class);
@@ -100,17 +100,21 @@ public class MainPR extends AbstractApplication {
         SendPrTask SendPRpar = new SendPrTask(N,DAMPING_FACTOR);
         UpdatePrTask updatePR = new UpdatePrTask();
 
+        RunPrRoundTask Run1 = new RunPrRoundTask(N,DAMPING_FACTOR,false);
+        RunPrRoundTask Run2 = new RunPrRoundTask(N,DAMPING_FACTOR,true);
+
 
         //TaskScript taskScriptSend = new TaskScript(SendPRpar);
         //TaskScript taskScriptUpdate = new TaskScript(updatePR);
 
-        TaskScript taskScript = new TaskScript(SendPRpar,updatePR);
+        //TaskScript taskScript = new TaskScript(SendPRpar,updatePR);
+        TaskScript taskScript = new TaskScript(Run1,Run2);
         //TaskScript taskScript = new TaskScript(PRInfo,SendPRpar,updatePR,PRInfo,SendPRpar,updatePR,PRInfo,SendPRpar,updatePR,PRInfo);
         //TaskScript taskScript = new TaskScript(SendPR,updatePR,SendPR,updatePR,SendPR,updatePR,PRInfo);
         // TaskScript taskScript = new TaskScript(PRInfo,SendPRpar,updatePR,SendPRpar,updatePR,SendPRpar,updatePR,SendPRpar,updatePR,SendPRpar,updatePR,PRInfo);
         startTime = System.nanoTime();
         for (int i = 0; i < 10; i++) {
-            int votes = 0;
+            //int votes = 0;
             TaskScriptState state = computeService.submitTaskScript(taskScript, (short) 0, listener);
             while (!state.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0) {
                 try {
@@ -127,7 +131,7 @@ public class MainPR extends AbstractApplication {
 
                 }
             }*/
-            for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
+            /*for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
                 IntegerChunk integerChunk = new IntegerChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
                 chunkService.get().get(integerChunk);
                 System.out.println(NodeID.toHexString(nodeID) + " votes: " + integerChunk.get_value());
@@ -136,7 +140,7 @@ public class MainPR extends AbstractApplication {
             if((double) votes / (double) N >= 0.8){
                 System.out.println(">>Reached vote halting limit in round " + i);
                 break;
-            }
+            }*/
         }
         diffTime = System.nanoTime() - startTime;
         System.out.printf("Timer Computation: " + diffTime);

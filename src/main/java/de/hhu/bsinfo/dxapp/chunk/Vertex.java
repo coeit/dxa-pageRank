@@ -7,26 +7,26 @@ import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 
 import java.util.Arrays;
 
-public class PageRankInVertex extends AbstractChunk {
+public class Vertex extends AbstractChunk {
     //private int[] m_inEdges = new int[0];
     private long[] m_inEdges = new long[0];
-    private double m_currPR = 0.0;
-    private double m_tmpPR = 0.0;
+    private double m_PR1 = 0.0;
+    private double m_PR2 = 0.0;
     private int m_outDeg = 0;
     private int m_name;
 
 
-    public PageRankInVertex(int p_name) {
+    public Vertex(int p_name) {
         super();
         m_name = p_name;
     }
 
-    public PageRankInVertex(final long p_id){
+    public Vertex(final long p_id){
         super(p_id);
     }
 
     public void invokeVertexPR(int N) {
-        m_currPR = 1/(double) N;
+        m_PR1 = 1/(double) N;
         if(m_outDeg == 0){
             m_outDeg = N;
         }
@@ -52,36 +52,24 @@ public class PageRankInVertex extends AbstractChunk {
 
     }
 
-    public void addIncPR(double p_PR){
-        m_tmpPR += p_PR;
+    public void calcPR1(int N, double D, double p_tmpPR){
+        m_PR1 = (1 - D)/N + D * p_tmpPR;
     }
 
-    public void calcPR(int N, double D){
-        m_tmpPR = (1 - D)/N + D * m_tmpPR;
+    public void calcPR2(int N, double D, double p_tmpPR){
+        m_PR2 = (1 - D)/N + D * p_tmpPR;
     }
 
-    public void updatePR(){
-        m_currPR = m_tmpPR;
-        m_tmpPR = 0.0;
-    }
 
     public int getOutDeg(){return m_outDeg;}
 
-    public double getCurrPR(){
-        return m_currPR;
+    public double getPR1(){
+        return m_PR1;
     }
 
-    public double getTmpPR(){
-        return m_tmpPR;
+    public double getPR2(){
+        return m_PR2;
     }
-
-    public void setM_currPR(double p_newPR){
-        m_currPR = p_newPR;
-    }
-
-    /*public void setM_prevPR(){
-        m_prevPR = m_currPR;
-    }*/
 
     public long[] getM_inEdges(){
         return m_inEdges;
@@ -94,8 +82,8 @@ public class PageRankInVertex extends AbstractChunk {
 
     @Override
     public void exportObject(Exporter p_exporter) {
-        p_exporter.writeDouble(m_currPR);
-        p_exporter.writeDouble(m_tmpPR);
+        p_exporter.writeDouble(m_PR1);
+        p_exporter.writeDouble(m_PR2);
         p_exporter.writeInt(m_outDeg);
         p_exporter.writeInt(m_name);
         p_exporter.writeLongArray(m_inEdges);
@@ -103,8 +91,8 @@ public class PageRankInVertex extends AbstractChunk {
 
     @Override
     public void importObject(Importer p_importer) {
-        m_currPR = p_importer.readDouble(m_currPR);
-        m_tmpPR = p_importer.readDouble(m_tmpPR);
+        m_PR1 = p_importer.readDouble(m_PR1);
+        m_PR2 = p_importer.readDouble(m_PR2);
         m_outDeg = p_importer.readInt(m_outDeg);
         m_name = p_importer.readInt(m_name);
         m_inEdges = p_importer.readLongArray(m_inEdges);

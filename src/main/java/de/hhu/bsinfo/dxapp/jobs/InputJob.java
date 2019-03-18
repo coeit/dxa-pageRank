@@ -46,7 +46,7 @@ public class InputJob extends AbstractJob {
         BootService m_bootService = getService(BootService.class);
 
         int vertexCnt = 0;
-        HashMap<Integer, PageRankInVertex> chunkMap = new HashMap<>();
+        HashMap<Integer, Vertex> chunkMap = new HashMap<>();
         //String filename = "/home/cons/data_s.txt";
         //String filename = "/home/cons/Desktop/hollins.dat_";
         //m_vertexCount = 8;
@@ -60,13 +60,13 @@ public class InputJob extends AbstractJob {
                 String[] split = line.split(" ");
 
                 if(!chunkMap.containsKey(Integer.parseInt(split[0]))){
-                    PageRankInVertex tmp = new PageRankInVertex(Integer.parseInt(split[0]));
+                    Vertex tmp = new Vertex(Integer.parseInt(split[0]));
                     chunkMap.put(Integer.parseInt(split[0]), tmp);
                     //System.out.println(split[0] + " : " + ChunkID.toHexString(correspondingChunkID(Integer.parseInt(split[0]),slaveIDs)));
                     vertexCnt++;
                 }
                 if(!chunkMap.containsKey(Integer.parseInt(split[1]))){
-                    PageRankInVertex tmp = new PageRankInVertex(Integer.parseInt(split[1]));
+                    Vertex tmp = new Vertex(Integer.parseInt(split[1]));
                     chunkMap.put(Integer.parseInt(split[1]), tmp);
                     //System.out.println(split[1] + " : " + ChunkID.toHexString(correspondingChunkID(Integer.parseInt(split[1]),slaveIDs)));
                     vertexCnt++;
