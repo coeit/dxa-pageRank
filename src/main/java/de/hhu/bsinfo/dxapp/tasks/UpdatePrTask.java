@@ -54,7 +54,7 @@ public class UpdatePrTask implements Task {
         PageRankInVertex vertex = new PageRankInVertex(p_cid);
         //chunkService.get().get(vertex);
         chunkLocalService.getLocal().get(vertex);
-        double err = vertex.getM_currPR() - vertex.getM_tmpPR();
+        double err = vertex.getCurrPR() - vertex.getTmpPR();
         int ret = 0;
         if(Math.abs(err) < 0.001){ ret = 1;}
         vertex.updatePR();

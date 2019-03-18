@@ -1,5 +1,6 @@
 package de.hhu.bsinfo.dxapp.tasks;
 
+import de.hhu.bsinfo.dxapp.chunk.Vertex;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxram.boot.BootService;
 import de.hhu.bsinfo.dxram.chunk.ChunkLocalService;
@@ -77,10 +78,10 @@ public class PRInfoTask implements Task {
         ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
         ChunkLocalService chunkLocalService = p_ctx.getDXRAMServiceAccessor().getService(ChunkLocalService.class);
 
-        PageRankInVertex vert = new PageRankInVertex(p_cid);
+        Vertex vert = new Vertex(p_cid);
         chunkLocalService.getLocal().get(vert);
 
-        BigDecimal b = new BigDecimal(vert.getM_currPR());
+        BigDecimal b = new BigDecimal(vert.getPR1());
         //System.out.println(vert.get_name() + " * " + BigDecimal.valueOf(vert.getM_currPR()).toPlainString());
         System.out.println(vert.get_name() + " * " + b.toString());
     }
