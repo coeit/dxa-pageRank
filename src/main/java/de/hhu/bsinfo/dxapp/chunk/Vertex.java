@@ -15,6 +15,9 @@ public class Vertex extends AbstractChunk {
     private int m_outDeg = 0;
     private int m_name;
 
+    public Vertex(){
+        super();
+    }
 
     public Vertex(int p_name) {
         super();
