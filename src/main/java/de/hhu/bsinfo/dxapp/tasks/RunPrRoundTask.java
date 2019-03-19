@@ -67,7 +67,7 @@ public class RunPrRoundTask implements Task {
         double tmpPR = 0.0;
         if(!m_flag){
             for (int i = 0; i < incidenceList.length; i++) {
-                neighbors[i].setID(incidenceList[i]);
+                neighbors[i] = new Vertex(incidenceList[i]);
             }
             chunkService.get().get(neighbors);
             for(Vertex tmp : neighbors){
@@ -82,7 +82,7 @@ public class RunPrRoundTask implements Task {
             //System.out.println("#1 " + vertex.getPR2());
         } else {
             for (int i = 0; i < incidenceList.length; i++) {
-                neighbors[i].setID(incidenceList[i]);
+                neighbors[i] = new Vertex(incidenceList[i]);
             }
             chunkService.get().get(neighbors);
             for(Vertex tmp : neighbors){
