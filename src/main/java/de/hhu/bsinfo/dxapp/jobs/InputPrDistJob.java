@@ -1,4 +1,4 @@
-package de.hhu.bsinfo.dxapp.jobs;
+/*package de.hhu.bsinfo.dxapp.jobs;
 
 import de.hhu.bsinfo.dxapp.chunk.PageRankInVertex;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
@@ -61,7 +61,7 @@ public class InputPrDistJob extends AbstractJob {
             e.printStackTrace();
         }
 
-        /*for (Integer vertexPR : chunkMap.keySet()) {
+        for (Integer vertexPR : chunkMap.keySet()) {
             //chunkMap.get(vertexPR).invokeVertexPR(chunkMap.keySet().size());
             System.out.println(vertexPR);
             chunkMap.get(vertexPR).invokeVertexPR(chunkCnt);
@@ -91,7 +91,7 @@ public class InputPrDistJob extends AbstractJob {
                     }
                 }
             }
-        }*/
+        }
     }
 
     public long correspondingChunkID(int p_vertex, ArrayList<Short> slaveIDs){
@@ -116,3 +116,4 @@ public class InputPrDistJob extends AbstractJob {
         return super.sizeofObject();
     }
 }
+*/

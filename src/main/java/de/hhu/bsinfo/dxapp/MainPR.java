@@ -11,7 +11,6 @@ import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
 import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxram.app.AbstractApplication;
-import de.hhu.bsinfo.dxram.app.AbstractApplication;
 //import de.hhu.bsinfo.dxram.app.Application;
 import de.hhu.bsinfo.dxram.app.ApplicationService;
 import de.hhu.bsinfo.dxram.boot.BootService;

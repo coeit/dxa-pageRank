@@ -50,10 +50,10 @@ public class RunPrRoundTask implements Task {
 
         Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
         localchunks.next();
-        //StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0).trySplit(),true).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));
-        StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0) ,false).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));
+        StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0).trySplit(),true).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));
+        //StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0) ,false).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));
 
-        return 0;   
+        return 0;
     }
 
     public void getIncomingPR(Long p_cid, TaskContext p_ctx, int vertexCount, double damping){
@@ -62,25 +62,38 @@ public class RunPrRoundTask implements Task {
         Vertex vertex = new Vertex(p_cid);
 
         chunkLocalService.getLocal().get(vertex);
-        //System.out.println(ChunkID.toHexString(m_vertex.getID()));
         long incidenceList[] = vertex.getM_inEdges();
+        Vertex[] neighbors = new Vertex[incidenceList.length];
         double tmpPR = 0.0;
         if(!m_flag){
             for (int i = 0; i < incidenceList.length; i++) {
-                //System.out.print("---" + ChunkID.toHexString(incidenceList[i]) + "---");
+                neighbors[i].setID(incidenceList[i]);
+            }
+            chunkService.get().get(neighbors);
+            for(Vertex tmp : neighbors){
+                tmpPR += tmp.getPR1()/(double)tmp.getOutDeg();
+            }
+            /*for (int i = 0; i < incidenceList.length; i++) {
                 Vertex tmpChunk = new Vertex(incidenceList[i]);
                 chunkService.get().get(tmpChunk);
                 tmpPR += tmpChunk.getPR1()/(double)tmpChunk.getOutDeg();
-            }
+            }*/
             vertex.calcPR2(N,DAMP,tmpPR);
             //System.out.println("#1 " + vertex.getPR2());
         } else {
             for (int i = 0; i < incidenceList.length; i++) {
-                //System.out.print("---" + ChunkID.toHexString(incidenceList[i]) + "---");
+                neighbors[i].setID(incidenceList[i]);
+            }
+            chunkService.get().get(neighbors);
+            for(Vertex tmp : neighbors){
+                tmpPR += tmp.getPR1()/(double)tmp.getOutDeg();
+            }
+
+            /*for (int i = 0; i < incidenceList.length; i++) {
                 Vertex tmpChunk = new Vertex(incidenceList[i]);
                 chunkService.get().get(tmpChunk);
                 tmpPR += tmpChunk.getPR2()/(double)tmpChunk.getOutDeg();
-            }
+            }*/
             vertex.calcPR1(N,DAMP,tmpPR);
             //System.out.println("#2 " + vertex.getPR1());
         }
