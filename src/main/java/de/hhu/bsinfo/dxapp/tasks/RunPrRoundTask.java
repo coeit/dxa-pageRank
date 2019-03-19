@@ -50,8 +50,10 @@ public class RunPrRoundTask implements Task {
 
         Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
         localchunks.next();
-        StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0).trySplit(),true).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));
-        return 0;
+        //StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0).trySplit(),true).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));
+        StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0) ,false).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));
+
+        return 0;   
     }
 
     public void getIncomingPR(Long p_cid, TaskContext p_ctx, int vertexCount, double damping){
@@ -71,7 +73,7 @@ public class RunPrRoundTask implements Task {
                 tmpPR += tmpChunk.getPR1()/(double)tmpChunk.getOutDeg();
             }
             vertex.calcPR2(N,DAMP,tmpPR);
-            System.out.println("#1 " + vertex.getPR2());
+            //System.out.println("#1 " + vertex.getPR2());
         } else {
             for (int i = 0; i < incidenceList.length; i++) {
                 //System.out.print("---" + ChunkID.toHexString(incidenceList[i]) + "---");
@@ -80,7 +82,7 @@ public class RunPrRoundTask implements Task {
                 tmpPR += tmpChunk.getPR2()/(double)tmpChunk.getOutDeg();
             }
             vertex.calcPR1(N,DAMP,tmpPR);
-            System.out.println("#2 " + vertex.getPR1());
+            //System.out.println("#2 " + vertex.getPR1());
         }
         //System.out.println("# " + vertex.getM_tmpPR());
         chunkService.put().put(vertex);
