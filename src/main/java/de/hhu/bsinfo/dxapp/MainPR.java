@@ -124,18 +124,19 @@ public class MainPR extends AbstractApplication {
 
                 }
             }
-            for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
+            RoundVotes.add(votes);
+            /*for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
                 IntegerChunk integerChunk = new IntegerChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
                 chunkService.get().get(integerChunk);
                 //System.out.println(NodeID.toHexString(nodeID) + " votes: " + integerChunk.get_value());
                 votes += integerChunk.get_value();
             }
-            RoundVotes.add(votes);
+
             NumRounds++;
             if((double) votes / (double) N >= 0.9){
                 //System.out.println(">>Reached vote halting limit in round " + i);
                 break;
-            }
+            }*/
         }
         stopwatch.stop();
         //System.out.println("Timer Computation: " + stopwatch.getTimeStr());
