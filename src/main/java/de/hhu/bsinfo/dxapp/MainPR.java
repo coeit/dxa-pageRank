@@ -61,7 +61,7 @@ public class MainPR extends AbstractApplication {
         MasterSlaveComputeService computeService = getService(MasterSlaveComputeService.class);
         JobService jobService = getService(JobService.class);
 
-        createOutputDirs();
+        String outDir = createOutputDirs();
 
         Stopwatch stopwatch = new Stopwatch();
 
@@ -94,7 +94,6 @@ public class MainPR extends AbstractApplication {
             }
         };
 
-        PRInfoTask PRInfo = new PRInfoTask();
         SendPrTask SendPRpar = new SendPrTask(N,DAMPING_FACTOR);
         UpdatePrTask updatePR = new UpdatePrTask();
 
@@ -142,6 +141,8 @@ public class MainPR extends AbstractApplication {
         }
         stopwatch.stop();
         System.out.println("Timer Computation: " + stopwatch.getTimeStr());
+
+        PRInfoTask PRInfo = new PRInfoTask(outDir);
 	    TaskScript PRInfoTaskScript = new TaskScript(PRInfo);
 	    TaskScriptState PRInfoTaskScriptState = computeService.submitTaskScript(PRInfoTaskScript, (short) 0, listener);
         while (!PRInfoTaskScriptState.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0) {
@@ -153,7 +154,7 @@ public class MainPR extends AbstractApplication {
         }
     }
 
-    public void createOutputDirs(){
+    public String createOutputDirs(){
         String HOME = System.getProperty("user.home");
         File PrOutDir = new File(HOME + "/" + "dxa-pageRank_out");
 
@@ -163,7 +164,8 @@ public class MainPR extends AbstractApplication {
         String out = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss").format(new Date());
         File outDir = new File(PrOutDir + "/" + out);
         outDir.mkdir();
-
+        String ret = new String(PrOutDir + "/" + out);
+        return ret;
     }
 
 

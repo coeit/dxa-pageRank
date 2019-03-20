@@ -38,14 +38,14 @@ public class PRInfoTask implements Task {
     }
 
     public PRInfoTask(String p_outDir){
-
+        m_outDir = p_outDir;
     }
 
     @Override
     public int execute(TaskContext p_ctx) {
         ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
         BootService bootService = p_ctx.getDXRAMServiceAccessor().getService(BootService.class);
-
+        System.out.println("OUTDIR: " + m_outDir);
         Vertex[] vertex = new Vertex[chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).size()];
         System.out.println("getAllLocalChunkIDRanges.size: " + chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).size());
         System.out.println("getTotalLIDsInStore: " + chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getTotalLIDsInStore());
