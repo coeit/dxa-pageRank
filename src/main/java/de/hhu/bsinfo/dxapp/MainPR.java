@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
 import de.hhu.bsinfo.dxmem.core.CIDTable;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
@@ -73,7 +74,7 @@ public class MainPR extends AbstractApplication {
         //System.out.println("Timer InputJob: " + stopwatch.getTimeStr());
         long InputTime = stopwatch.getTime();
         for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
-            IntegerChunk chunk = new IntegerChunk();
+            VoteChunk chunk = new VoteChunk();
             chunkService.create().create(bootService.getNodeID(),chunk);
             nameService.register(chunk,NodeID.toHexString(nodeID).substring(2,6));
         }
@@ -113,9 +114,11 @@ public class MainPR extends AbstractApplication {
 
         ArrayList<Integer> RoundVotes = new ArrayList<>();
         int NumRounds = 0;
+        double PRsum = 0.0;
         stopwatch.start();
         for (int i = 0; i < 10; i++) {
             int votes = 0;
+            PRsum = 0.0;
             TaskScriptState state = computeService.submitTaskScript(taskScript, (short) 0, listener);
             while (!state.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0) {
                 try {
@@ -124,19 +127,22 @@ public class MainPR extends AbstractApplication {
 
                 }
             }
-            RoundVotes.add(votes);
-            /*for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
-                IntegerChunk integerChunk = new IntegerChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
-                chunkService.get().get(integerChunk);
+
+            for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
+                VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
+                chunkService.get().get(voteChunk);
                 //System.out.println(NodeID.toHexString(nodeID) + " votes: " + integerChunk.get_value());
-                votes += integerChunk.get_value();
+                votes += voteChunk.getVotes();
+                PRsum += voteChunk.getPRsum();
             }
 
+            RoundVotes.add(votes);
             NumRounds++;
+
             if((double) votes / (double) N >= 0.9){
                 //System.out.println(">>Reached vote halting limit in round " + i);
                 break;
-            }*/
+            }
         }
         stopwatch.stop();
         //System.out.println("Timer Computation: " + stopwatch.getTimeStr());
@@ -153,7 +159,7 @@ public class MainPR extends AbstractApplication {
         }
 
         int[] RoundVotesArr = RoundVotes.stream().mapToInt(i -> i).toArray();
-        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,InputTime,ExecutionTime,NumRounds,RoundVotesArr);
+        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,InputTime,ExecutionTime,NumRounds,PRsum,RoundVotesArr);
         jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();
 

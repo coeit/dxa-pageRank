@@ -1,6 +1,7 @@
 package de.hhu.bsinfo.dxapp.tasks;
 
 import de.hhu.bsinfo.dxapp.chunk.Vertex;
+import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkIDRanges;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
@@ -22,6 +23,7 @@ import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Spliterators;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -31,6 +33,7 @@ public class RunPrRoundTask implements Task {
     private int N;
     private double DAMP;
     private boolean m_flag;
+    private double m_PRsum;
 
     public RunPrRoundTask(){}
 
@@ -53,7 +56,8 @@ public class RunPrRoundTask implements Task {
         localchunks.next();
         StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0).trySplit(),true).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));*/
         //StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0) ,false).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));
-
+        m_PRsum = 0.0;
+        final AtomicInteger voteCnt = new AtomicInteger(0);
         Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
         //Spliterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).spliterator();
         localchunks.next();
@@ -67,17 +71,23 @@ public class RunPrRoundTask implements Task {
         //chunkService.get().get(localVertices);
         chunkLocalService.getLocal().get(localVertices);
 
-        Stream.of(localVertices).parallel().forEach(localVertex -> getIncomingPR(localVertex,p_ctx));
+        Stream.of(localVertices).parallel().forEach(localVertex -> voteCnt.getAndAdd(getIncomingPR(localVertex,p_ctx)));
+
+        VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(bootService.getNodeID()).substring(2,6),333));
+        voteChunk.setVotes(voteCnt.get());
+        voteChunk.setPRsum(m_PRsum);
+        chunkService.put().put(voteChunk);
 
         return 0;
     }
 
-    public void getIncomingPR(Vertex p_vertex, TaskContext p_ctx){
+    public int getIncomingPR(Vertex p_vertex, TaskContext p_ctx){
         ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
         /*ChunkLocalService chunkLocalService = p_ctx.getDXRAMServiceAccessor().getService(ChunkLocalService.class);
         Vertex vertex = new Vertex(p_cid);
 
         chunkLocalService.getLocal().get(vertex);*/
+        int ret = 0;
         long incidenceList[] = p_vertex.getM_inEdges();
         Vertex[] neighbors = new Vertex[incidenceList.length];
         double tmpPR = 0.0;
@@ -85,36 +95,38 @@ public class RunPrRoundTask implements Task {
             for (int i = 0; i < incidenceList.length; i++) {
                 neighbors[i] = new Vertex(incidenceList[i]);
             }
+
             chunkService.get().get(neighbors);
+
             for(Vertex tmp : neighbors){
                 tmpPR += tmp.getPR1()/(double)tmp.getOutDeg();
             }
-            /*for (int i = 0; i < incidenceList.length; i++) {
-                Vertex tmpChunk = new Vertex(incidenceList[i]);
-                chunkService.get().get(tmpChunk);
-                tmpPR += tmpChunk.getPR1()/(double)tmpChunk.getOutDeg();
-            }*/
             p_vertex.calcPR2(N,DAMP,tmpPR);
-            //System.out.println("#1 " + vertex.getPR2());
+            m_PRsum += p_vertex.getPR2();
+
+            double err = p_vertex.getPR2() - p_vertex.getPR1();
+            if(Math.abs(err) < 0.001){ ret = 1;}
+
         } else {
             for (int i = 0; i < incidenceList.length; i++) {
                 neighbors[i] = new Vertex(incidenceList[i]);
             }
+
             chunkService.get().get(neighbors);
+
             for(Vertex tmp : neighbors){
                 tmpPR += tmp.getPR2()/(double)tmp.getOutDeg();
             }
 
-            /*for (int i = 0; i < incidenceList.length; i++) {
-                Vertex tmpChunk = new Vertex(incidenceList[i]);
-                chunkService.get().get(tmpChunk);
-                tmpPR += tmpChunk.getPR2()/(double)tmpChunk.getOutDeg();
-            }*/
             p_vertex.calcPR1(N,DAMP,tmpPR);
-            //System.out.println("#2 " + vertex.getPR1());
+            m_PRsum += p_vertex.getPR1();
+
+            double err = p_vertex.getPR1() - p_vertex.getPR2();
+            if(Math.abs(err) < 0.001){ ret = 1;}
         }
-        //System.out.println("# " + vertex.getM_tmpPR());
         chunkService.put().put(p_vertex);
+
+        return ret;
     }
 
     @Override
