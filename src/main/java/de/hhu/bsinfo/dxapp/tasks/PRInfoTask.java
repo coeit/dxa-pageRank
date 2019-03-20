@@ -18,14 +18,21 @@ import de.hhu.bsinfo.dxutils.serialization.Importer;
 import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import java.math.BigDecimal;
@@ -46,25 +53,54 @@ public class PRInfoTask implements Task {
         ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
         BootService bootService = p_ctx.getDXRAMServiceAccessor().getService(BootService.class);
         System.out.println("OUTDIR: " + m_outDir);
-        Vertex[] vertex = new Vertex[chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).size()];
-        System.out.println("getAllLocalChunkIDRanges.size: " + chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).size());
-        System.out.println("getTotalLIDsInStore: " + chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getTotalLIDsInStore());
-        System.out.println("getTotalCidsOfRanges: " + chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).getTotalCidsOfRanges());
-        System.out.println("getCurrentLIDCounter: " + chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getCurrentLIDCounter());
-        System.out.println("getCIDTableStatus().getTotalTableCount(): " + chunkService.status().getStatus(bootService.getNodeID()).getCIDTableStatus().getTotalTableCount());
-        /*for (int i = 0; i < vertex.length; i++) {
-            vertex[i] = new Vertex(incidenceList[i]);
-        }*/
+
+        String outPath = m_outDir + "/" + NodeID.toHexString(bootService.getNodeID()).substring(2,6) + "_pageRank.out";
+        File outFile = new File(outPath);
+        try {
+            outFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Path p = Paths.get(outPath);
 
         Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
         //Spliterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).spliterator();
         localchunks.next();
-        StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0),false).forEach(p_cid -> printInfo(p_cid,p_ctx));
 
-        /*try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("filename.txt"), "utf-8"))) {
-        } catch (IOException e){
+        Vertex[] localVertices = new Vertex[(int)chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getCurrentLIDCounter()];
+
+        for (int i = 0; i < localVertices.length; i++) {
+            localVertices[i] = new Vertex(localchunks.next());
+        }
+
+        chunkService.get().get(localVertices);
+
+        try (BufferedWriter writer = Files.newBufferedWriter(p))
+        {
+            Stream.of(localVertices).forEach(localVertex -> {
+                try {
+                    printInfo(localVertex,writer);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        /*Writer writer = null;
+        try {
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(m_outDir + "/" + NodeID.toHexString(bootService.getNodeID()).substring(2,6) + "_pageRank.out"), "utf-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }*/
+
+
+        //StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0),false).forEach(p_cid -> printInfo(p_cid,));
+
+
 
 
 
@@ -100,16 +136,17 @@ public class PRInfoTask implements Task {
         return 0;
     }
 
-    public void printInfo(Long p_cid, TaskContext p_ctx){
-        ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
+    public void printInfo(Vertex vertex, Writer writer) throws IOException {
+        /*ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
         ChunkLocalService chunkLocalService = p_ctx.getDXRAMServiceAccessor().getService(ChunkLocalService.class);
 
         Vertex vert = new Vertex(p_cid);
         chunkLocalService.getLocal().get(vert);
-
-        BigDecimal b = new BigDecimal(vert.getPR1());
+        */
+        BigDecimal b = new BigDecimal(vertex.getPR1());
         //System.out.println(vert.get_name() + " * " + BigDecimal.valueOf(vert.getM_currPR()).toPlainString());
-        System.out.println(vert.get_name() + " * " + b.toString());
+        //System.out.println(vertex.get_name() + " * " + b.toString());
+        writer.write(vertex.get_name() + " * " + BigDecimal.valueOf(vertex.getPR1()).toPlainString());
     }
 
     @Override

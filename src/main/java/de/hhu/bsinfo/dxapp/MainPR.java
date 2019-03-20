@@ -161,7 +161,7 @@ public class MainPR extends AbstractApplication {
         if (!PrOutDir.exists()){
             PrOutDir.mkdir();
         }
-        String out = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss").format(new Date());
+        String out = new SimpleDateFormat("dxa-pageRank_yyyy-MM-dd_hh-mm-ss").format(new Date());
         File outDir = new File(PrOutDir + "/" + out);
         outDir.mkdir();
         String ret = new String(PrOutDir + "/" + out);
