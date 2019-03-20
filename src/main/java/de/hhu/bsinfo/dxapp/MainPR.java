@@ -70,7 +70,8 @@ public class MainPR extends AbstractApplication {
         jobService.pushJobRemote(inputJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();
         stopwatch.stop();
-        System.out.println("Timer InputJob: " + stopwatch.getTimeStr());
+        //System.out.println("Timer InputJob: " + stopwatch.getTimeStr());
+        long InputTime = stopwatch.getTime();
         for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
             IntegerChunk chunk = new IntegerChunk();
             chunkService.create().create(bootService.getNodeID(),chunk);
@@ -109,9 +110,12 @@ public class MainPR extends AbstractApplication {
         //TaskScript taskScript = new TaskScript(PRInfo,SendPRpar,updatePR,PRInfo,SendPRpar,updatePR,PRInfo,SendPRpar,updatePR,PRInfo);
         //TaskScript taskScript = new TaskScript(SendPR,updatePR,SendPR,updatePR,SendPR,updatePR,PRInfo);
         // TaskScript taskScript = new TaskScript(PRInfo,SendPRpar,updatePR,SendPRpar,updatePR,SendPRpar,updatePR,SendPRpar,updatePR,SendPRpar,updatePR,PRInfo);
+
+        ArrayList<Integer> RoundVotes = new ArrayList<>();
+        int NumRounds = 0;
         stopwatch.start();
         for (int i = 0; i < 10; i++) {
-            //int votes = 0;
+            int votes = 0;
             TaskScriptState state = computeService.submitTaskScript(taskScript, (short) 0, listener);
             while (!state.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0) {
                 try {
@@ -120,28 +124,22 @@ public class MainPR extends AbstractApplication {
 
                 }
             }
-            /*TaskScriptState state1 = computeService.submitTaskScript(taskScriptUpdate,(short) 0,listener);
-            while (!state1.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0) {
-                try {
-                    Thread.sleep(100);
-                } catch (final InterruptedException ignore) {
-
-                }
-            }*/
-            /*for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
+            for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
                 IntegerChunk integerChunk = new IntegerChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
                 chunkService.get().get(integerChunk);
-                System.out.println(NodeID.toHexString(nodeID) + " votes: " + integerChunk.get_value());
+                //System.out.println(NodeID.toHexString(nodeID) + " votes: " + integerChunk.get_value());
                 votes += integerChunk.get_value();
             }
-            if((double) votes / (double) N >= 0.8){
-                System.out.println(">>Reached vote halting limit in round " + i);
+            RoundVotes.add(votes);
+            NumRounds++;
+            if((double) votes / (double) N >= 0.9){
+                //System.out.println(">>Reached vote halting limit in round " + i);
                 break;
-            }*/
+            }
         }
         stopwatch.stop();
-        System.out.println("Timer Computation: " + stopwatch.getTimeStr());
-
+        //System.out.println("Timer Computation: " + stopwatch.getTimeStr());
+        long ExecutionTime = stopwatch.getTime();
         PRInfoTask PRInfo = new PRInfoTask(outDir);
 	    TaskScript PRInfoTaskScript = new TaskScript(PRInfo);
 	    TaskScriptState PRInfoTaskScriptState = computeService.submitTaskScript(PRInfoTaskScript, (short) 0, listener);
@@ -152,6 +150,12 @@ public class MainPR extends AbstractApplication {
 
             }
         }
+
+        int[] RoundVotesArr = RoundVotes.stream().mapToInt(i -> i).toArray();
+        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,InputTime,ExecutionTime,NumRounds,RoundVotesArr);
+        jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
+        jobService.waitForAllJobsToFinish();
+
     }
 
     public String createOutputDirs(){

@@ -52,9 +52,8 @@ public class PRInfoTask implements Task {
     public int execute(TaskContext p_ctx) {
         ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
         BootService bootService = p_ctx.getDXRAMServiceAccessor().getService(BootService.class);
-        System.out.println("OUTDIR: " + m_outDir);
-
-        String outPath = m_outDir + "/" + NodeID.toHexString(bootService.getNodeID()).substring(2,6) + "_pageRank.out";
+        String outPath = m_outDir + "/" + NodeID.toHexStringShort(bootService.getNodeID());
+        System.out.println(outPath);
         File outFile = new File(outPath);
         try {
             outFile.createNewFile();
@@ -88,51 +87,6 @@ public class PRInfoTask implements Task {
             e.printStackTrace();
         }
 
-        /*Writer writer = null;
-        try {
-            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(m_outDir + "/" + NodeID.toHexString(bootService.getNodeID()).substring(2,6) + "_pageRank.out"), "utf-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }*/
-
-
-        //StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0),false).forEach(p_cid -> printInfo(p_cid,));
-
-
-
-
-
-        /*for (short nid : m_bootService.getOnlinePeerNodeIDs()){
-            String n_id = NodeID.toHexString(nid).substring(2,6);
-            nids.add(n_id);
-        }
-
-        ArrayList<Short> slaveIDs = m_computeService.getStatusMaster((short) 0).getConnectedSlaves();
-
-
-        for (short slaveID : slaveIDs){
-            Iterator<Long> localChunks = m_chunkService.cidStatus().getAllLocalChunkIDRanges(slaveID).iterator();
-            //if (!vertexPR.getName().equals(NodeID.toHexString(m_bootService.getNodeID()).substring(2,6))) {
-            //if(!nids.contains(vertexPR.getName())){
-            localChunks.next();
-            while(localChunks.hasNext()){
-                //PageRankInVertex vert = new PageRankInVertex(m_nameService.getChunkID(vertexPR.getName(),100));
-                PageRankInVertex vert = new PageRankInVertex(localChunks.next());
-                m_chunkService.get().get(vert);
-		        System.out.print(vert.get_name() + ": ");
-                //System.out.print(vertexPR.getName() + ": " + vert.getM_currPR());
-                //System.out.print(vertexPR.getName() + ": " + ChunkID.toHexString(m_nameService.getChunkID(vertexPR.getName(),100)) + ": ");
-                for (Long i : vert.getM_inEdges()){
-                    System.out.print(ChunkID.toHexString(i) + " ");
-                }
-                System.out.println("\noutdeg: " + vert.getM_outDeg());// + " " + vert.get_indegAlt());
-                System.out.println("PR: " + vert.getM_currPR());
-                System.out.println("=====");
-            }
-
-        }*/
         return 0;
     }
 
