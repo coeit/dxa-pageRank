@@ -49,6 +49,9 @@ public class PRInfoTask implements Task {
         Vertex[] vertex = new Vertex[chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).size()];
         System.out.println("getAllLocalChunkIDRanges.size: " + chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).size());
         System.out.println("getTotalLIDsInStore: " + chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getTotalLIDsInStore());
+        System.out.println("getTotalCidsOfRanges: " + chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).getTotalCidsOfRanges());
+        System.out.println("getCurrentLIDCounter: " + chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getCurrentLIDCounter());
+        System.out.println("getCIDTableStatus().getTotalTableCount(): " + chunkService.status().getStatus(bootService.getNodeID()).getCIDTableStatus().getTotalTableCount());
         /*for (int i = 0; i < vertex.length; i++) {
             vertex[i] = new Vertex(incidenceList[i]);
         }*/
