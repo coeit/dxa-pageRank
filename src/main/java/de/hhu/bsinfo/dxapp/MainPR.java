@@ -139,7 +139,7 @@ public class MainPR extends AbstractApplication {
             RoundVotes.add(votes);
             NumRounds++;
 
-            if((double) votes / (double) N >= 0.9 && i > 1){
+            if((double) votes / (double) N >= 0.9 && i > 2){
                 //System.out.println(">>Reached vote halting limit in round " + i);
                 break;
             }
