@@ -105,7 +105,7 @@ public class RunPrRoundTask implements Task {
             m_PRsum += p_vertex.getPR2();
 
             double err = p_vertex.getPR2() - p_vertex.getPR1();
-            if(Math.abs(err) < 0.001){ ret = 1;}
+            if(Math.abs(err) < 0.000001){ ret = 1;}
 
         } else {
             for (int i = 0; i < incidenceList.length; i++) {
