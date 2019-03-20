@@ -1,7 +1,10 @@
 package de.hhu.bsinfo.dxapp;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -57,10 +60,8 @@ public class MainPR extends AbstractApplication {
         NameserviceService nameService = getService(NameserviceService.class);
         MasterSlaveComputeService computeService = getService(MasterSlaveComputeService.class);
         JobService jobService = getService(JobService.class);
-        ApplicationService applicationService = getService(ApplicationService.class);
-        FunctionService functionService = getService(FunctionService.class);
 
-        short input_nid = computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0);
+        createOutputDirs();
 
         Stopwatch stopwatch = new Stopwatch();
 
@@ -150,6 +151,19 @@ public class MainPR extends AbstractApplication {
 
             }
         }
+    }
+
+    public void createOutputDirs(){
+        String HOME = System.getProperty("user.home");
+        File PrOutDir = new File(HOME + "/" + "dxa-pageRank_out");
+
+        if (!PrOutDir.exists()){
+            PrOutDir.mkdir();
+        }
+        String out = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss").format(new Date());
+        File outDir = new File(PrOutDir + "/" + out);
+        outDir.mkdir();
+
     }
 
 

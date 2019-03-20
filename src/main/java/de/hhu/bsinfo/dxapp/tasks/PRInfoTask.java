@@ -15,9 +15,16 @@ import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
 import de.hhu.bsinfo.dxutils.NodeID;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
+import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.StreamSupport;
 
@@ -25,20 +32,36 @@ import java.math.BigDecimal;
 
 public class PRInfoTask implements Task {
 
+    String m_outDir;
+
     public PRInfoTask(){
+    }
+
+    public PRInfoTask(String p_outDir){
+
     }
 
     @Override
     public int execute(TaskContext p_ctx) {
         ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
         BootService bootService = p_ctx.getDXRAMServiceAccessor().getService(BootService.class);
-        //MasterSlaveComputeService computeService = p_ctx.getDXRAMServiceAccessor().getService(MasterSlaveComputeService.class);
-        ArrayList<String> nids = new ArrayList<>();
 
+        Vertex[] vertex = new Vertex[chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).size()];
+        System.out.println("getAllLocalChunkIDRanges.size: " + chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).size());
+        System.out.println("getTotalLIDsInStore: " + chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getTotalLIDsInStore());
+        /*for (int i = 0; i < vertex.length; i++) {
+            vertex[i] = new Vertex(incidenceList[i]);
+        }*/
 
         Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
+        //Spliterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).spliterator();
         localchunks.next();
         StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0),false).forEach(p_cid -> printInfo(p_cid,p_ctx));
+
+        /*try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("filename.txt"), "utf-8"))) {
+        } catch (IOException e){
+            e.printStackTrace();
+        }*/
 
 
 
@@ -93,16 +116,16 @@ public class PRInfoTask implements Task {
 
     @Override
     public void exportObject(Exporter p_exporter) {
-
+        p_exporter.writeString(m_outDir);
     }
 
     @Override
     public void importObject(Importer p_importer) {
-
+        m_outDir = p_importer.readString(m_outDir);
     }
 
     @Override
     public int sizeofObject() {
-        return 0;
+        return ObjectSizeUtil.sizeofString(m_outDir);
     }
 }

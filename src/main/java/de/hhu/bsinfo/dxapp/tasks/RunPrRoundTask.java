@@ -47,7 +47,7 @@ public class RunPrRoundTask implements Task {
         ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
         NameserviceService nameService = p_ctx.getDXRAMServiceAccessor().getService(NameserviceService.class);
         //ChunkIDRanges localChunkIDRangesIt = chunkService.cidStatus().getAllLocalChunkIDRanges(m_bootService.getNodeID());
-
+        /**try getting all local chunks in advance**/
         Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
         localchunks.next();
         StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0).trySplit(),true).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));
@@ -86,7 +86,7 @@ public class RunPrRoundTask implements Task {
             }
             chunkService.get().get(neighbors);
             for(Vertex tmp : neighbors){
-                tmpPR += tmp.getPR1()/(double)tmp.getOutDeg();
+                tmpPR += tmp.getPR2()/(double)tmp.getOutDeg();
             }
 
             /*for (int i = 0; i < incidenceList.length; i++) {
