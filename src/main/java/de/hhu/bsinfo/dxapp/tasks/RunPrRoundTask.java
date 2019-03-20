@@ -122,7 +122,7 @@ public class RunPrRoundTask implements Task {
             m_PRsum += p_vertex.getPR1();
 
             double err = p_vertex.getPR1() - p_vertex.getPR2();
-            if(Math.abs(err) < 0.001){ ret = 1;}
+            if(Math.abs(err) < 0.000001){ ret = 1;}
         }
         chunkService.put().put(p_vertex);
 
