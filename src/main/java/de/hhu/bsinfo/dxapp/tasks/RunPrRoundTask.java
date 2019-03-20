@@ -45,24 +45,40 @@ public class RunPrRoundTask implements Task {
     public int execute(TaskContext p_ctx) {
         BootService bootService = p_ctx.getDXRAMServiceAccessor().getService(BootService.class);
         ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
+        ChunkLocalService chunkLocalService = p_ctx.getDXRAMServiceAccessor().getService(ChunkLocalService.class);
         NameserviceService nameService = p_ctx.getDXRAMServiceAccessor().getService(NameserviceService.class);
         //ChunkIDRanges localChunkIDRangesIt = chunkService.cidStatus().getAllLocalChunkIDRanges(m_bootService.getNodeID());
         /**try getting all local chunks in advance**/
-        Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
+        /*Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
         localchunks.next();
-        StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0).trySplit(),true).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));
+        StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0).trySplit(),true).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));*/
         //StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0) ,false).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));
+
+        Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
+        //Spliterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).spliterator();
+        localchunks.next();
+
+        Vertex[] localVertices = new Vertex[(int)chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getCurrentLIDCounter()];
+
+        for (int i = 0; i < localVertices.length; i++) {
+            localVertices[i] = new Vertex(localchunks.next());
+        }
+
+        //chunkService.get().get(localVertices);
+        chunkLocalService.getLocal().get(localVertices);
+
+        Stream.of(localVertices).parallel().forEach(localVertex -> getIncomingPR(localVertex,p_ctx));
 
         return 0;
     }
 
-    public void getIncomingPR(Long p_cid, TaskContext p_ctx, int vertexCount, double damping){
+    public void getIncomingPR(Vertex p_vertex, TaskContext p_ctx){
         ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
-        ChunkLocalService chunkLocalService = p_ctx.getDXRAMServiceAccessor().getService(ChunkLocalService.class);
+        /*ChunkLocalService chunkLocalService = p_ctx.getDXRAMServiceAccessor().getService(ChunkLocalService.class);
         Vertex vertex = new Vertex(p_cid);
 
-        chunkLocalService.getLocal().get(vertex);
-        long incidenceList[] = vertex.getM_inEdges();
+        chunkLocalService.getLocal().get(vertex);*/
+        long incidenceList[] = p_vertex.getM_inEdges();
         Vertex[] neighbors = new Vertex[incidenceList.length];
         double tmpPR = 0.0;
         if(!m_flag){
@@ -78,7 +94,7 @@ public class RunPrRoundTask implements Task {
                 chunkService.get().get(tmpChunk);
                 tmpPR += tmpChunk.getPR1()/(double)tmpChunk.getOutDeg();
             }*/
-            vertex.calcPR2(N,DAMP,tmpPR);
+            p_vertex.calcPR2(N,DAMP,tmpPR);
             //System.out.println("#1 " + vertex.getPR2());
         } else {
             for (int i = 0; i < incidenceList.length; i++) {
@@ -94,11 +110,11 @@ public class RunPrRoundTask implements Task {
                 chunkService.get().get(tmpChunk);
                 tmpPR += tmpChunk.getPR2()/(double)tmpChunk.getOutDeg();
             }*/
-            vertex.calcPR1(N,DAMP,tmpPR);
+            p_vertex.calcPR1(N,DAMP,tmpPR);
             //System.out.println("#2 " + vertex.getPR1());
         }
         //System.out.println("# " + vertex.getM_tmpPR());
-        chunkService.put().put(vertex);
+        chunkService.put().put(p_vertex);
     }
 
     @Override

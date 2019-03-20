@@ -79,7 +79,7 @@ public class PRInfoTask implements Task {
         {
             Stream.of(localVertices).forEach(localVertex -> {
                 try {
-                    printInfo(localVertex,writer);
+                    writer.write(localVertex.get_name() + " " + BigDecimal.valueOf(localVertex.getPR1()).toPlainString() + "\n");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -146,7 +146,7 @@ public class PRInfoTask implements Task {
         BigDecimal b = new BigDecimal(vertex.getPR1());
         //System.out.println(vert.get_name() + " * " + BigDecimal.valueOf(vert.getM_currPR()).toPlainString());
         //System.out.println(vertex.get_name() + " * " + b.toString());
-        writer.write(vertex.get_name() + " * " + BigDecimal.valueOf(vertex.getPR1()).toPlainString());
+        writer.write(vertex.get_name() + " " + BigDecimal.valueOf(vertex.getPR1()).toPlainString() + "\n");
     }
 
     @Override
