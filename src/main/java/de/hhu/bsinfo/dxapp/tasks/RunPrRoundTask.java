@@ -74,6 +74,7 @@ public class RunPrRoundTask implements Task {
         Stream.of(localVertices).parallel().forEach(localVertex -> voteCnt.getAndAdd(getIncomingPR(localVertex,p_ctx)));
 
         VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(bootService.getNodeID()).substring(2,6),333));
+        chunkService.get().get(voteChunk);
         voteChunk.setVotes(voteCnt.get());
         voteChunk.setPRsum(m_PRsum);
         chunkService.put().put(voteChunk);

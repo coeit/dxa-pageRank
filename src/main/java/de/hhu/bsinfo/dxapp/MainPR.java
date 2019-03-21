@@ -128,23 +128,19 @@ public class MainPR extends AbstractApplication {
                 }
             }
             NumRounds++;
-            if(i != 0){
-                for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
-                    VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
-                    chunkService.get().get(voteChunk);
-                    System.out.println(NodeID.toHexString(nodeID) + " votes: " + voteChunk.getVotes());
-                    votes += voteChunk.getVotes();
-                    PRsum += voteChunk.getPRsum();
-                }
-                RoundVotes.add(votes);
-
-                if((double) votes / (double) N >= 0.9 && i > 2){
-                    //System.out.println(">>Reached vote halting limit in round " + i);
-                    break;
-                }
+            for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
+                VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
+                chunkService.get().get(voteChunk);
+                System.out.println(NodeID.toHexString(nodeID) + " votes: " + voteChunk.getVotes());
+                votes += voteChunk.getVotes();
+                PRsum += voteChunk.getPRsum();
             }
+            RoundVotes.add(votes);
 
-
+            if((double) votes / (double) N >= 0.9){
+                //System.out.println(">>Reached vote halting limit in round " + i);
+                break;
+            }
 
         }
         stopwatch.stop();
