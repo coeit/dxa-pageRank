@@ -108,7 +108,7 @@ public class MainPR extends AbstractApplication {
 
         TaskScript taskScriptRun1 = new TaskScript(Run1);
         TaskScript taskScriptRun2 = new TaskScript(Run2);
-
+        
         ArrayList<Integer> RoundVotes = new ArrayList<>();
         int NumRounds = 0;
         double PRsum = 0.0;
