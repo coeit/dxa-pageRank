@@ -30,6 +30,7 @@ public class Vertex extends AbstractChunk {
 
     public void invokeVertexPR(int N) {
         m_PR1 = 1/(double) N;
+        m_PR2 = 1/(double) N;
         if(m_outDeg == 0){
             m_outDeg = N;
         }
