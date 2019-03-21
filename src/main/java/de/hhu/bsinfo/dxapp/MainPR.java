@@ -122,7 +122,7 @@ public class MainPR extends AbstractApplication {
             } else {
                 state = computeService.submitTaskScript(taskScriptRun2, (short) 0, listener);
             }
-            while (!state.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0 && state.getExecutionReturnCodes() != null) {
+            while (!state.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0 && state.getExecutionReturnCodes() == null) {
                 try {
                     Thread.sleep(100);
                 } catch (final InterruptedException ignore) {
