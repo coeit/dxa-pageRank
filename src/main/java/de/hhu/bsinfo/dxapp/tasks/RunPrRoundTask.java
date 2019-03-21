@@ -78,10 +78,6 @@ public class RunPrRoundTask implements Task {
         voteChunk.setPRsum(m_PRsum);
         chunkService.put().put(voteChunk);
 
-        VoteChunk v = new VoteChunk(nameService.getChunkID(NodeID.toHexString(bootService.getNodeID()).substring(2,6),333));
-        chunkService.get().get(v);
-        System.out.println("RunVotes: " + v.getVotes());
-
         return 0;
     }
 

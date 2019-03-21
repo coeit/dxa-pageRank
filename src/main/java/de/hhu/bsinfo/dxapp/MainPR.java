@@ -127,28 +127,25 @@ public class MainPR extends AbstractApplication {
 
                 }
             }
+            if(i != 0){
+                for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
+                    VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
+                    chunkService.get().get(voteChunk);
+                    System.out.println(NodeID.toHexString(nodeID) + " votes: " + voteChunk.getVotes());
+                    votes += voteChunk.getVotes();
+                    PRsum += voteChunk.getPRsum();
+                }
+                RoundVotes.add(votes);
+                NumRounds++;
 
-            try {
-                Thread.sleep(2000);
-            } catch (final InterruptedException ignore) {
-
+                if((double) votes / (double) N >= 0.9 && i > 2){
+                    //System.out.println(">>Reached vote halting limit in round " + i);
+                    break;
+                }
             }
 
-            for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
-                VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
-                chunkService.get().get(voteChunk);
-                System.out.println(NodeID.toHexString(nodeID) + " votes: " + voteChunk.getVotes());
-                votes += voteChunk.getVotes();
-                PRsum += voteChunk.getPRsum();
-            }
 
-            RoundVotes.add(votes);
-            NumRounds++;
 
-            if((double) votes / (double) N >= 0.9 && i > 2){
-                //System.out.println(">>Reached vote halting limit in round " + i);
-                break;
-            }
         }
         stopwatch.stop();
         //System.out.println("Timer Computation: " + stopwatch.getTimeStr());
