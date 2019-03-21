@@ -108,7 +108,7 @@ public class MainPR extends AbstractApplication {
 
         TaskScript taskScriptRun1 = new TaskScript(Run1);
         TaskScript taskScriptRun2 = new TaskScript(Run2);
-        
+
         ArrayList<Integer> RoundVotes = new ArrayList<>();
         int NumRounds = 0;
         double PRsum = 0.0;
@@ -122,7 +122,6 @@ public class MainPR extends AbstractApplication {
             } else {
                 state = computeService.submitTaskScript(taskScriptRun2, (short) 0, listener);
             }
-
             while (!state.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0 && state.getExecutionReturnCodes() == null) {
                 try {
                     Thread.sleep(100);
@@ -134,7 +133,7 @@ public class MainPR extends AbstractApplication {
 
             for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
                 VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
-                chunkService.get().get(voteChunk);
+                chunkService.get().get(voteChunk,ChunkLockOperation.READ_LOCK_ACQ_PRE_OP,-1);
                 System.out.println(NodeID.toHexString(nodeID) + " votes Round " + i  + ": " + voteChunk.getVotes());
                 votes += voteChunk.getVotes();
                 PRsum += voteChunk.getPRsum();

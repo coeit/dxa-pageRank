@@ -57,8 +57,7 @@ public class RunPrRoundTask implements Task {
         StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0).trySplit(),true).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));*/
         //StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0) ,false).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));
         VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(bootService.getNodeID()).substring(2,6),333));
-        chunkService.get().get(voteChunk);
-        chunkService.lock().lock(true,false,-1,voteChunk);
+        chunkService.get().get(voteChunk,ChunkLockOperation.READ_LOCK_ACQ_PRE_OP);
 
         m_PRsum = 0.0;
         final AtomicInteger voteCnt = new AtomicInteger(0);
@@ -80,8 +79,7 @@ public class RunPrRoundTask implements Task {
 
         voteChunk.setVotes(voteCnt.get());
         voteChunk.setPRsum(m_PRsum);
-        chunkService.put().put(voteChunk);
-        chunkService.lock().lock(false,false,333,voteChunk);
+        chunkService.put().put(voteChunk,ChunkLockOperation.READ_LOCK_REL_POST_OP);
         System.out.println("RunPr: " + voteChunk.getVotes());
 
         return 0;
