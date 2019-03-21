@@ -129,6 +129,15 @@ public class MainPR extends AbstractApplication {
 
                 }
             }
+
+            if(i == 0){
+                try {
+                    Thread.sleep(100);
+                } catch (final InterruptedException ignore) {
+
+                }
+            }
+
             NumRounds++;
             for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
                 VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
