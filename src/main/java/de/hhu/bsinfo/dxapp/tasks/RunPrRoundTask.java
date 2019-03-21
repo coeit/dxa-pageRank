@@ -82,7 +82,7 @@ public class RunPrRoundTask implements Task {
         voteChunk.incVotes(voteCnt.get());
         voteChunk.incPrSum(m_PRsum);
         chunkService.put().put(voteChunk, ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
-        System.out.println("RunPr: " + voteChunk.getVotes());
+        System.out.println("RunPr: " + voteCnt.get());
 
         return 0;
     }
