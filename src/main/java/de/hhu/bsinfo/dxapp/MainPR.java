@@ -74,12 +74,15 @@ public class MainPR extends AbstractApplication {
         stopwatch.stop();
         //System.out.println("Timer InputJob: " + stopwatch.getTimeStr());
         long InputTime = stopwatch.getTime();
-        for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
+        VoteChunk voteChunk = new VoteChunk();
+        chunkService.create().create(bootService.getNodeID(),voteChunk);
+
+        /*for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
             VoteChunk chunk = new VoteChunk();
             chunkService.create().create(bootService.getNodeID(),chunk);
             nameService.register(chunk,NodeID.toHexString(nodeID).substring(2,6));
             chunkService.put().put(chunk);
-        }
+        }*/
 
         IntegerChunk vCnt = new IntegerChunk(nameService.getChunkID("vCnt",333));
         chunkService.get().get(vCnt);
@@ -101,8 +104,8 @@ public class MainPR extends AbstractApplication {
         SendPrTask SendPRpar = new SendPrTask(N,DAMPING_FACTOR);
         UpdatePrTask updatePR = new UpdatePrTask();
 
-        RunPrRoundTask Run1 = new RunPrRoundTask(N,DAMPING_FACTOR,false);
-        RunPrRoundTask Run2 = new RunPrRoundTask(N,DAMPING_FACTOR,true);
+        RunPrRoundTask Run1 = new RunPrRoundTask(N,DAMPING_FACTOR,false,voteChunk.getID());
+        RunPrRoundTask Run2 = new RunPrRoundTask(N,DAMPING_FACTOR,true,voteChunk.getID());
 
         //TaskScript taskScript = new TaskScript(Run1,Run2);
 
@@ -122,7 +125,7 @@ public class MainPR extends AbstractApplication {
             } else {
                 state = computeService.submitTaskScript(taskScriptRun2, (short) 0, listener);
             }
-            while (!state.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0 && state.getExecutionReturnCodes() == null) {
+            while (!state.hasTaskCompleted()) {
                 try {
                     Thread.sleep(100);
                 } catch (final InterruptedException ignore) {
@@ -130,8 +133,10 @@ public class MainPR extends AbstractApplication {
                 }
             }
 
-
-            for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
+            chunkService.get().get(voteChunk);
+            votes = voteChunk.getVotes();
+            PRsum = voteChunk.getPRsum();
+            /*for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
                 VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
                 chunkService.lock().lock(true,false,-1,voteChunk);
                 chunkService.get().get(voteChunk);
@@ -139,7 +144,7 @@ public class MainPR extends AbstractApplication {
                 System.out.println(NodeID.toHexString(nodeID) + " votes Round " + i  + ": " + voteChunk.getVotes());
                 votes += voteChunk.getVotes();
                 PRsum += voteChunk.getPRsum();
-            }
+            }*/
             RoundVotes.add(votes);
             NumRounds++;
             if((double) votes / (double) N >= 0.9){

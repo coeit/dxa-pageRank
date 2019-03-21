@@ -34,14 +34,16 @@ public class RunPrRoundTask implements Task {
     private double DAMP;
     private boolean m_flag;
     private double m_PRsum;
+    private long m_voteChunkID;
 
     public RunPrRoundTask(){}
 
-    public RunPrRoundTask(int vertexCount, double damping_factor, boolean p_flag){
+    public RunPrRoundTask(int vertexCount, double damping_factor, boolean p_flag, long p_voteChunkID){
         //NUM_THREADS = num_threads;
         DAMP = damping_factor;
         N = vertexCount;
         m_flag = p_flag;
+        m_voteChunkID = p_voteChunkID;
     }
 
     @Override
@@ -56,10 +58,7 @@ public class RunPrRoundTask implements Task {
         localchunks.next();
         StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0).trySplit(),true).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));*/
         //StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0) ,false).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));
-        VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(bootService.getNodeID()).substring(2,6),333));
-        chunkService.lock().lock(true,false,-1,voteChunk);
 
-        chunkService.get().get(voteChunk);
 
         m_PRsum = 0.0;
         final AtomicInteger voteCnt = new AtomicInteger(0);
@@ -78,11 +77,12 @@ public class RunPrRoundTask implements Task {
 
         Stream.of(localVertices).parallel().forEach(localVertex -> voteCnt.getAndAdd(getIncomingPR(localVertex,p_ctx)));
 
-
-        voteChunk.setVotes(voteCnt.get());
-        voteChunk.setPRsum(m_PRsum);
-        chunkService.put().put(voteChunk);
-        chunkService.lock().lock(false,false,-1,voteChunk);
+        VoteChunk voteChunk = new VoteChunk(m_voteChunkID);
+        chunkService.get().get(voteChunk,ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
+        voteChunk.incVotes(voteCnt.get());
+        voteChunk.resetPrSum();
+        voteChunk.incPrSum(m_PRsum);
+        chunkService.put().put(voteChunk, ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
         System.out.println("RunPr: " + voteChunk.getVotes());
 
         return 0;
@@ -147,6 +147,7 @@ public class RunPrRoundTask implements Task {
         p_exporter.writeInt(N);
         p_exporter.writeDouble(DAMP);
         p_exporter.writeBoolean(m_flag);
+        p_exporter.writeLong(m_voteChunkID);
     }
 
     @Override
@@ -155,10 +156,11 @@ public class RunPrRoundTask implements Task {
         N = p_importer.readInt(N);
         DAMP = p_importer.readDouble(DAMP);
         m_flag = p_importer.readBoolean(m_flag);
+        m_voteChunkID = p_importer.readLong(m_voteChunkID);
     }
 
     @Override
     public int sizeofObject() {
-        return Integer.BYTES + Double.BYTES + ObjectSizeUtil.sizeofBoolean();
+        return Integer.BYTES + Double.BYTES + Long.BYTES +ObjectSizeUtil.sizeofBoolean();
     }
 }

@@ -34,12 +34,16 @@ public class VoteChunk extends AbstractChunk {
         return m_PRsum;
     }
 
-    public void setPRsum(double p_PRsum){
-        m_PRsum = p_PRsum;
+    public void incPrSum (double p_PRsum){
+        m_PRsum += p_PRsum;
     }
 
-    public void setVotes(int p_votes) {
-        m_votes = p_votes;
+    public void resetPrSum(){
+        m_PRsum = 0;
+    }
+
+    public void incVotes(int p_votes) {
+        m_votes += p_votes;
     }
 
     @Override
