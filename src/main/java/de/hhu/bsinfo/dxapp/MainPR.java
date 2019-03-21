@@ -128,6 +128,12 @@ public class MainPR extends AbstractApplication {
                 }
             }
 
+            try {
+                Thread.sleep(2000);
+            } catch (final InterruptedException ignore) {
+
+            }
+
             for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
                 VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
                 chunkService.get().get(voteChunk);
