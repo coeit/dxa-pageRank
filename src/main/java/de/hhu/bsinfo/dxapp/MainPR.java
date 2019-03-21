@@ -78,6 +78,7 @@ public class MainPR extends AbstractApplication {
             VoteChunk chunk = new VoteChunk();
             chunkService.create().create(bootService.getNodeID(),chunk);
             nameService.register(chunk,NodeID.toHexString(nodeID).substring(2,6));
+            chunkService.put().put(chunk);
         }
 
         IntegerChunk vCnt = new IntegerChunk(nameService.getChunkID("vCnt",333));
