@@ -112,7 +112,7 @@ public class MainPR extends AbstractApplication {
         double PRsum = 0.0;
         stopwatch.start();
         TaskScriptState state;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 30; i++) {
             int votes = 0;
             PRsum = 0.0;
             if(i % 2 == 0){
@@ -127,6 +127,7 @@ public class MainPR extends AbstractApplication {
 
                 }
             }
+            NumRounds++;
             if(i != 0){
                 for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
                     VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
@@ -136,7 +137,6 @@ public class MainPR extends AbstractApplication {
                     PRsum += voteChunk.getPRsum();
                 }
                 RoundVotes.add(votes);
-                NumRounds++;
 
                 if((double) votes / (double) N >= 0.9 && i > 2){
                     //System.out.println(">>Reached vote halting limit in round " + i);
