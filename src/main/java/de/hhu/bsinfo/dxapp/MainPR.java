@@ -102,24 +102,24 @@ public class MainPR extends AbstractApplication {
         RunPrRoundTask Run1 = new RunPrRoundTask(N,DAMPING_FACTOR,false);
         RunPrRoundTask Run2 = new RunPrRoundTask(N,DAMPING_FACTOR,true);
 
+        //TaskScript taskScript = new TaskScript(Run1,Run2);
 
-        //TaskScript taskScriptSend = new TaskScript(SendPRpar);
-        //TaskScript taskScriptUpdate = new TaskScript(updatePR);
-
-        //TaskScript taskScript = new TaskScript(SendPRpar,updatePR);
-        TaskScript taskScript = new TaskScript(Run1,Run2);
-        //TaskScript taskScript = new TaskScript(PRInfo,SendPRpar,updatePR,PRInfo,SendPRpar,updatePR,PRInfo,SendPRpar,updatePR,PRInfo);
-        //TaskScript taskScript = new TaskScript(SendPR,updatePR,SendPR,updatePR,SendPR,updatePR,PRInfo);
-        // TaskScript taskScript = new TaskScript(PRInfo,SendPRpar,updatePR,SendPRpar,updatePR,SendPRpar,updatePR,SendPRpar,updatePR,SendPRpar,updatePR,PRInfo);
+        TaskScript taskScriptRun1 = new TaskScript(Run1);
+        TaskScript taskScriptRun2 = new TaskScript(Run2);
 
         ArrayList<Integer> RoundVotes = new ArrayList<>();
         int NumRounds = 0;
         double PRsum = 0.0;
         stopwatch.start();
+        TaskScriptState state;
         for (int i = 0; i < 10; i++) {
             int votes = 0;
             PRsum = 0.0;
-            TaskScriptState state = computeService.submitTaskScript(taskScript, (short) 0, listener);
+            if(i % 2 == 0){
+                state = computeService.submitTaskScript(taskScriptRun1, (short) 0, listener);
+            } else {
+                state = computeService.submitTaskScript(taskScriptRun2, (short) 0, listener);
+            }
             while (!state.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0) {
                 try {
                     Thread.sleep(100);
@@ -131,7 +131,7 @@ public class MainPR extends AbstractApplication {
             for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
                 VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
                 chunkService.get().get(voteChunk);
-                //System.out.println(NodeID.toHexString(nodeID) + " votes: " + integerChunk.get_value());
+                System.out.println(NodeID.toHexString(nodeID) + " votes: " + voteChunk.getVotes());
                 votes += voteChunk.getVotes();
                 PRsum += voteChunk.getPRsum();
             }
