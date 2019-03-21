@@ -38,8 +38,9 @@ public class VoteChunk extends AbstractChunk {
         m_PRsum += p_PRsum;
     }
 
-    public void resetPrSum(){
-        m_PRsum = 0;
+    public void reset (){
+        m_votes = 0;
+        m_PRsum = 0.0;
     }
 
     public void incVotes(int p_votes) {

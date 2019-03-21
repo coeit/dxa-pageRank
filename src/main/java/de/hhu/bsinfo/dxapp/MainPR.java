@@ -76,7 +76,7 @@ public class MainPR extends AbstractApplication {
         long InputTime = stopwatch.getTime();
         VoteChunk voteChunk = new VoteChunk();
         chunkService.create().create(bootService.getNodeID(),voteChunk);
-
+        chunkService.put().put(voteChunk);
         /*for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
             VoteChunk chunk = new VoteChunk();
             chunkService.create().create(bootService.getNodeID(),chunk);
@@ -133,9 +133,11 @@ public class MainPR extends AbstractApplication {
                 }
             }
 
-            chunkService.get().get(voteChunk);
+            chunkService.get().get(voteChunk,ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
             votes = voteChunk.getVotes();
             PRsum = voteChunk.getPRsum();
+            voteChunk.reset();
+            chunkService.put().put(voteChunk);
             /*for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
                 VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
                 chunkService.lock().lock(true,false,-1,voteChunk);
