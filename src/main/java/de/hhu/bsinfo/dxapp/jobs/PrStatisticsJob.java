@@ -58,6 +58,7 @@ public class PrStatisticsJob extends AbstractJob {
             writer.write("EXECUTION_TIME\t" + ExecutionTime + "s" + "\n");
             String PRsum = String.format("%.4f", m_PRsum);
             writer.write("PAGERANK_SUM\t" + PRsum + "\n");
+            writer.write("----Votes in Round----\n");
             for (int i = 0; i < m_votes.length; i++) {
                 String voteRatio = String.format("%.2f", (double)m_votes[i]/(double)m_vertexCount);
                 writer.write("ROUND" + (i+2) + "\t" + m_votes[i] + "/" + m_vertexCount + " " + voteRatio + "\n");
