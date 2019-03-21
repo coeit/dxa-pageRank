@@ -133,7 +133,9 @@ public class MainPR extends AbstractApplication {
 
             for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
                 VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
-                chunkService.get().get(voteChunk,ChunkLockOperation.READ_LOCK_ACQ_PRE_OP,-1);
+                chunkService.lock().lock(true,false,-1,voteChunk);
+                chunkService.get().get(voteChunk);
+                chunkService.lock().lock(false,false,-1,voteChunk);
                 System.out.println(NodeID.toHexString(nodeID) + " votes Round " + i  + ": " + voteChunk.getVotes());
                 votes += voteChunk.getVotes();
                 PRsum += voteChunk.getPRsum();
