@@ -85,7 +85,6 @@ public class MainPR extends AbstractApplication {
             File[] files = dir.listFiles((d, name) -> name.contains(p_args[0] + "_split"));
             int i = 0;
             stopwatch.start();
-            assert files != null;
             for (File file : files) {
                 System.out.println(file);
                 InputPrDistJob inputPrDistJob = new InputPrDistJob(file.getName(),Integer.parseInt(p_args[1]));
@@ -111,21 +110,19 @@ public class MainPR extends AbstractApplication {
             nameService.register(chunk,NodeID.toHexString(nodeID).substring(2,6));
             chunkService.put().put(chunk);
         }*/
-
-        IntegerChunk vCnt = new IntegerChunk(nameService.getChunkID("vCnt",333));
-        chunkService.get().get(vCnt);
-        int N = vCnt.get_value();
+        chunkService.get().get(cntChunk);
+        int N = cntChunk.get_value();
         System.out.println("nid: " + bootService.getNodeID() + " VERTEX COUNT: " + N);
 
         TaskListener listener = new TaskListener() {
             @Override
             public void taskBeforeExecution(final TaskScriptState p_taskScriptState) {
-                System.out.println("ComputeTask: Starting execution " + p_taskScriptState.toString());
+                System.out.println("ComputeTask: Starting execution on Node " + NodeID.toHexString(p_taskScriptState.getNodeIdSubmitted()));
             }
 
             @Override
             public void taskCompleted(final TaskScriptState p_taskScriptState) {
-                System.out.println("ComputeTask: Finished execution " + p_taskScriptState.toString());
+                System.out.println("ComputeTask: Finished execution on Node " + NodeID.toHexString(p_taskScriptState.getNodeIdSubmitted()));
             }
         };
 
