@@ -79,12 +79,11 @@ public class MainPR extends AbstractApplication {
         IntegerChunk cntChunk = new IntegerChunk();
         chunkService.create().create(computeService.getStatusMaster((short) 0 ).getMasterNodeId(),cntChunk);
         chunkService.put().put(cntChunk);
-
         Stopwatch stopwatch = new Stopwatch();
         System.out.println("len: "  + p_args.length);
         if (p_args.length > 1) {
             N = Integer.parseInt(p_args[1]);
-            File dir = new File(new File(p_args[0]).getParent());
+            File dir = new File(new File(p_args[0]).getAbsoluteFile().getParent());
             System.out.println(dir.getName());
             File[] files = dir.listFiles((d, name) -> name.contains(p_args[0] + "_split"));
             int i = 0;
