@@ -83,9 +83,10 @@ public class MainPR extends AbstractApplication {
         System.out.println("len: "  + p_args.length);
         if (p_args.length > 1) {
             N = Integer.parseInt(p_args[1]);
-            File dir = new File(new File(p_args[0]).getParentFile().getAbsolutePath());
+            File input_file = new File(p_args[0]);
+            File dir = new File(input_file.getParentFile().getAbsolutePath());
             System.out.println(dir.getName());
-            File[] files = dir.listFiles((d, name) -> name.contains(p_args[0] + "_split"));
+            File[] files = dir.listFiles((d, name) -> name.contains(input_file.getName() + "_split"));
             int i = 0;
             stopwatch.start();
             for (File file : files) {
