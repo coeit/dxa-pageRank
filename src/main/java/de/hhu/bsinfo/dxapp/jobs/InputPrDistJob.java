@@ -89,13 +89,14 @@ public class InputPrDistJob extends AbstractJob {
         for (long in : outdeg.keySet()){
             Vertex vertex = new Vertex(in);
             while(true) {
-                chunkService.get().get(vertex, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
+                chunkService.get().get(vertex);
                 if(vertex.isStateOk()){
+                    System.out.println("got him");
+                    chunkService.get().get(vertex,ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
                     vertex.increment_outDeg(outdeg.get(in));
                     chunkService.put().put(vertex,ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
                     break;
                 } else {
-                    chunkService.put().put(vertex,ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
                     try {
                         Thread.sleep(10);
                     } catch (InterruptedException e) {

@@ -122,12 +122,12 @@ public class MainPR extends AbstractApplication {
         TaskListener listener = new TaskListener() {
             @Override
             public void taskBeforeExecution(final TaskScriptState p_taskScriptState) {
-                System.out.println("ComputeTask: Starting execution on Node " + NodeID.toHexString(p_taskScriptState.getNodeIdSubmitted()));
+                System.out.println("ComputeTask: Starting execution");
             }
 
             @Override
             public void taskCompleted(final TaskScriptState p_taskScriptState) {
-                System.out.println("ComputeTask: Finished execution on Node " + NodeID.toHexString(p_taskScriptState.getNodeIdSubmitted()));
+                System.out.println("ComputeTask: Finished execution");
             }
         };
 
