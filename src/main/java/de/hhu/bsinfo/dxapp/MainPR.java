@@ -58,6 +58,7 @@ public class MainPR extends AbstractApplication {
     @Override
     public void main(final String[] p_args) {
         double DAMPING_FACTOR = 0.85;
+        int N;
         if (p_args.length < 1){
             System.out.println("Not enough Arguments ... shutting down");
             signalShutdown();
@@ -80,18 +81,24 @@ public class MainPR extends AbstractApplication {
         chunkService.put().put(cntChunk);
 
         Stopwatch stopwatch = new Stopwatch();
+        System.out.println("len: "  + p_args.length);
         if (p_args.length > 1) {
+            N = Integer.parseInt(p_args[1]);
             File dir = new File(new File(p_args[0]).getParent());
+            System.out.println(dir.getName());
             File[] files = dir.listFiles((d, name) -> name.contains(p_args[0] + "_split"));
             int i = 0;
             stopwatch.start();
             for (File file : files) {
-                System.out.println(file);
+                System.out.println(file.getName());
                 InputPrDistJob inputPrDistJob = new InputPrDistJob(file.getName(),Integer.parseInt(p_args[1]));
                 jobService.pushJobRemote(inputPrDistJob,computeService.getStatusMaster((short) 0).getConnectedSlaves().get(i));
                 i++;
             }
         } else {
+            chunkService.get().get(cntChunk);
+            N = cntChunk.get_value();
+            //System.out.println("nid: " + bootService.getNodeID() + " VERTEX COUNT: " + N);
             stopwatch.start();
             InputJob inputJob = new InputJob(p_args[0],cntChunk.getID());
             jobService.pushJobRemote(inputJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
@@ -110,8 +117,6 @@ public class MainPR extends AbstractApplication {
             nameService.register(chunk,NodeID.toHexString(nodeID).substring(2,6));
             chunkService.put().put(chunk);
         }*/
-        chunkService.get().get(cntChunk);
-        int N = cntChunk.get_value();
         System.out.println("nid: " + bootService.getNodeID() + " VERTEX COUNT: " + N);
 
         TaskListener listener = new TaskListener() {
