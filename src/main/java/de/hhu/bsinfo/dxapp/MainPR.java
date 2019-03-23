@@ -90,8 +90,8 @@ public class MainPR extends AbstractApplication {
             int i = 0;
             stopwatch.start();
             for (File file : files) {
-                System.out.println(file.getName());
-                InputPrDistJob inputPrDistJob = new InputPrDistJob(file.getName(),Integer.parseInt(p_args[1]));
+                System.out.println(file.getAbsolutePath());
+                InputPrDistJob inputPrDistJob = new InputPrDistJob(file.getAbsolutePath(),Integer.parseInt(p_args[1]));
                 jobService.pushJobRemote(inputPrDistJob,computeService.getStatusMaster((short) 0).getConnectedSlaves().get(i));
                 i++;
             }
