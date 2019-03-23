@@ -30,6 +30,7 @@ import de.hhu.bsinfo.dxram.function.util.ParameterList;
 import de.hhu.bsinfo.dxram.generated.BuildConfig;
 import de.hhu.bsinfo.dxapp.jobs.*;
 import de.hhu.bsinfo.dxram.job.*;
+import de.hhu.bsinfo.dxram.logger.LoggerService;
 import de.hhu.bsinfo.dxram.ms.*;
 import de.hhu.bsinfo.dxram.ms.script.TaskScript;
 import de.hhu.bsinfo.dxapp.tasks.*;
@@ -57,6 +58,14 @@ public class MainPR extends AbstractApplication {
     @Override
     public void main(final String[] p_args) {
         double DAMPING_FACTOR = 0.85;
+        if (p_args.length < 1){
+            System.out.println("Not enough Arguments ... shutting down");
+            signalShutdown();
+        }
+
+
+
+
         BootService bootService = getService(BootService.class);
         ChunkService chunkService = getService(ChunkService.class);
         NameserviceService nameService = getService(NameserviceService.class);
@@ -65,11 +74,30 @@ public class MainPR extends AbstractApplication {
 
         String outDir = createOutputDirs();
 
-        Stopwatch stopwatch = new Stopwatch();
 
-        InputJob inputJob = new InputJob(p_args[0]);
-        stopwatch.start();
-        jobService.pushJobRemote(inputJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
+        IntegerChunk cntChunk = new IntegerChunk();
+        chunkService.create().create(computeService.getStatusMaster((short) 0 ).getMasterNodeId(),cntChunk);
+        chunkService.put().put(cntChunk);
+
+        Stopwatch stopwatch = new Stopwatch();
+        if (p_args.length > 1) {
+            File dir = new File(new File(p_args[0]).getParent());
+            File[] files = dir.listFiles((d, name) -> name.contains(p_args[0] + "_split"));
+            int i = 0;
+            stopwatch.start();
+            assert files != null;
+            for (File file : files) {
+                System.out.println(file);
+                InputPrDistJob inputPrDistJob = new InputPrDistJob(file.getName(),Integer.parseInt(p_args[1]));
+                jobService.pushJobRemote(inputPrDistJob,computeService.getStatusMaster((short) 0).getConnectedSlaves().get(i));
+                i++;
+            }
+        } else {
+            stopwatch.start();
+            InputJob inputJob = new InputJob(p_args[0],cntChunk.getID());
+            jobService.pushJobRemote(inputJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
+
+        }
         jobService.waitForAllJobsToFinish();
         stopwatch.stop();
         //System.out.println("Timer InputJob: " + stopwatch.getTimeStr());
@@ -92,12 +120,12 @@ public class MainPR extends AbstractApplication {
         TaskListener listener = new TaskListener() {
             @Override
             public void taskBeforeExecution(final TaskScriptState p_taskScriptState) {
-                System.out.println("ComputeTask: Starting execution");
+                System.out.println("ComputeTask: Starting execution " + p_taskScriptState.toString());
             }
 
             @Override
             public void taskCompleted(final TaskScriptState p_taskScriptState) {
-                System.out.println("ComputeTask: Finished execution ");
+                System.out.println("ComputeTask: Finished execution " + p_taskScriptState.toString());
             }
         };
 
@@ -115,11 +143,10 @@ public class MainPR extends AbstractApplication {
         ArrayList<Integer> RoundVotes = new ArrayList<>();
         int NumRounds = 0;
         double PRsum = 0.0;
+        int votes;
         stopwatch.start();
         TaskScriptState state;
         for (int i = 0; i < 30; i++) {
-            int votes = 0;
-            PRsum = 0.0;
             if(i % 2 == 0){
                 state = computeService.submitTaskScript(taskScriptRun1, (short) 0, listener);
             } else {
@@ -138,7 +165,6 @@ public class MainPR extends AbstractApplication {
             PRsum = voteChunk.getPRsum();
             voteChunk.reset();
             chunkService.put().put(voteChunk,ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
-            System.out.println(" votes Round " + i  + ": " + voteChunk.getVotes());
             /*for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
                 VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
                 chunkService.lock().lock(true,false,-1,voteChunk);

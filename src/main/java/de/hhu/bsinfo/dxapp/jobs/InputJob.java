@@ -25,12 +25,13 @@ public class InputJob extends AbstractJob {
     //public static final short MS_TYPE_ID = 3;
 
     private String m_filename;
-    //private int m_vertexCount = 0;
+    private long m_cntChunkID;
 
     public InputJob() {}
 
-    public InputJob(String p_filename){
+    public InputJob(String p_filename, long p_cntChunkID){
         m_filename = p_filename;
+        m_cntChunkID = p_cntChunkID;
     }
 
     /*public InputJob(String p_filename){
@@ -81,10 +82,10 @@ public class InputJob extends AbstractJob {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        IntegerChunk vertexCount = new IntegerChunk(vertexCnt);
-        chunkService.create().create(computeService.getStatusMaster((short) 0 ).getMasterNodeId(),vertexCount);
-        nameService.register(vertexCount,"vCnt");
-        chunkService.put().put(vertexCount);
+        IntegerChunk cntChunk = new IntegerChunk(m_cntChunkID);
+        chunkService.get().get(cntChunk);
+        cntChunk.set_value(vertexCnt);
+        chunkService.put().put(cntChunk);
 
         //ArrayList<Short> connectedSlaves = computeService.getStatusMaster((short) 0).getConnectedSlaves();
         int slaveIndex = 0;
@@ -118,6 +119,7 @@ public class InputJob extends AbstractJob {
         super.importObject(p_importer);
 
         m_filename = p_importer.readString(m_filename);
+        m_cntChunkID = p_importer.readLong(m_cntChunkID);
         //m_vertexCount = p_importer.readInt(m_vertexCount);
     }
 
@@ -126,12 +128,13 @@ public class InputJob extends AbstractJob {
         super.exportObject(p_exporter);
 
         p_exporter.writeString(m_filename);
+        p_exporter.writeLong(m_cntChunkID);
         //p_exporter.writeInt(m_vertexCount);
     }
 
     @Override
     public int sizeofObject() {
-        return super.sizeofObject() + ObjectSizeUtil.sizeofString(m_filename);
+        return super.sizeofObject() + ObjectSizeUtil.sizeofString(m_filename) + Long.BYTES;
     }
 
 }
