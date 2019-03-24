@@ -59,7 +59,7 @@ public class MainPR extends AbstractApplication {
     public void main(final String[] p_args) {
         double DAMPING_FACTOR = 0.85;
         int N;
-        if (p_args.length < 1){
+        if (p_args.length < 2){
             System.out.println("Not enough Arguments ... shutting down");
             signalShutdown();
         }
@@ -75,36 +75,44 @@ public class MainPR extends AbstractApplication {
 
         String outDir = createOutputDirs();
 
-
         IntegerChunk cntChunk = new IntegerChunk();
         chunkService.create().create(computeService.getStatusMaster((short) 0 ).getMasterNodeId(),cntChunk);
         chunkService.put().put(cntChunk);
         Stopwatch stopwatch = new Stopwatch();
         System.out.println("len: "  + p_args.length);
-        if (p_args.length > 1) {
+        if (p_args.length > 2) {
             N = Integer.parseInt(p_args[1]);
             File input_file = new File(p_args[0]);
             File dir = new File(input_file.getParentFile().getAbsolutePath());
             System.out.println(dir.getName());
             File[] files = dir.listFiles((d, name) -> name.contains(input_file.getName() + "_split"));
-            int i = 0;
-            stopwatch.start();
-            for (File file : files) {
-                System.out.println(file.getAbsolutePath());
-                InputPrDistJob inputPrDistJob = new InputPrDistJob(file.getAbsolutePath(),Integer.parseInt(p_args[1]));
-                jobService.pushJobRemote(inputPrDistJob,computeService.getStatusMaster((short) 0).getConnectedSlaves().get(i));
-                i++;
+            StringBuilder builder = null;
+            for (File file : files){
+                builder.append(file.getAbsolutePath() + "@");
             }
+            InputPrDistTask inputPrDistTask = new InputPrDistTask(builder.toString(),N);
+            TaskScript inputPrDistTaskScript = new TaskScript(inputPrDistTask);
+            TaskScriptState inputPrDistTaskScriptState = computeService.submitTaskScript(inputPrDistTaskScript,(short) 0);
+            stopwatch.start();
+            while(!inputPrDistTaskScriptState.hasTaskCompleted()){
+                try {
+                    Thread.sleep(100);
+                } catch (final InterruptedException ignore) {
+
+                }
+            }
+
         } else {
             chunkService.get().get(cntChunk);
             N = cntChunk.get_value();
             //System.out.println("nid: " + bootService.getNodeID() + " VERTEX COUNT: " + N);
             stopwatch.start();
-            InputJob inputJob = new InputJob(p_args[0],cntChunk.getID());
-            jobService.pushJobRemote(inputJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
-
+            //InputJob inputJob = new InputJob(p_args[0],cntChunk.getID());
+            InputPrJob inputPrJob = new InputPrJob(p_args[0],Integer.parseInt(p_args[1]));
+            jobService.pushJobRemote(inputPrJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
+            jobService.waitForAllJobsToFinish();
         }
-        jobService.waitForAllJobsToFinish();
+
         stopwatch.stop();
         //System.out.println("Timer InputJob: " + stopwatch.getTimeStr());
         long InputTime = stopwatch.getTime();

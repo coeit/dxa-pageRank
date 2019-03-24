@@ -77,7 +77,7 @@ public class InputJob extends AbstractJob {
                  // ERRORs beim lesen
                 chunkMap.get(Integer.parseInt(split[1])).addInEdge(correspondingChunkID(Integer.parseInt(split[0]),slaveIDs));
                 //chunkMap.get(Integer.parseInt(split[1])).addInEdge(Integer.parseInt(split[0]));
-                chunkMap.get(Integer.parseInt(split[0])).increment_outDeg();
+                //chunkMap.get(Integer.parseInt(split[0])).increment_outDeg(1,);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -90,6 +90,8 @@ public class InputJob extends AbstractJob {
         //ArrayList<Short> connectedSlaves = computeService.getStatusMaster((short) 0).getConnectedSlaves();
         int slaveIndex = 0;
         int chunkCnt = chunkMap.keySet().size();
+
+
         for (Integer vertexPR : chunkMap.keySet()) {
             //chunkMap.get(vertexPR).invokeVertexPR(chunkMap.keySet().size());
             chunkMap.get(vertexPR).invokeVertexPR(chunkCnt);

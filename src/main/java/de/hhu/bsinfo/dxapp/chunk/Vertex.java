@@ -36,12 +36,12 @@ public class Vertex extends AbstractChunk {
         }
     }
 
-    public void increment_outDeg(){
-        m_outDeg++;
-    }
+    public void increment_outDeg(int p_num, int N){
+        if(m_outDeg  == N){
+            m_outDeg = 0;
+        }
+        m_outDeg += p_num;
 
-    public void increment_outDeg(int num){
-        m_outDeg += num;
     }
 
     public void addInEdge(final long p_neighbour) {
