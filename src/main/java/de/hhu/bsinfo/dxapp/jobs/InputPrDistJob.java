@@ -94,7 +94,7 @@ public class InputPrDistJob extends AbstractJob {
                 if(ranges.isInRange(in)){
                     System.out.println(ChunkID.toHexString(in));
                     chunkService.get().get(vertex,ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
-                    vertex.increment_outDeg(outdeg.get(in));
+                    //vertex.increment_outDeg(outdeg.get(in));
                     chunkService.put().put(vertex,ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
                     break;
                 } else {
