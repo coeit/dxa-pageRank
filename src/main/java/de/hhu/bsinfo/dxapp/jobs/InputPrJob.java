@@ -55,8 +55,8 @@ public class InputPrJob extends AbstractJob {
             int v1,v2;
             while ((line = br.readLine()) != null){
                 String[] split = line.split(" ");
-                v1 = Integer.parseInt(split[0]);
-                v2 = Integer.parseInt(split[1]); //ERROR CHECK
+                v1 = Integer.parseInt(split[0]) - 1;
+                v2 = Integer.parseInt(split[1]) - 1; //ERROR CHECK
 
                 if(vertices[v1] == null){
                     vertices[v1] = new Vertex(v1);
@@ -69,7 +69,7 @@ public class InputPrJob extends AbstractJob {
                 }
 
                 vertices[v1].increment_outDeg(1,m_vertexCnt);
-                vertices[v2].addInEdge(correspondingChunkID(v1, slaveIDs));
+                vertices[v2].addInEdge(correspondingChunkID(v1 + 1, slaveIDs));
             }
         } catch (IOException e) {
             e.printStackTrace();
