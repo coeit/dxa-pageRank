@@ -3,6 +3,7 @@ package de.hhu.bsinfo.dxapp.jobs;
 import de.hhu.bsinfo.dxapp.chunk.PageRankInVertex;
 import de.hhu.bsinfo.dxapp.chunk.Vertex;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
+import de.hhu.bsinfo.dxmem.data.ChunkIDRanges;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxram.boot.BootService;
 import de.hhu.bsinfo.dxram.chunk.ChunkLocalService;
@@ -88,17 +89,17 @@ public class InputPrDistJob extends AbstractJob {
 
         for (long in : outdeg.keySet()){
             Vertex vertex = new Vertex(in);
+            ChunkIDRanges ranges = chunkService.cidStatus().getAllLocalChunkIDRanges(ChunkID.getCreatorID(in));
             while(true) {
-                chunkService.get().get(vertex);
-                if(vertex.isStateOk()){
-                    System.out.println("got him");
+                if(ranges.isInRange(in)){
+                    System.out.println(ChunkID.toHexString(in));
                     chunkService.get().get(vertex,ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
                     vertex.increment_outDeg(outdeg.get(in));
                     chunkService.put().put(vertex,ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
                     break;
                 } else {
                     try {
-                        Thread.sleep(10);
+                        Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
