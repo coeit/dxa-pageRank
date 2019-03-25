@@ -50,11 +50,11 @@ public class InputPrDistTask implements Task {
             int v1,v2;
             while ((line = br.readLine()) != null){
                 String[] split = line.split(" ");
-                v1 = Integer.parseInt(split[0]);
-                v2 = (int) Math.ceil(Double.parseDouble(split[1]) /(double) taskContext.getCtxData().getSlaveNodeIds().length); //ERROR CHECK
+                v1 = Integer.parseInt(split[0]) -1;
+                v2 = (int) Math.ceil((Double.parseDouble(split[1]) - 1)/(double) taskContext.getCtxData().getSlaveNodeIds().length); //ERROR CHECK
 
                 if(localVertices[v2] == null){
-                    localVertices[v2] = new Vertex(v2);
+                    localVertices[v2] = new Vertex(v2 + 1);
                     localVertices[v2].invokeVertexPR(m_vertexCnt);
                 }
 
