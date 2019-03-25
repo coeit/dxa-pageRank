@@ -67,15 +67,11 @@ public class RunPrRoundTask implements Task {
         localchunks.next();
 
         Vertex[] localVertices = new Vertex[(int)chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getCurrentLIDCounter()];
-        System.out.println("LIDs: " + localVertices.length);
         for (int i = 0; i < localVertices.length; i++) {
             localVertices[i] = new Vertex(localchunks.next());
         }
 
         chunkService.get().get(localVertices);
-        for (int i = 0; i < localVertices.length; i++) {
-            System.out.println(localVertices[i].get_name() + " " + ChunkID.toHexString(localVertices[i].getID()));
-        }
         //chunkLocalService.getLocal().get(localVertices);
 
         Stream.of(localVertices).parallel().forEach(localVertex -> voteCnt.getAndAdd(getIncomingPR(localVertex,p_ctx)));
@@ -106,7 +102,6 @@ public class RunPrRoundTask implements Task {
             }
 
             chunkService.get().get(neighbors);
-
             for(Vertex tmp : neighbors){
                 tmpPR += tmp.getPR1()/(double)tmp.getOutDeg();
             }
