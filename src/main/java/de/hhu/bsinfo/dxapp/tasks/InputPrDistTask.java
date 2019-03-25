@@ -42,15 +42,16 @@ public class InputPrDistTask implements Task {
 
         String[] fileSplit = m_files.split("@");
         String myFile = fileSplit[mySlaveID];
-
+        System.out.println("MyFile: " + myFile);
         int[] outDegrees = new int[m_vertexCnt];
-
+        System.out.println("local V cnt: " + localVertexCnt);
         try(BufferedReader br = new BufferedReader(new FileReader(myFile))){
             String line;
-            int v1,v2;
+            int v1,v2,v2i;
             while ((line = br.readLine()) != null){
                 String[] split = line.split(" ");
                 v1 = Integer.parseInt(split[0]) -1;
+                v2i = Integer.parseInt(split[1]);
                 v2 = (int) Math.ceil((Double.parseDouble(split[1]) - 1)/(double) taskContext.getCtxData().getSlaveNodeIds().length); //ERROR CHECK
 
                 if(localVertices[v2] == null){
@@ -60,9 +61,15 @@ public class InputPrDistTask implements Task {
 
                 outDegrees[v1]++;
                 localVertices[v2].addInEdge(correspondingChunkID(v1 + 1, slaveIDs));
+                System.out.println(ChunkID.toHexString(correspondingChunkID(v1 + 1, slaveIDs)) + " " + ChunkID.toHexString(correspondingChunkID(v2i + 1, slaveIDs)));
+
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        for (Vertex vertex : localVertices){
+            System.out.println(vertex.get_name() + " :: " + ChunkID.toHexString(vertex.getID()));
         }
 
         chunkLocalService.createLocal().create(localVertices);
