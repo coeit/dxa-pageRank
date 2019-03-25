@@ -43,7 +43,7 @@ public class InputPrDistTask implements Task {
         String[] fileSplit = m_files.split("@");
         String myFile = null;
         for (String s : fileSplit){
-            if(s.contains("split_" + slaveIDs.length) && mySlaveID == 0){
+            if(s.contains("split_" + (slaveIDs.length - 1)) && mySlaveID == 0){
                 myFile = s;
                 break;
             } else if(s.contains("split_" + (mySlaveID -1))){
@@ -76,7 +76,7 @@ public class InputPrDistTask implements Task {
                     if (v2old + slaveIDs.length != v2i && v2old != v2i){
                         int skipped = (v2i - v2old)/slaveIDs.length - 1;
                         for (int i = 1; i <= skipped; i++) {
-                            localVertices[v2 - i] = new Vertex(v2i - i * slaveIDs.length);
+                            localVertices[v2 - i] = new Vertex(v2i + 1 - i * slaveIDs.length);
                             localVertices[v2 - i].invokeVertexPR(m_vertexCnt);
                         }
 
@@ -93,12 +93,14 @@ public class InputPrDistTask implements Task {
             e.printStackTrace();
         }
 
-        for (int i = 0; i < localVertices.length; i++) {
-            System.out.println(localVertices[i].get_name() + " :: " + ChunkID.toHexString(localVertices[i].getID()));
-        }
+
 
         chunkLocalService.createLocal().create(localVertices);
         chunkService.put().put(localVertices);
+
+        for (int i = 0; i < localVertices.length; i++) {
+            System.out.println(localVertices[i].get_name() + " :: " + ChunkID.toHexString(localVertices[i].getID()));
+        }
 
         for (int i = 0; i < outDegrees.length; i++) {
             if(outDegrees[i] == 0){
