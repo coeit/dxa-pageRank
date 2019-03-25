@@ -91,7 +91,9 @@ public class InputPrDistTask implements Task {
                 localVertices[v2].addInEdge(correspondingChunkID(v1 + 1, slaveIDs));
                 //System.out.println(ChunkID.toHexString(correspondingChunkID(v1 + 1, slaveIDs)) + " " + ChunkID.toHexString(correspondingChunkID(v2i + 1, slaveIDs)));
             }
+            System.out.println("CNt:" + cnt);
             while(cnt < localVertexCnt){
+                System.out.println(cnt);
                 localVertices[cnt] = new Vertex(localVertices[cnt-1].get_name() + slaveIDs.length);
             }
 
