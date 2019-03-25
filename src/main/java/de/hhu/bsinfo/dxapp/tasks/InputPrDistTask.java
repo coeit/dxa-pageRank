@@ -114,7 +114,8 @@ public class InputPrDistTask implements Task {
 
         for (int i = 0; i < localVertices.length; i++) {
             chunkLocalService.getLocal().get(localVertices[i]);
-            System.out.println(localVertices[i].get_name() + ":: " + localVertices[i].getID() + " " + localVertices[i].getOutDeg());
+            System.out.println(localVertices[i].get_name() + " :: " + ChunkID.toHexString(localVertices[i].getID()) + " " + localVertices[i].getOutDeg());
+            System.out.println(localVertices[i].getPR1() + " " + localVertices[i].getPR2());
         }
 
 
