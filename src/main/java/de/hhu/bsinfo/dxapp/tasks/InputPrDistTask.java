@@ -59,7 +59,7 @@ public class InputPrDistTask implements Task {
                 }
 
                 outDegrees[v1]++;
-                localVertices[v2].addInEdge(correspondingChunkID(v1, slaveIDs));
+                localVertices[v2].addInEdge(correspondingChunkID(v1 + 1, slaveIDs));
             }
         } catch (IOException e) {
             e.printStackTrace();
