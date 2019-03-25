@@ -89,9 +89,9 @@ public class MainPR extends AbstractApplication {
             File dir = new File(input_file.getParentFile().getAbsolutePath());
             System.out.println(dir.getName());
             File[] files = dir.listFiles((d, name) -> name.contains(input_file.getName() + "_split"));
-            StringBuilder builder = null;
+            StringBuilder builder = new StringBuilder();
             for (File file : files){
-                builder.append(file.getAbsolutePath() + "@");
+                    builder.append(file.getAbsolutePath() + "@");
             }
             InputPrDistTask inputPrDistTask = new InputPrDistTask(builder.toString(),N);
             TaskScript inputPrDistTaskScript = new TaskScript(inputPrDistTask);
