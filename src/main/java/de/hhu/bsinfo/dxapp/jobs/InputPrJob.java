@@ -79,7 +79,7 @@ public class InputPrJob extends AbstractJob {
         int slaveIndex = 0;
         for (Vertex vertex : vertices){
             chunkService.create().create(slaveIDs.get(slaveIndex % slaveIDs.size()),vertex);
-            System.out.println(vertex.get_name() + " :: " + ChunkID.toHexString(vertex.getID()) + " " + vertex.getOutDeg());
+            System.out.println(vertex.get_name() + " :: " + ChunkID.toHexString(vertex.getID()) + " " + vertex.getOutDeg() + " PR1: " + vertex.getPR1() + " PR2: " + vertex.getPR2());
             for (int i = 0; i < vertex.getM_inEdges().length; i++) {
                 System.out.print(ChunkID.toHexString(vertex.getM_inEdges()[i]) + " ");
             }
