@@ -41,8 +41,18 @@ public class InputPrDistTask implements Task {
         Vertex[] localVertices = new Vertex[localVertexCnt];
 
         String[] fileSplit = m_files.split("@");
-        String myFile = fileSplit[mySlaveID];
-        System.out.println("MyFile: " + myFile);
+        String myFile = null;
+        for (String s : fileSplit){
+            if(s.contains("split_" + mySlaveID)){
+                myFile = s;
+                break;
+            }
+        }
+        if(myFile == null){
+            System.out.println("Split file " + mySlaveID + " not found!");
+        }
+        //String myFile = fileSplit[mySlaveID];
+        System.out.println("MyFile: " + myFile + ", mySlaveID: " + mySlaveID);
         int[] outDegrees = new int[m_vertexCnt];
         System.out.println("local V cnt: " + localVertexCnt);
         try(BufferedReader br = new BufferedReader(new FileReader(myFile))){
