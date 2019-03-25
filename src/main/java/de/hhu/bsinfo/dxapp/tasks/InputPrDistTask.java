@@ -47,16 +47,29 @@ public class InputPrDistTask implements Task {
         System.out.println("local V cnt: " + localVertexCnt);
         try(BufferedReader br = new BufferedReader(new FileReader(myFile))){
             String line;
-            int v1,v2,v2i;
+            int v1,v2,v2i,v2old;
+            if(mySlaveID == 0){
+                v2old = slaveIDs.length;
+            } else {
+                v2old = mySlaveID;
+            }
             while ((line = br.readLine()) != null){
                 String[] split = line.split(" ");
                 v1 = Integer.parseInt(split[0]) -1;
-                v2i = Integer.parseInt(split[1]);
-                v2 = (int) Math.ceil((Double.parseDouble(split[1]) - 1)/(double) taskContext.getCtxData().getSlaveNodeIds().length); //ERROR CHECK
-
+                v2i = Integer.parseInt(split[1]) -1;
+                v2 = (int) Math.ceil((Double.parseDouble(split[1]) - 2)/(double) slaveIDs.length); //ERROR CHECK
                 if(localVertices[v2] == null){
-                    localVertices[v2] = new Vertex(v2 + 1);
+                    localVertices[v2] = new Vertex(v2i + 1);
                     localVertices[v2].invokeVertexPR(m_vertexCnt);
+                    if (v2old + slaveIDs.length != v2i && v2old != v2i){
+                        int skipped = (v2i - v2old)/slaveIDs.length - 1;
+                        for (int i = 1; i <= skipped; i++) {
+                            localVertices[v2 - i] = new Vertex(v2i - i * slaveIDs.length);
+                            localVertices[v2 - i].invokeVertexPR(m_vertexCnt);
+                        }
+
+                    }
+                    v2old = v2i;
                 }
 
                 outDegrees[v1]++;
@@ -68,8 +81,8 @@ public class InputPrDistTask implements Task {
             e.printStackTrace();
         }
 
-        for (Vertex vertex : localVertices){
-            System.out.println(vertex.get_name() + " :: " + ChunkID.toHexString(vertex.getID()));
+        for (int i = 0; i < localVertices.length; i++) {
+            System.out.println(localVertices[i].get_name() + " :: " + ChunkID.toHexString(localVertices[i].getID()));
         }
 
         chunkLocalService.createLocal().create(localVertices);
