@@ -43,9 +43,11 @@ public class InputPrDistTask implements Task {
         String[] fileSplit = m_files.split("@");
         String myFile = null;
         for (String s : fileSplit){
-            if(s.contains("split_" + mySlaveID)){
+            if(s.contains("split_" + slaveIDs.length) && mySlaveID == 0){
                 myFile = s;
                 break;
+            } else if(s.contains("split_" + (mySlaveID -1))){
+                myFile = s;
             }
         }
         if(myFile == null){
