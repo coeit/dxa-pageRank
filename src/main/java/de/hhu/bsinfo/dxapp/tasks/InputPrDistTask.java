@@ -3,12 +3,14 @@ package de.hhu.bsinfo.dxapp.tasks;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import de.hhu.bsinfo.dxapp.chunk.Vertex;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxram.chunk.ChunkLocalService;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
+import de.hhu.bsinfo.dxram.ms.MasterSlaveComputeService;
 import de.hhu.bsinfo.dxram.ms.Signal;
 import de.hhu.bsinfo.dxram.ms.Task;
 import de.hhu.bsinfo.dxram.ms.TaskContext;
@@ -33,6 +35,7 @@ public class InputPrDistTask implements Task {
 
         ChunkService chunkService = taskContext.getDXRAMServiceAccessor().getService(ChunkService.class);
         ChunkLocalService chunkLocalService = taskContext.getDXRAMServiceAccessor().getService(ChunkLocalService.class);
+        MasterSlaveComputeService computeService = taskContext.getDXRAMServiceAccessor().getService(MasterSlaveComputeService.class);
 
         short mySlaveID = taskContext.getCtxData().getSlaveId();
         short[] slaveIDs = taskContext.getCtxData().getSlaveNodeIds();
@@ -41,6 +44,11 @@ public class InputPrDistTask implements Task {
         Vertex[] localVertices = new Vertex[localVertexCnt];
 
         String[] fileSplit = m_files.split("@");
+        ArrayList<Short> a = computeService.getStatusMaster((short) 0).getConnectedSlaves();
+        for (int i = 0; i < slaveIDs.length; i++) {
+            System.out.println(slaveIDs[i] + " " + a.get(i));
+        }
+
         String myFile = null;
         for (String s : fileSplit){
             if(s.contains("split_" + (slaveIDs.length - 1)) && mySlaveID == 0){
