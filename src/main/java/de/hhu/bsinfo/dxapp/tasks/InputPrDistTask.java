@@ -95,6 +95,7 @@ public class InputPrDistTask implements Task {
             while(cnt < localVertexCnt){
                 System.out.println(cnt);
                 localVertices[cnt] = new Vertex(localVertices[cnt-1].get_name() + slaveIDs.length);
+                cnt++;
             }
 
         } catch (IOException e) {
