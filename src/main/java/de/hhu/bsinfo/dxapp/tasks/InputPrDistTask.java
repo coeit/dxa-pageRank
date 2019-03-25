@@ -112,6 +112,11 @@ public class InputPrDistTask implements Task {
             chunkService.put().put(vertex,ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
         }
 
+        for (int i = 0; i < localVertices.length; i++) {
+            chunkLocalService.getLocal().get(localVertices[i]);
+            System.out.println(localVertices[i].get_name() + ":: " + localVertices[i].getID() + " " + localVertices[i].getOutDeg());
+        }
+
 
 
         return 0;
