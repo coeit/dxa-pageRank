@@ -86,7 +86,7 @@ public class InputPrDistTask implements Task {
 
                 outDegrees[v1]++;
                 localVertices[v2].addInEdge(correspondingChunkID(v1 + 1, slaveIDs));
-                System.out.println(ChunkID.toHexString(correspondingChunkID(v1 + 1, slaveIDs)) + " " + ChunkID.toHexString(correspondingChunkID(v2i + 1, slaveIDs)));
+                //System.out.println(ChunkID.toHexString(correspondingChunkID(v1 + 1, slaveIDs)) + " " + ChunkID.toHexString(correspondingChunkID(v2i + 1, slaveIDs)));
 
             }
         } catch (IOException e) {
@@ -98,9 +98,9 @@ public class InputPrDistTask implements Task {
         chunkLocalService.createLocal().create(localVertices);
         chunkService.put().put(localVertices);
 
-        for (int i = 0; i < localVertices.length; i++) {
+        /*for (int i = 0; i < localVertices.length; i++) {
             System.out.println(localVertices[i].get_name() + " :: " + ChunkID.toHexString(localVertices[i].getID()));
-        }
+        }*/
 
         for (int i = 0; i < outDegrees.length; i++) {
             if(outDegrees[i] == 0){
