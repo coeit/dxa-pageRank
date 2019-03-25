@@ -114,7 +114,7 @@ public class RunPrRoundTask implements Task {
             m_PRsum += p_vertex.getPR2();
 
             double err = p_vertex.getPR2() - p_vertex.getPR1();
-            if(Math.abs(err) < 0.01){ ret = 1;}
+            if(Math.abs(err) < 0.000001){ ret = 1;}
             //System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPR2() + " " + p_vertex.getPR1());
 
         } else {
@@ -132,7 +132,7 @@ public class RunPrRoundTask implements Task {
             m_PRsum += p_vertex.getPR1();
 
             double err = p_vertex.getPR1() - p_vertex.getPR2();
-            if(Math.abs(err) < 0.01){ ret = 1;}
+            if(Math.abs(err) < 0.000001){ ret = 1;}
             //System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPR1() + " " + p_vertex.getPR2());
         }
         chunkService.put().put(p_vertex);

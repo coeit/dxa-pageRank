@@ -2,4 +2,4 @@
 
 ./gradlew build
 
-rm $USER/dxram/plugin/dxa-pageRank.jar
+rm $HOME/dxram/plugin/dxa-pageRank.jar
