@@ -70,7 +70,7 @@ public class InputPrJob extends AbstractJob {
 
                 vertices[v1].increment_outDeg(1,m_vertexCnt);
                 vertices[v2].addInEdge(correspondingChunkID(v1 + 1, slaveIDs));
-                System.out.println(correspondingChunkID(v1 + 1, slaveIDs) + " " + correspondingChunkID(v2 + 1, slaveIDs));
+                System.out.println(ChunkID.toHexString(correspondingChunkID(v1 + 1, slaveIDs)) + " " + ChunkID.toHexString(correspondingChunkID(v2 + 1, slaveIDs)));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -79,7 +79,7 @@ public class InputPrJob extends AbstractJob {
         int slaveIndex = 0;
         for (Vertex vertex : vertices){
             chunkService.create().create(slaveIDs.get(slaveIndex % slaveIDs.size()),vertex);
-            System.out.println(vertex + " :: " + ChunkID.toHexString(vertex.getID()) + " " + vertex.getOutDeg());
+            System.out.println(vertex.get_name() + " :: " + ChunkID.toHexString(vertex.getID()) + " " + vertex.getOutDeg());
             //m_nameService.register(chunkMap.get(vertexPR), vertexPR.toString());
             chunkService.put().put(vertex);
             slaveIndex++;
