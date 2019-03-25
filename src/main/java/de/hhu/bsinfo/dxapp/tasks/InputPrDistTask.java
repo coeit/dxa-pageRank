@@ -59,6 +59,7 @@ public class InputPrDistTask implements Task {
         System.out.println("local V cnt: " + localVertexCnt);
         try(BufferedReader br = new BufferedReader(new FileReader(myFile))){
             String line;
+            int cnt = 0;
             int v1,v2,v2i,v2old;
             if(mySlaveID == 0){
                 v2old = slaveIDs.length;
@@ -71,6 +72,7 @@ public class InputPrDistTask implements Task {
                 v2i = Integer.parseInt(split[1]) -1;
                 v2 = (int) Math.ceil((Double.parseDouble(split[1]) - 2)/(double) slaveIDs.length); //ERROR CHECK
                 if(localVertices[v2] == null){
+                    cnt++;
                     localVertices[v2] = new Vertex(v2i + 1);
                     localVertices[v2].invokeVertexPR(m_vertexCnt);
                     if (v2old + slaveIDs.length != v2i && v2old != v2i){
@@ -78,6 +80,7 @@ public class InputPrDistTask implements Task {
                         for (int i = 1; i <= skipped; i++) {
                             localVertices[v2 - i] = new Vertex(v2i + 1 - i * slaveIDs.length);
                             localVertices[v2 - i].invokeVertexPR(m_vertexCnt);
+                            cnt++;
                         }
 
                     }
@@ -87,14 +90,17 @@ public class InputPrDistTask implements Task {
                 outDegrees[v1]++;
                 localVertices[v2].addInEdge(correspondingChunkID(v1 + 1, slaveIDs));
                 //System.out.println(ChunkID.toHexString(correspondingChunkID(v1 + 1, slaveIDs)) + " " + ChunkID.toHexString(correspondingChunkID(v2i + 1, slaveIDs)));
-
             }
+            while(cnt < localVertexCnt){
+                localVertices[cnt] = new Vertex(localVertices[cnt-1].get_name() + slaveIDs.length);
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         for (int i = 0; i < localVertices.length; i++) {
-            chunkLocalService.getLocal().get(localVertices[i]);
+            //chunkLocalService.getLocal().get(localVertices[i]);
             System.out.println(localVertices[i].get_name() + " :: " + ChunkID.toHexString(localVertices[i].getID()) + " " + localVertices[i].getOutDeg());
             /*for (int j = 0; j < localVertices[i].getM_inEdges().length; j++) {
                 System.out.print(ChunkID.toHexString(localVertices[i].getM_inEdges()[j]) + " ");
