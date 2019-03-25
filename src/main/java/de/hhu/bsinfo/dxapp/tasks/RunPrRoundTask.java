@@ -67,9 +67,10 @@ public class RunPrRoundTask implements Task {
         localchunks.next();
 
         Vertex[] localVertices = new Vertex[(int)chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getCurrentLIDCounter()];
-
+        System.out.println("LIDs: " + localVertices.length);
         for (int i = 0; i < localVertices.length; i++) {
             localVertices[i] = new Vertex(localchunks.next());
+            System.out.println(localVertices[i].get_name() + " " + ChunkID.toHexString(localVertices[i].getID()));
         }
 
         chunkService.get().get(localVertices);
@@ -82,7 +83,7 @@ public class RunPrRoundTask implements Task {
         voteChunk.incVotes(voteCnt.get());
         voteChunk.incPrSum(m_PRsum);
         chunkService.put().put(voteChunk, ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
-        //System.out.println("RunPr: " + voteCnt.get());
+        System.out.println("RunPr Vote Cnt: " + voteCnt.get());
 
         return 0;
     }
@@ -111,7 +112,7 @@ public class RunPrRoundTask implements Task {
             m_PRsum += p_vertex.getPR2();
 
             double err = p_vertex.getPR2() - p_vertex.getPR1();
-            if(Math.abs(err) < 0.000001){ ret = 1;}
+            if(Math.abs(err) < 0.01){ ret = 1;}
 
         } else {
             for (int i = 0; i < incidenceList.length; i++) {
@@ -128,7 +129,7 @@ public class RunPrRoundTask implements Task {
             m_PRsum += p_vertex.getPR1();
 
             double err = p_vertex.getPR1() - p_vertex.getPR2();
-            if(Math.abs(err) < 0.000001){ ret = 1;}
+            if(Math.abs(err) < 0.01){ ret = 1;}
         }
         chunkService.put().put(p_vertex);
 

@@ -59,12 +59,12 @@ public class InputPrJob extends AbstractJob {
                 v2 = Integer.parseInt(split[1]) - 1; //ERROR CHECK
 
                 if(vertices[v1] == null){
-                    vertices[v1] = new Vertex(v1);
+                    vertices[v1] = new Vertex(v1 + 1);
                     vertices[v1].invokeVertexPR(m_vertexCnt);
                 }
 
                 if(vertices[v2] == null){
-                    vertices[v2] = new Vertex(v2);
+                    vertices[v2] = new Vertex(v2 + 1);
                     vertices[v2].invokeVertexPR(m_vertexCnt);
                 }
 
@@ -80,6 +80,10 @@ public class InputPrJob extends AbstractJob {
         for (Vertex vertex : vertices){
             chunkService.create().create(slaveIDs.get(slaveIndex % slaveIDs.size()),vertex);
             System.out.println(vertex.get_name() + " :: " + ChunkID.toHexString(vertex.getID()) + " " + vertex.getOutDeg());
+            for (int i = 0; i < vertex.getM_inEdges().length; i++) {
+                System.out.print(ChunkID.toHexString(vertex.getM_inEdges()[i]) + " ");
+            }
+            System.out.println();
             //m_nameService.register(chunkMap.get(vertexPR), vertexPR.toString());
             chunkService.put().put(vertex);
             slaveIndex++;
