@@ -44,10 +44,6 @@ public class InputPrDistTask implements Task {
         Vertex[] localVertices = new Vertex[localVertexCnt];
 
         String[] fileSplit = m_files.split("@");
-        ArrayList<Short> a = computeService.getStatusMaster((short) 0).getConnectedSlaves();
-        for (int i = 0; i < slaveIDs.length; i++) {
-            System.out.println(slaveIDs[i] + " " + a.get(i));
-        }
 
         String myFile = null;
         /*for (String s : fileSplit){
@@ -123,19 +119,6 @@ public class InputPrDistTask implements Task {
 
         chunkLocalService.createLocal().create(localVertices);
         chunkService.put().put(localVertices);
-
-        for (int i = 0; i < localVertices.length; i++) {
-            chunkLocalService.getLocal().get(localVertices[i]);
-            System.out.println(localVertices[i].get_name() + " :: " + ChunkID.toHexString(localVertices[i].getID()) + " " + localVertices[i].getOutDeg());
-            /*for (int j = 0; j < localVertices[i].getM_inEdges().length; j++) {
-                System.out.print(ChunkID.toHexString(localVertices[i].getM_inEdges()[j]) + " ");
-            }
-            System.out.println("\n" + localVertices[i].getPR1() + " " + localVertices[i].getPR2());*/
-        }
-
-        /*for (int i = 0; i < localVertices.length; i++) {
-            System.out.println(localVertices[i].get_name() + " :: " + ChunkID.toHexString(localVertices[i].getID()));
-        }*/
 
         for (int i = 0; i < outDegrees.length; i++) {
             if(outDegrees[i] == 0){
