@@ -50,14 +50,22 @@ public class InputPrDistTask implements Task {
         }
 
         String myFile = null;
-        for (String s : fileSplit){
+        /*for (String s : fileSplit){
             if(s.contains("split_" + (slaveIDs.length - 1)) && mySlaveID == 0){
                 myFile = s;
                 break;
             } else if(s.contains("split_" + (mySlaveID -1))){
                 myFile = s;
             }
+        }*/
+
+        for (String s : fileSplit){
+            if(s.contains("split_" + (mySlaveID -1))){
+                myFile = s;
+                break;
+            }
         }
+
         if(myFile == null){
             System.out.println("Split file " + mySlaveID + " not found!");
         }
