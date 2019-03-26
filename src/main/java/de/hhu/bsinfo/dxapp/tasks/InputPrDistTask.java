@@ -167,7 +167,7 @@ public class InputPrDistTask implements Task {
         }
 
         int slaveCnt = slaveIDs.length;
-        short nid = arr[slaveIDs[(short) ((p_vertex-1) % slaveCnt)]];
+        short nid = slaveIDs[arr[(short) ((p_vertex-1) % slaveCnt)]];
         long lid = (long) (((p_vertex-1) / slaveCnt) + 1);
         return ChunkID.getChunkID(nid,lid);
     }
