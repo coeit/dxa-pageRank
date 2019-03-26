@@ -111,6 +111,7 @@ public class InputPrDistTask implements Task {
             while(cnt < localVertexCnt){
                 System.out.println(cnt);
                 localVertices[cnt] = new Vertex(localVertices[cnt-1].get_name() + slaveIDs.length);
+                localVertices[cnt].invokeVertexPR(m_vertexCnt);
                 cnt++;
             }
 
@@ -118,17 +119,19 @@ public class InputPrDistTask implements Task {
             e.printStackTrace();
         }
 
+        
+
+        chunkLocalService.createLocal().create(localVertices);
+        chunkService.put().put(localVertices);
+
         for (int i = 0; i < localVertices.length; i++) {
-            //chunkLocalService.getLocal().get(localVertices[i]);
+            chunkLocalService.getLocal().get(localVertices[i]);
             System.out.println(localVertices[i].get_name() + " :: " + ChunkID.toHexString(localVertices[i].getID()) + " " + localVertices[i].getOutDeg());
             /*for (int j = 0; j < localVertices[i].getM_inEdges().length; j++) {
                 System.out.print(ChunkID.toHexString(localVertices[i].getM_inEdges()[j]) + " ");
             }
             System.out.println("\n" + localVertices[i].getPR1() + " " + localVertices[i].getPR2());*/
         }
-
-        chunkLocalService.createLocal().create(localVertices);
-        chunkService.put().put(localVertices);
 
         /*for (int i = 0; i < localVertices.length; i++) {
             System.out.println(localVertices[i].get_name() + " :: " + ChunkID.toHexString(localVertices[i].getID()));
