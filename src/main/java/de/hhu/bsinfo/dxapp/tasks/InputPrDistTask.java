@@ -160,8 +160,14 @@ public class InputPrDistTask implements Task {
     }
 
     public long correspondingChunkID(int p_vertex, short[] slaveIDs){
+
+        short[] arr = new short[slaveIDs.length];
+        for (int i = 0; i < slaveIDs.length - 1; i++) {
+            arr[i] = (short) (i + 1);
+        }
+
         int slaveCnt = slaveIDs.length;
-        short nid = slaveIDs[(short) ((p_vertex-1) % slaveCnt)];
+        short nid = arr[slaveIDs[(short) ((p_vertex-1) % slaveCnt)]];
         long lid = (long) (((p_vertex-1) / slaveCnt) + 1);
         return ChunkID.getChunkID(nid,lid);
     }
