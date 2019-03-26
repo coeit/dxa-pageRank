@@ -86,7 +86,7 @@ public class InputPrDistTask implements Task {
                 String[] split = line.split(" ");
                 v1 = Integer.parseInt(split[0]) -1;
                 v2i = Integer.parseInt(split[1]) -1;
-                v2 = (int) Math.ceil((Double.parseDouble(split[1]) - 2)/(double) slaveIDs.length); //ERROR CHECK
+                v2 = (int) Math.ceil((Double.parseDouble(split[1]) - slaveIDs.length)/(double) slaveIDs.length); //ERROR CHECK
                 if(localVertices[v2] == null){
                     cnt++;
                     localVertices[v2] = new Vertex(v2i + 1);
@@ -119,7 +119,7 @@ public class InputPrDistTask implements Task {
             e.printStackTrace();
         }
 
-        
+
 
         chunkLocalService.createLocal().create(localVertices);
         chunkService.put().put(localVertices);
