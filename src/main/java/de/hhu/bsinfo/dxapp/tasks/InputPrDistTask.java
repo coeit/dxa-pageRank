@@ -60,7 +60,7 @@ public class InputPrDistTask implements Task {
         }*/
 
         for (String s : fileSplit){
-            if(s.contains("split_" + (mySlaveID -1))){
+            if(s.contains("split_" + (mySlaveID))){
                 myFile = s;
                 break;
             }
