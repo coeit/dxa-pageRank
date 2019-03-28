@@ -111,7 +111,7 @@ public class RunPrRoundTask implements Task {
 
         double err = p_vertex.getPageRank(Math.abs(m_round - 1)) - p_vertex.getPageRank(m_round);
         if(Math.abs(err) < 0.00001){ ret = 1;}
-        System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPageRank(Math.abs(m_round - 1)) + " " + p_vertex.getPageRank(m_round));
+        //System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPageRank(Math.abs(m_round - 1)) + " " + p_vertex.getPageRank(m_round));
 
 
         /*if(!m_flag){

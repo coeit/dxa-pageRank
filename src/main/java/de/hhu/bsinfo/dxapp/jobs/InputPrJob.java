@@ -90,11 +90,11 @@ public class InputPrJob extends AbstractJob {
 
         for (Vertex vertex : vertices){
             chunkService.create().create(slaveIDs.get(slaveIndex % slaveIDs.size()),vertex);
-            System.out.println(vertex.get_name() + " :: " + ChunkID.toHexString(vertex.getID()) + " " + vertex.getOutDeg() + " PR1: " + vertex.getPageRank(0) + " PR2: " + vertex.getPageRank(1));
+            /*System.out.println(vertex.get_name() + " :: " + ChunkID.toHexString(vertex.getID()) + " " + vertex.getOutDeg() + " PR1: " + vertex.getPageRank(0) + " PR2: " + vertex.getPageRank(1));
             for (int i = 0; i < vertex.getM_inEdges().length; i++) {
                 System.out.print(ChunkID.toHexString(vertex.getM_inEdges()[i]) + " ");
             }
-            System.out.println();
+            System.out.println();*/
             //m_nameService.register(chunkMap.get(vertexPR), vertexPR.toString());
             chunkService.put().put(vertex);
             slaveIndex++;
