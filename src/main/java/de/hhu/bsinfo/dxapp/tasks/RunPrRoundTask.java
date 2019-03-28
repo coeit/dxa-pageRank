@@ -74,7 +74,10 @@ public class RunPrRoundTask implements Task {
         chunkService.get().get(localVertices);
         //chunkLocalService.getLocal().get(localVertices);
 
-        Stream.of(localVertices).parallel().forEach(localVertex -> voteCnt.getAndAdd(getIncomingPR(localVertex,p_ctx)));
+        Stream.of(localVertices).parallel().forEach(localVertex -> {
+            voteCnt.getAndAdd(getIncomingPR(localVertex,chunkService));
+            chunkService.put().put(localVertex);
+        });
 
         VoteChunk voteChunk = new VoteChunk(m_voteChunkID);
         chunkService.get().get(voteChunk,ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
@@ -86,8 +89,7 @@ public class RunPrRoundTask implements Task {
         return 0;
     }
 
-    public int getIncomingPR(Vertex p_vertex, TaskContext p_ctx){
-        ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
+    public int getIncomingPR(Vertex p_vertex, ChunkService p_chunkService){
         /*ChunkLocalService chunkLocalService = p_ctx.getDXRAMServiceAccessor().getService(ChunkLocalService.class);
         Vertex vertex = new Vertex(p_cid);
 
@@ -101,7 +103,7 @@ public class RunPrRoundTask implements Task {
                 neighbors[i] = new Vertex(incidenceList[i]);
             }
 
-            chunkService.get().get(neighbors);
+            p_chunkService.get().get(neighbors);
             for(Vertex tmp : neighbors){
                 tmpPR += tmp.getPR1()/(double)tmp.getOutDeg();
             }
@@ -117,7 +119,7 @@ public class RunPrRoundTask implements Task {
                 neighbors[i] = new Vertex(incidenceList[i]);
             }
 
-            chunkService.get().get(neighbors);
+            p_chunkService.get().get(neighbors);
 
             for(Vertex tmp : neighbors){
                 tmpPR += tmp.getPR2()/(double)tmp.getOutDeg();
@@ -130,7 +132,6 @@ public class RunPrRoundTask implements Task {
             if(Math.abs(err) < 0.000001){ ret = 1;}
             //System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPR1() + " " + p_vertex.getPR2());
         }
-        chunkService.put().put(p_vertex);
         return ret;
     }
 
