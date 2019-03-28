@@ -173,6 +173,6 @@ public class RunPrRoundTask implements Task {
 
     @Override
     public int sizeofObject() {
-        return Integer.BYTES + Double.BYTES + Long.BYTES +ObjectSizeUtil.sizeofBoolean();
+        return Integer.BYTES * 2 + Double.BYTES + Long.BYTES;
     }
 }
