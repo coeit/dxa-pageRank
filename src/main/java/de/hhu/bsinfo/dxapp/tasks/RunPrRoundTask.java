@@ -129,9 +129,9 @@ public class RunPrRoundTask implements Task {
 
             double err = p_vertex.getPR1() - p_vertex.getPR2();
             if(Math.abs(err) < 0.01){ ret = 1;}
-            p_chunkService.put().put(p_vertex);
             System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPR1() + " " + p_vertex.getPR2());
         }
+        p_chunkService.put().put(p_vertex);
         return ret;
     }
 
