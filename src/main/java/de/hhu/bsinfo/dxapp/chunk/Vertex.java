@@ -32,12 +32,12 @@ public class Vertex extends AbstractChunk {
         m_PR1 = 1/(double) N;
         m_PR2 = 1/(double) N;
         if(m_outDeg == 0){
-            m_outDeg = N;
+            m_outDeg = N - 1;
         }
     }
 
     public void increment_outDeg(int p_num, int N){
-        if(m_outDeg  == N){
+        if(m_outDeg  == N - 1){
             m_outDeg = 0;
         }
         m_outDeg += p_num;

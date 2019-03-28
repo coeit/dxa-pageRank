@@ -79,7 +79,7 @@ public class InputPrJob extends AbstractJob {
         int slaveIndex = 0;
 
         for (int i = 0; i < vertices.length; i++) {
-            if(vertices[i].getOutDeg() == m_vertexCnt){
+            if(vertices[i].getOutDeg() == m_vertexCnt - 1){
                 for (int j = 0; j < vertices.length; j++) {
                     if(j != i){
                         vertices[j].addInEdge(correspondingChunkID(i + 1,slaveIDs));
