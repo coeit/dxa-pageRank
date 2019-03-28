@@ -76,7 +76,6 @@ public class RunPrRoundTask implements Task {
 
         Stream.of(localVertices).parallel().forEach(localVertex -> {
             voteCnt.getAndAdd(getIncomingPR(localVertex,chunkService));
-            chunkService.put().put(localVertex);
         });
 
         VoteChunk voteChunk = new VoteChunk(m_voteChunkID);
@@ -130,6 +129,7 @@ public class RunPrRoundTask implements Task {
 
             double err = p_vertex.getPR1() - p_vertex.getPR2();
             if(Math.abs(err) < 0.000001){ ret = 1;}
+            p_chunkService.put().put(p_vertex);
             //System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPR1() + " " + p_vertex.getPR2());
         }
         return ret;
