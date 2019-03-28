@@ -143,8 +143,8 @@ public class MainPR extends AbstractApplication {
         SendPrTask SendPRpar = new SendPrTask(N,DAMPING_FACTOR);
         UpdatePrTask updatePR = new UpdatePrTask();
 
-        RunPrRoundTask Run1 = new RunPrRoundTask(N,DAMPING_FACTOR,false,voteChunk.getID());
-        RunPrRoundTask Run2 = new RunPrRoundTask(N,DAMPING_FACTOR,true,voteChunk.getID());
+        RunPrRoundTask Run1 = new RunPrRoundTask(N,DAMPING_FACTOR,0,voteChunk.getID());
+        RunPrRoundTask Run2 = new RunPrRoundTask(N,DAMPING_FACTOR,1,voteChunk.getID());
 
         //TaskScript taskScript = new TaskScript(Run1,Run2);
 
@@ -223,6 +223,7 @@ public class MainPR extends AbstractApplication {
             PrOutDir.mkdir();
         }
         String out = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss").format(new Date());
+        out = "pageRank_" + out;
         File outDir = new File(PrOutDir + "/" + out);
         outDir.mkdir();
         String ret = new String(PrOutDir + "/" + out);

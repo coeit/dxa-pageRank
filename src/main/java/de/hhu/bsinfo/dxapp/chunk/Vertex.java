@@ -10,8 +10,7 @@ import java.util.Arrays;
 public class Vertex extends AbstractChunk {
     //private int[] m_inEdges = new int[0];
     private long[] m_inEdges = new long[0];
-    private double m_PR1 = 0.0;
-    private double m_PR2 = 0.0;
+    private double[] m_pageRank = new double[2];
     private int m_outDeg = 0;
     private int m_name;
 
@@ -29,8 +28,8 @@ public class Vertex extends AbstractChunk {
     }
 
     public void invokeVertexPR(int N) {
-        m_PR1 = 1/(double) N;
-        m_PR2 = 1/(double) N;
+        m_pageRank[0] = 1/(double) N;
+        m_pageRank[1] = 1/(double) N;
         if(m_outDeg == 0){
             m_outDeg = N - 1;
         }
@@ -56,23 +55,14 @@ public class Vertex extends AbstractChunk {
 
     }
 
-    public void calcPR1(int N, double D, double p_tmpPR){
-        m_PR1 = (1 - D)/N + D * p_tmpPR;
+    public void calcPageRank(int N, double D, double p_sum, int p_round){
+        m_pageRank[p_round] = (1 - D)/N + D * p_sum;
     }
-
-    public void calcPR2(int N, double D, double p_tmpPR){
-        m_PR2 = (1 - D)/N + D * p_tmpPR;
-    }
-
 
     public int getOutDeg(){return m_outDeg;}
 
-    public double getPR1(){
-        return m_PR1;
-    }
-
-    public double getPR2(){
-        return m_PR2;
+    public double getPageRank(int p_round){
+        return m_pageRank[p_round];
     }
 
     public long[] getM_inEdges(){
@@ -86,8 +76,7 @@ public class Vertex extends AbstractChunk {
 
     @Override
     public void exportObject(Exporter p_exporter) {
-        p_exporter.writeDouble(m_PR1);
-        p_exporter.writeDouble(m_PR2);
+        p_exporter.writeDoubleArray(m_pageRank);
         p_exporter.writeInt(m_outDeg);
         p_exporter.writeInt(m_name);
         p_exporter.writeLongArray(m_inEdges);
@@ -95,8 +84,7 @@ public class Vertex extends AbstractChunk {
 
     @Override
     public void importObject(Importer p_importer) {
-        m_PR1 = p_importer.readDouble(m_PR1);
-        m_PR2 = p_importer.readDouble(m_PR2);
+        m_pageRank = p_importer.readDoubleArray(m_pageRank);
         m_outDeg = p_importer.readInt(m_outDeg);
         m_name = p_importer.readInt(m_name);
         m_inEdges = p_importer.readLongArray(m_inEdges);
@@ -104,6 +92,6 @@ public class Vertex extends AbstractChunk {
 
     @Override
     public int sizeofObject() {
-        return Double.BYTES * 2 + Integer.BYTES * 2 + ObjectSizeUtil.sizeofLongArray(m_inEdges);
+        return ObjectSizeUtil.sizeofDoubleArray(m_pageRank) + Integer.BYTES * 2 + ObjectSizeUtil.sizeofLongArray(m_inEdges);
     }
 }

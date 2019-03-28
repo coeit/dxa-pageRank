@@ -31,18 +31,18 @@ public class RunPrRoundTask implements Task {
 
     //private int NUM_THREADS;
     private int N;
-    private double DAMP;
-    private boolean m_flag;
+    private double m_damp;
+    private int m_round;
     private double m_PRsum;
     private long m_voteChunkID;
 
     public RunPrRoundTask(){}
 
-    public RunPrRoundTask(int vertexCount, double damping_factor, boolean p_flag, long p_voteChunkID){
+    public RunPrRoundTask(int vertexCount, double p_damp, int p_round, long p_voteChunkID){
         //NUM_THREADS = num_threads;
-        DAMP = damping_factor;
+        m_damp = p_damp;
         N = vertexCount;
-        m_flag = p_flag;
+        m_round = p_round;
         m_voteChunkID = p_voteChunkID;
     }
 
@@ -56,8 +56,8 @@ public class RunPrRoundTask implements Task {
         /**try getting all local chunks in advance**/
         /*Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
         localchunks.next();
-        StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0).trySplit(),true).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));*/
-        //StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0) ,false).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,DAMP));
+        StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0).trySplit(),true).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,m_damp));*/
+        //StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0) ,false).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,m_damp));
 
 
         m_PRsum = 0.0;
@@ -97,7 +97,20 @@ public class RunPrRoundTask implements Task {
         long incidenceList[] = p_vertex.getM_inEdges();
         Vertex[] neighbors = new Vertex[incidenceList.length];
         double tmpPR = 0.0;
-        if(!m_flag){
+
+        p_chunkService.get().get(neighbors);
+        for(Vertex tmp : neighbors){
+            tmpPR += tmp.getPageRank(m_round)/(double)tmp.getOutDeg();
+        }
+        p_vertex.calcPageRank(N,m_damp,tmpPR, Math.abs(m_round - 1));
+        m_PRsum += p_vertex.getPageRank(Math.abs(m_round - 1));
+
+        double err = p_vertex.getPageRank(Math.abs(m_round - 1)) - p_vertex.getPageRank(m_round);
+        if(Math.abs(err) < 0.00001){ ret = 1;}
+        System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPageRank(Math.abs(m_round - 1)) + " " + p_vertex.getPageRank(m_round));
+
+
+        /*if(!m_flag){
             for (int i = 0; i < incidenceList.length; i++) {
                 neighbors[i] = new Vertex(incidenceList[i]);
             }
@@ -106,11 +119,11 @@ public class RunPrRoundTask implements Task {
             for(Vertex tmp : neighbors){
                 tmpPR += tmp.getPR1()/(double)tmp.getOutDeg();
             }
-            p_vertex.calcPR2(N,DAMP,tmpPR);
+            p_vertex.calcPR2(N,m_damp,tmpPR);
             m_PRsum += p_vertex.getPR2();
 
             double err = p_vertex.getPR2() - p_vertex.getPR1();
-            if(Math.abs(err) < 0.01){ ret = 1;}
+            if(Math.abs(err) < 0.00001){ ret = 1;}
             System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPR2() + " " + p_vertex.getPR1());
 
         } else {
@@ -124,13 +137,13 @@ public class RunPrRoundTask implements Task {
                 tmpPR += tmp.getPR2()/(double)tmp.getOutDeg();
             }
 
-            p_vertex.calcPR1(N,DAMP,tmpPR);
+            p_vertex.calcPR1(N,m_damp,tmpPR);
             m_PRsum += p_vertex.getPR1();
 
             double err = p_vertex.getPR1() - p_vertex.getPR2();
-            if(Math.abs(err) < 0.01){ ret = 1;}
+            if(Math.abs(err) < 0.00001){ ret = 1;}
             System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPR1() + " " + p_vertex.getPR2());
-        }
+        }*/
         p_chunkService.put().put(p_vertex);
         return ret;
     }
@@ -144,8 +157,8 @@ public class RunPrRoundTask implements Task {
     public void exportObject(Exporter p_exporter) {
         //p_exporter.writeInt(NUM_THREADS);
         p_exporter.writeInt(N);
-        p_exporter.writeDouble(DAMP);
-        p_exporter.writeBoolean(m_flag);
+        p_exporter.writeDouble(m_damp);
+        p_exporter.writeInt(m_round);
         p_exporter.writeLong(m_voteChunkID);
     }
 
@@ -153,8 +166,8 @@ public class RunPrRoundTask implements Task {
     public void importObject(Importer p_importer) {
         //NUM_THREADS = p_importer.readInt(NUM_THREADS);
         N = p_importer.readInt(N);
-        DAMP = p_importer.readDouble(DAMP);
-        m_flag = p_importer.readBoolean(m_flag);
+        m_damp = p_importer.readDouble(m_damp);
+        m_round = p_importer.readInt(m_round);
         m_voteChunkID = p_importer.readLong(m_voteChunkID);
     }
 
