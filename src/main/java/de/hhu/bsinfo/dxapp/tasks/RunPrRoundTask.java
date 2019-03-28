@@ -98,6 +98,10 @@ public class RunPrRoundTask implements Task {
         Vertex[] neighbors = new Vertex[incidenceList.length];
         double tmpPR = 0.0;
 
+        for (int i = 0; i < incidenceList.length; i++) {
+            neighbors[i] = new Vertex(incidenceList[i]);
+        }
+
         p_chunkService.get().get(neighbors);
         for(Vertex tmp : neighbors){
             tmpPR += tmp.getPageRank(m_round)/(double)tmp.getOutDeg();
