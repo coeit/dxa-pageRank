@@ -160,7 +160,7 @@ public class MainPR extends AbstractApplication {
             PRsum = voteChunk.getPRsum();
             voteChunk.reset();
             chunkService.put().put(voteChunk,ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
-
+            System.out.println("Err: " + PRerr + " Sum: " + PRsum);
             roundPRerr.add(PRerr);
             roundPRsum.add(PRsum);
             NumRounds++;
