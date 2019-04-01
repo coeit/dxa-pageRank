@@ -137,7 +137,7 @@ public class MainPR extends AbstractApplication {
         ArrayList<Double> roundPRerr = new ArrayList<>();
 
         int NumRounds = 0;
-        double PRsum = 0.0;
+        //double PRsum = 0.0;
         double PRerr = 0.0;
         stopwatch.start();
         TaskScriptState state;
@@ -157,15 +157,15 @@ public class MainPR extends AbstractApplication {
 
             chunkService.get().get(voteChunk,ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
             PRerr = voteChunk.getPRerr();
-            PRsum = voteChunk.getPRsum();
+            //PRsum = voteChunk.getPRsum();
             voteChunk.reset();
             chunkService.put().put(voteChunk,ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
-            System.out.println("Err: " + PRerr + " Sum: " + PRsum);
+            //System.out.println("Err: " + PRerr + " Sum: " + PRsum);
             roundPRerr.add(PRerr);
-            roundPRsum.add(PRsum);
+            //roundPRsum.add(PRsum);
             NumRounds++;
 
-            if (PRerr <= 1e-5) {
+            if (PRerr <= 1e-4) {
                 break;
             }
 
@@ -187,10 +187,10 @@ public class MainPR extends AbstractApplication {
 
 
 
-        double[] roundPRsumArr = roundPRsum.stream().mapToDouble(i -> i).toArray();
+        //double[] roundPRsumArr = roundPRsum.stream().mapToDouble(i -> i).toArray();
         double[] roundPRerrArr = roundPRerr.stream().mapToDouble(i -> i).toArray();
 
-        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,InputTime,ExecutionTime,NumRounds,roundPRsumArr,roundPRerrArr);
+        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,InputTime,ExecutionTime,NumRounds,roundPRerrArr);
         jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();
 

@@ -35,7 +35,7 @@ public class RunPrRoundTask implements Task {
     private int N;
     private double m_damp;
     private int m_round;
-    private DoubleAdder m_PRsum = new DoubleAdder();
+    //private DoubleAdder m_PRsum = new DoubleAdder();
     private DoubleAdder m_PRerr = new DoubleAdder();
     private long m_voteChunkID;
 
@@ -77,13 +77,14 @@ public class RunPrRoundTask implements Task {
         //chunkLocalService.getLocal().get(localVertices);
 
         Stream.of(localVertices).parallel().forEach(localVertex -> getIncomingPR(localVertex,chunkService));
+        System.out.println(System.currentTimeMillis());
 
         VoteChunk voteChunk = new VoteChunk(m_voteChunkID);
         chunkService.get().get(voteChunk,ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
-        voteChunk.incPRsum(m_PRsum.sum());
+        //voteChunk.incPRsum(m_PRsum.sum());
         voteChunk.incPRerr(m_PRerr.sum());
         chunkService.put().put(voteChunk, ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
-        System.out.println("RunPrErr: " + m_PRerr.sum() + " RoundPRsum: " + m_PRsum.sum());
+        //System.out.println("RunPrErr: " + m_PRerr.sum() + " RoundPRsum: " + m_PRsum.sum());
 
         return 0;
     }
@@ -105,7 +106,7 @@ public class RunPrRoundTask implements Task {
         p_vertex.calcPageRank(N,m_damp,tmpPR, Math.abs(m_round - 1));
 
 
-        m_PRsum.add(p_vertex.getPageRank(Math.abs(m_round -1)));
+        //m_PRsum.add(p_vertex.getPageRank(Math.abs(m_round -1)));
         m_PRerr.add(Math.abs(p_vertex.getPageRank(Math.abs(m_round - 1)) - p_vertex.getPageRank(m_round)));
         //System.out.println(p_vertex.getPageRank(Math.abs(m_round - 1)) + "\t" + p_vertex.getPageRank(m_round));
 
