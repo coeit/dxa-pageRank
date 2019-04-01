@@ -83,7 +83,7 @@ public class RunPrRoundTask implements Task {
         voteChunk.incPRsum(m_PRsum.sum());
         voteChunk.incPRerr(m_PRerr.sum());
         chunkService.put().put(voteChunk, ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
-        //System.out.println("RunPr Vote Cnt: " + voteCnt.get());
+        System.out.println("RunPrErr: " + m_PRerr.sum());
 
         return 0;
     }
@@ -103,11 +103,13 @@ public class RunPrRoundTask implements Task {
             tmpPR += tmp.getPageRank(m_round)/(double)tmp.getOutDeg();
         }
         p_vertex.calcPageRank(N,m_damp,tmpPR, Math.abs(m_round - 1));
-        p_chunkService.put().put(p_vertex);
+
 
         m_PRsum.add(p_vertex.getPageRank(Math.abs(m_round -1)));
         m_PRerr.add(p_vertex.getPageRank(Math.abs(m_round - 1)) - p_vertex.getPageRank(m_round));
+        System.out.println(p_vertex.getPageRank(Math.abs(m_round - 1)) + "\t" + p_vertex.getPageRank(m_round));
 
+        p_chunkService.put().put(p_vertex);
         //double err = p_vertex.getPageRank(Math.abs(m_round - 1)) - p_vertex.getPageRank(m_round);
         //System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPageRank(Math.abs(m_round - 1)) + " " + p_vertex.getPageRank(m_round));
 
