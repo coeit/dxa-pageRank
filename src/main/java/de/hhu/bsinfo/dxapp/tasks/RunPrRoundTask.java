@@ -77,7 +77,7 @@ public class RunPrRoundTask implements Task {
         //chunkLocalService.getLocal().get(localVertices);
 
         Stream.of(localVertices).parallel().forEach(localVertex -> getIncomingPR(localVertex,chunkService));
-        System.out.println(System.currentTimeMillis());
+        //System.out.println(System.currentTimeMillis());
 
         VoteChunk voteChunk = new VoteChunk(m_voteChunkID);
         chunkService.get().get(voteChunk,ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
