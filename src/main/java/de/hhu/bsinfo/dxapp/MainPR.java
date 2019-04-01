@@ -3,43 +3,25 @@ package de.hhu.bsinfo.dxapp;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
-import de.hhu.bsinfo.dxmem.core.CIDTable;
-import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
-import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
-import de.hhu.bsinfo.dxmem.data.AbstractChunk;
-import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxram.app.AbstractApplication;
 //import de.hhu.bsinfo.dxram.app.Application;
-import de.hhu.bsinfo.dxram.app.ApplicationService;
 import de.hhu.bsinfo.dxram.boot.BootService;
-import de.hhu.bsinfo.dxram.chunk.ChunkLocalService;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
-import de.hhu.bsinfo.dxram.chunk.data.ChunkAnon;
 import de.hhu.bsinfo.dxapp.chunk.IntegerChunk;
 import de.hhu.bsinfo.dxram.engine.DXRAMVersion;
-import de.hhu.bsinfo.dxram.function.*;
 //import de.hhu.bsinfo.dxram.function.PRInputFunction;
-import de.hhu.bsinfo.dxram.function.util.ParameterList;
 import de.hhu.bsinfo.dxram.generated.BuildConfig;
 import de.hhu.bsinfo.dxapp.jobs.*;
 import de.hhu.bsinfo.dxram.job.*;
-import de.hhu.bsinfo.dxram.logger.LoggerService;
 import de.hhu.bsinfo.dxram.ms.*;
 import de.hhu.bsinfo.dxram.ms.script.TaskScript;
 import de.hhu.bsinfo.dxapp.tasks.*;
 import de.hhu.bsinfo.dxutils.Stopwatch;
 import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
-import de.hhu.bsinfo.dxram.ms.tasks.PrintTask;
-import de.hhu.bsinfo.dxutils.NodeID;
-import org.apache.logging.log4j.core.config.plugins.util.ResolverUtil;
-import org.omg.PortableInterceptor.INACTIVE;
 
 /**
  * "Hello world" example DXRAM application
@@ -151,10 +133,12 @@ public class MainPR extends AbstractApplication {
         TaskScript taskScriptRun1 = new TaskScript(Run1);
         TaskScript taskScriptRun2 = new TaskScript(Run2);
 
-        ArrayList<Integer> RoundVotes = new ArrayList<>();
+        ArrayList<Double> roundPRsum = new ArrayList<>();
+        ArrayList<Double> roundPRerr = new ArrayList<>();
+
         int NumRounds = 0;
         double PRsum = 0.0;
-        int votes;
+        double PRerr = 0.0;
         stopwatch.start();
         TaskScriptState state;
         for (int i = 0; i < 30; i++) {
@@ -172,23 +156,16 @@ public class MainPR extends AbstractApplication {
             }
 
             chunkService.get().get(voteChunk,ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
-            votes = voteChunk.getVotes();
+            PRerr = voteChunk.getPRerr();
             PRsum = voteChunk.getPRsum();
             voteChunk.reset();
             chunkService.put().put(voteChunk,ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
-            /*for (short nodeID: computeService.getStatusMaster((short) 0).getConnectedSlaves()){
-                VoteChunk voteChunk = new VoteChunk(nameService.getChunkID(NodeID.toHexString(nodeID).substring(2,6),333));
-                chunkService.lock().lock(true,false,-1,voteChunk);
-                chunkService.get().get(voteChunk);
-                chunkService.lock().lock(false,false,-1,voteChunk);
-                System.out.println(NodeID.toHexString(nodeID) + " votes Round " + i  + ": " + voteChunk.getVotes());
-                votes += voteChunk.getVotes();
-                PRsum += voteChunk.getPRsum();
-            }*/
-            RoundVotes.add(votes);
+
+            roundPRerr.add(PRerr);
+            roundPRsum.add(PRsum);
             NumRounds++;
-            if((double) votes / (double) N >= 0.9){
-                //System.out.println(">>Reached vote halting limit in round " + i);
+
+            if (PRerr <= 1e-5) {
                 break;
             }
 
@@ -208,8 +185,12 @@ public class MainPR extends AbstractApplication {
             }
         }
 
-        int[] RoundVotesArr = RoundVotes.stream().mapToInt(i -> i).toArray();
-        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,InputTime,ExecutionTime,NumRounds,PRsum,RoundVotesArr);
+
+
+        double[] roundPRsumArr = roundPRsum.stream().mapToDouble(i -> i).toArray();
+        double[] roundPRerrArr = roundPRerr.stream().mapToDouble(i -> i).toArray();
+
+        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,InputTime,ExecutionTime,NumRounds,roundPRsumArr,roundPRerrArr);
         jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();
 

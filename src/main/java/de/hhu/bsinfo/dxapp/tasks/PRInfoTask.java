@@ -52,7 +52,7 @@ public class PRInfoTask implements Task {
     public int execute(TaskContext p_ctx) {
         ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
         BootService bootService = p_ctx.getDXRAMServiceAccessor().getService(BootService.class);
-        String outPath = m_outDir + "/" + NodeID.toHexStringShort(bootService.getNodeID());
+        String outPath = m_outDir + "/" + NodeID.toHexStringShort(bootService.getNodeID()) + ".pageRank";
         System.out.println(outPath);
         File outFile = new File(outPath);
         try {

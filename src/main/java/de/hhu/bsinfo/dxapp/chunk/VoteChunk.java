@@ -7,60 +7,54 @@ import jdk.nashorn.internal.objects.annotations.Getter;
 
 public class VoteChunk extends AbstractChunk {
 
-    private int m_votes;
+    private double m_PRerr;
     private double m_PRsum;
 
     public VoteChunk(){
         super();
-        m_votes = 0;
+        m_PRerr = 0.0;
         m_PRsum = 0.0;
-    }
-
-    public VoteChunk(int p_votes, double p_PRsum) {
-        super();
-        m_votes = p_votes;
-        m_PRsum = p_PRsum;
     }
 
     public VoteChunk(long p_chunkID) {
         super(p_chunkID);
     }
 
-    public int getVotes() {
-        return m_votes;
+    public double getPRerr() {
+        return m_PRerr;
     }
 
     public double getPRsum () {
         return m_PRsum;
     }
 
-    public void incPrSum (double p_PRsum){
+    public void incPRsum (double p_PRsum){
         m_PRsum += p_PRsum;
     }
 
-    public void reset (){
-        m_votes = 0;
-        m_PRsum = 0.0;
+    public void incPRerr(double p_PRerr) {
+        m_PRerr += p_PRerr;
     }
 
-    public void incVotes(int p_votes) {
-        m_votes += p_votes;
+    public void reset (){
+        m_PRerr = 0.0;
+        m_PRsum = 0.0;
     }
 
     @Override
     public void exportObject(Exporter p_exporter) {
-        p_exporter.writeInt(m_votes);
+        p_exporter.writeDouble(m_PRerr);
         p_exporter.writeDouble(m_PRsum);
     }
 
     @Override
     public void importObject(Importer p_importer) {
-        m_votes = p_importer.readInt(m_votes);
+        m_PRerr = p_importer.readDouble(m_PRerr);
         m_PRsum = p_importer.readDouble(m_PRsum);
     }
 
     @Override
     public int sizeofObject() {
-        return Integer.BYTES + Double.BYTES;
+        return Double.BYTES * 2;
     }
 }

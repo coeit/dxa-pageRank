@@ -19,20 +19,20 @@ public class PrStatisticsJob extends AbstractJob {
     private long m_InputTime;
     private long m_ExecutionTime;
     private int m_NumRounds;
-    private double m_PRsum;
-    private int[] m_votes;
+    private double[] m_PRsums;
+    private double[] m_PRerrs;
 
     public PrStatisticsJob() {
     }
 
-    public PrStatisticsJob(String p_outDir,int p_vertexCount ,long p_InputTime, long p_ExecutionTime, int p_NumRounds, double p_PRsum, int[] p_votes) {
+    public PrStatisticsJob(String p_outDir,int p_vertexCount ,long p_InputTime, long p_ExecutionTime, int p_NumRounds, double[] p_PRsums, double[] p_PRerrs) {
         m_outDir = p_outDir;
         m_vertexCount = p_vertexCount;
         m_InputTime = p_InputTime;
         m_ExecutionTime = p_ExecutionTime;
         m_NumRounds = p_NumRounds;
-        m_PRsum = p_PRsum;
-        m_votes = p_votes;
+        m_PRsums = p_PRsums;
+        m_PRerrs = p_PRerrs;
 
     }
 
@@ -56,12 +56,14 @@ public class PrStatisticsJob extends AbstractJob {
             String ExecutionTime = String.format("%.4f",(double)m_ExecutionTime/(double)1000000000);
             writer.write("INPUT_TIME\t" + InputTime + "s" + "\n");
             writer.write("EXECUTION_TIME\t" + ExecutionTime + "s" + "\n");
-            String PRsum = String.format("%.4f", m_PRsum);
-            writer.write("PAGERANK_SUM\t" + PRsum + "\n");
-            writer.write("----Votes in Round----\n");
-            for (int i = 0; i < m_votes.length; i++) {
-                String voteRatio = String.format("%.2f", (double)m_votes[i]/(double)m_vertexCount);
-                writer.write("ROUND" + (i+1) + "\t" + m_votes[i] + "/" + m_vertexCount + " " + voteRatio + "\n");
+
+            writer.write("--------ROUNDS--------\n");
+            writer.write("Round\tError\tSum");
+            for (int i = 0; i < m_PRsums.length; i++) {
+                String PRsum = String.format("%.4f", m_PRsums[i]);
+                String PRerr = String.format("%.4f", m_PRerrs[i]);
+                //String voteRatio = String.format("%.2f", (double)m_votes[i]/(double)m_vertexCount);
+                writer.write((i+1) + "\t" + m_PRerrs[i] + "\t" + m_PRsums[i] + "\n");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -76,8 +78,8 @@ public class PrStatisticsJob extends AbstractJob {
         m_InputTime = p_importer.readLong(m_InputTime);
         m_ExecutionTime = p_importer.readLong(m_ExecutionTime);
         m_NumRounds = p_importer.readInt(m_NumRounds);
-        m_PRsum = p_importer.readDouble(m_PRsum);
-        m_votes = p_importer.readIntArray(m_votes);
+        m_PRsums = p_importer.readDoubleArray(m_PRsums);
+        m_PRerrs = p_importer.readDoubleArray(m_PRerrs);
     }
 
     @Override
@@ -88,12 +90,13 @@ public class PrStatisticsJob extends AbstractJob {
         p_exporter.writeLong(m_InputTime);
         p_exporter.writeLong(m_ExecutionTime);
         p_exporter.writeInt(m_NumRounds);
-        p_exporter.writeDouble(m_PRsum);
-        p_exporter.writeIntArray(m_votes);
+        p_exporter.writeDoubleArray(m_PRsums);
+        p_exporter.writeDoubleArray(m_PRerrs);
     }
 
     @Override
     public int sizeofObject() {
-        return super.sizeofObject() + ObjectSizeUtil.sizeofString(m_outDir) + Integer.BYTES * 2 + Long.BYTES * 2 + Double.BYTES + ObjectSizeUtil.sizeofIntArray(m_votes);
+        return super.sizeofObject() + ObjectSizeUtil.sizeofString(m_outDir) + Integer.BYTES * 2
+                + Long.BYTES * 2 + ObjectSizeUtil.sizeofDoubleArray(m_PRerrs) + ObjectSizeUtil.sizeofDoubleArray(m_PRsums);
     }
 }

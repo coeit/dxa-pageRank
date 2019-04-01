@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Spliterators;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.DoubleAccumulator;
+import java.util.concurrent.atomic.DoubleAdder;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -33,7 +35,8 @@ public class RunPrRoundTask implements Task {
     private int N;
     private double m_damp;
     private int m_round;
-    private double m_PRsum;
+    private DoubleAdder m_PRsum = new DoubleAdder();
+    private DoubleAdder m_PRerr = new DoubleAdder();
     private long m_voteChunkID;
 
     public RunPrRoundTask(){}
@@ -60,8 +63,7 @@ public class RunPrRoundTask implements Task {
         //StreamSupport.stream(Spliterators.spliteratorUnknownSize(localchunks, 0) ,false).forEach(p_cid -> getIncomingPR(p_cid,p_ctx,N,m_damp));
 
 
-        m_PRsum = 0.0;
-        final AtomicInteger voteCnt = new AtomicInteger(0);
+        //final AtomicInteger voteCnt = new AtomicInteger(0);
         Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
         //Spliterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).spliterator();
         localchunks.next();
@@ -74,26 +76,20 @@ public class RunPrRoundTask implements Task {
         chunkService.get().get(localVertices);
         //chunkLocalService.getLocal().get(localVertices);
 
-        Stream.of(localVertices).parallel().forEach(localVertex -> {
-            voteCnt.getAndAdd(getIncomingPR(localVertex,chunkService));
-        });
+        Stream.of(localVertices).parallel().forEach(localVertex -> getIncomingPR(localVertex,chunkService));
 
         VoteChunk voteChunk = new VoteChunk(m_voteChunkID);
         chunkService.get().get(voteChunk,ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
-        voteChunk.incVotes(voteCnt.get());
-        voteChunk.incPrSum(m_PRsum);
+        voteChunk.incPRsum(m_PRsum.sum());
+        voteChunk.incPRerr(m_PRerr.sum());
         chunkService.put().put(voteChunk, ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
-        System.out.println("RunPr Vote Cnt: " + voteCnt.get());
+        //System.out.println("RunPr Vote Cnt: " + voteCnt.get());
 
         return 0;
     }
 
-    public int getIncomingPR(Vertex p_vertex, ChunkService p_chunkService){
-        /*ChunkLocalService chunkLocalService = p_ctx.getDXRAMServiceAccessor().getService(ChunkLocalService.class);
-        Vertex vertex = new Vertex(p_cid);
+    public void getIncomingPR(Vertex p_vertex, ChunkService p_chunkService){
 
-        chunkLocalService.getLocal().get(vertex);*/
-        int ret = 0;
         long incidenceList[] = p_vertex.getM_inEdges();
         Vertex[] neighbors = new Vertex[incidenceList.length];
         double tmpPR = 0.0;
@@ -107,10 +103,12 @@ public class RunPrRoundTask implements Task {
             tmpPR += tmp.getPageRank(m_round)/(double)tmp.getOutDeg();
         }
         p_vertex.calcPageRank(N,m_damp,tmpPR, Math.abs(m_round - 1));
-        m_PRsum += p_vertex.getPageRank(Math.abs(m_round - 1));
+        p_chunkService.put().put(p_vertex);
 
-        double err = p_vertex.getPageRank(Math.abs(m_round - 1)) - p_vertex.getPageRank(m_round);
-        if(Math.abs(err) < 0.00001){ ret = 1;}
+        m_PRsum.add(p_vertex.getPageRank(Math.abs(m_round -1)));
+        m_PRerr.add(p_vertex.getPageRank(Math.abs(m_round - 1)) - p_vertex.getPageRank(m_round));
+
+        //double err = p_vertex.getPageRank(Math.abs(m_round - 1)) - p_vertex.getPageRank(m_round);
         //System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPageRank(Math.abs(m_round - 1)) + " " + p_vertex.getPageRank(m_round));
 
 
@@ -148,8 +146,7 @@ public class RunPrRoundTask implements Task {
             if(Math.abs(err) < 0.00001){ ret = 1;}
             System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPR1() + " " + p_vertex.getPR2());
         }*/
-        p_chunkService.put().put(p_vertex);
-        return ret;
+
     }
 
     @Override
