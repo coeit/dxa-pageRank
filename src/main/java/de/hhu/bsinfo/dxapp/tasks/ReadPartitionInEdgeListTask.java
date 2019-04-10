@@ -96,7 +96,7 @@ public class ReadPartitionInEdgeListTask implements Task {
             if (outDegrees[i] == 0){
                 for (int localVertex : vertexMap.keySet()){
                     if (i + 1 != localVertex){
-                        vertexMap.get(localVertex).m_inEdges.add(i);
+                        vertexMap.get(localVertex).m_inEdges.add(i + 1);
                     }
                 }
             }
