@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class ReadVertex {
 
     public int m_outdeg;
-    public ArrayList<Integer> m_inEdges;
+    public ArrayList<Integer> m_inEdges = new ArrayList<>();
 
     public ReadVertex(){
     }
