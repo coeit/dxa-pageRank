@@ -61,7 +61,7 @@ public class ReadPartitionInEdgeListTask implements Task {
 
 
                 partition = Integer.parseInt(split[0]);
-                partitionIndex[vertexNumber] = partition + partitionIndexCounter[partition] * slaveIDs.length;
+                partitionIndex[vertexNumber - 1] = partition + partitionIndexCounter[partition] * slaveIDs.length;
                 partitionIndexCounter[partition]++;
 
                 for (int i = 1; i < split.length; i++) {
