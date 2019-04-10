@@ -117,7 +117,7 @@ public class ReadPartitionInEdgeListTask implements Task {
             Vertex vertex = new Vertex(vertexNum);
             long[] tmpEdges = new long[readVertex.m_inEdges.size()];
             for (int i = 0; i < tmpEdges.length; i++) {
-                long correspondingCid = correspondingChunkID(partitionIndex[readVertex.m_inEdges.get(i)], slaveIDs);
+                long correspondingCid = correspondingChunkID(partitionIndex[readVertex.m_inEdges.get(i) - 1], slaveIDs);
                 tmpEdges[i] = correspondingCid;
             }
             vertex.addInEdges(tmpEdges);
