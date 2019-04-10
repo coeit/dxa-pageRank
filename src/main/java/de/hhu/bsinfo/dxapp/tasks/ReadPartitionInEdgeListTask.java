@@ -64,12 +64,14 @@ public class ReadPartitionInEdgeListTask implements Task {
                 partitionIndex[vertexNumber] = partition + partitionIndexCounter[partition] * slaveIDs.length;
                 partitionIndexCounter[partition]++;
 
+                for (int i = 1; i < split.length; i++) {
+                    outDegrees[Integer.parseInt(split[i])]++;
+                }
+
                 if (partition == mySlaveID) {
                     ReadVertex tmp = new ReadVertex();
                     for (int i = 1; i < split.length; i++) {
-                        int v = Integer.parseInt(split[i]);
-                        outDegrees[v]++;
-                        tmp.m_inEdges.add(v);
+                        tmp.m_inEdges.add(Integer.parseInt(split[i]));
                     }
                     vertexMap.put(vertexNumber,tmp);
 
@@ -93,16 +95,16 @@ public class ReadPartitionInEdgeListTask implements Task {
         for (int i = 0; i < outDegrees.length; i++) {
             if (outDegrees[i] == 0){
                 for (int localVertex : vertexMap.keySet()){
-                    if (i != localVertex){
+                    if (i + 1 != localVertex){
                         vertexMap.get(localVertex).m_inEdges.add(i);
                     }
                 }
             }
-            if (vertexMap.get(i) != null){
+            if (vertexMap.get(i + 1) != null){
                 if(outDegrees[i] == 0) {
-                    vertexMap.get(i).setOutdeg(m_vertexCnt);
+                    vertexMap.get(i + 1).setOutdeg(m_vertexCnt);
                 } else {
-                    vertexMap.get(i).setOutdeg(outDegrees[i]);
+                    vertexMap.get(i + 1).setOutdeg(outDegrees[i]);
                 }
 
             }
@@ -122,8 +124,12 @@ public class ReadPartitionInEdgeListTask implements Task {
             vertex.setOutDeg(readVertex.m_outdeg);
             chunkLocalService.createLocal().create(vertex);
             chunkService.put().put(vertex);
-            System.out.println(vertex.get_name() + " " + vertex.getOutDeg() + " ++ " + Arrays.toString(vertex.getM_inEdges()));
-            vertexMap.remove(vertexNum);
+            System.out.print(vertex.get_name() + " " + vertex.getOutDeg() + " ++ ");
+            for (int i = 0; i < vertex.getM_inEdges().length; i++) {
+                System.out.print(vertex.getM_inEdges()[i] + " ");
+            }
+            System.out.println();
+            //vertexMap.remove(vertexNum);
         }
 
 
