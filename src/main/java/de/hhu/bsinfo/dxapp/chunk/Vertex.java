@@ -43,6 +43,10 @@ public class Vertex extends AbstractChunk {
 
     }
 
+    public void setOutDeg(int p_outDeg){
+        m_outDeg = p_outDeg;
+    }
+
     public void addInEdge(final long p_neighbour) {
         setInCnt(m_inEdges.length + 1);
         m_inEdges[m_inEdges.length - 1] = p_neighbour;
@@ -53,6 +57,10 @@ public class Vertex extends AbstractChunk {
             m_inEdges = Arrays.copyOf(m_inEdges, p_cnt);
         }
 
+    }
+
+    public void addInEdges(final long[] p_neighbors){
+        m_inEdges = p_neighbors;
     }
 
     public void calcPageRank(int N, double D, double p_sum, int p_round){
