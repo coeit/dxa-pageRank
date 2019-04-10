@@ -65,7 +65,7 @@ public class ReadPartitionInEdgeListTask implements Task {
                 partitionIndexCounter[partition]++;
 
                 for (int i = 1; i < split.length; i++) {
-                    outDegrees[Integer.parseInt(split[i])]++;
+                    outDegrees[Integer.parseInt(split[i]) - 1]++;
                 }
 
                 if (partition == mySlaveID) {
@@ -126,7 +126,7 @@ public class ReadPartitionInEdgeListTask implements Task {
             chunkService.put().put(vertex);
             System.out.print(vertex.get_name() + " " + vertex.getOutDeg() + " ++ ");
             for (int i = 0; i < vertex.getM_inEdges().length; i++) {
-                System.out.print(vertex.getM_inEdges()[i] + " ");
+                System.out.print(ChunkID.toHexString(vertex.getM_inEdges()[i]) + " ");
             }
             System.out.println();
             //vertexMap.remove(vertexNum);
