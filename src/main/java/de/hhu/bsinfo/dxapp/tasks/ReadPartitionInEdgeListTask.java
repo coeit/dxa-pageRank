@@ -84,13 +84,13 @@ public class ReadPartitionInEdgeListTask implements Task {
            e.printStackTrace();
         }
 
-        for (int i = 0; i < outDegrees.length; i++) {
+        /*for (int i = 0; i < outDegrees.length; i++) {
             System.out.println(i + " : " + outDegrees[i]);
         }
 
         for (int i = 0; i < partitionIndex.length; i++) {
             System.out.println(i + " + " + partitionIndex[i]);
-        }
+        }*/
 
         for (int i = 0; i < outDegrees.length; i++) {
             if (outDegrees[i] == 0){
@@ -112,7 +112,7 @@ public class ReadPartitionInEdgeListTask implements Task {
 
 
         for (int vertexNum : vertexMap.keySet()){
-            System.out.println(vertexNum + " " + vertexMap.get(vertexNum).m_outdeg + " :: " + vertexMap.get(vertexNum).m_inEdges.toString());
+            //System.out.println(vertexNum + " " + vertexMap.get(vertexNum).m_outdeg + " :: " + vertexMap.get(vertexNum).m_inEdges.toString());
             ReadVertex readVertex = vertexMap.get(vertexNum);
             Vertex vertex = new Vertex(vertexNum);
             long[] tmpEdges = new long[readVertex.m_inEdges.size()];
@@ -125,10 +125,10 @@ public class ReadPartitionInEdgeListTask implements Task {
             vertex.invokeVertexPR(m_vertexCnt);
             chunkLocalService.createLocal().create(vertex);
             chunkService.put().put(vertex);
-            System.out.print(vertex.get_name() + " " + ChunkID.toHexString(vertex.getID()) + " " + vertex.getOutDeg() + " ++ ");
+            /*System.out.print(vertex.get_name() + " " + ChunkID.toHexString(vertex.getID()) + " " + vertex.getOutDeg() + " ++ ");
             for (int i = 0; i < vertex.getM_inEdges().length; i++) {
                 System.out.print(ChunkID.toHexString(vertex.getM_inEdges()[i]) + " ");
-            }
+            }*/
             System.out.println(vertex.getPageRank(0));
             //vertexMap.remove(vertexNum);
         }
