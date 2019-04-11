@@ -102,7 +102,7 @@ public class ReadPartitionInEdgeListTask implements Task {
             }
             if (vertexMap.get(i + 1) != null){
                 if(outDegrees[i] == 0) {
-                    vertexMap.get(i + 1).setOutdeg(m_vertexCnt);
+                    vertexMap.get(i + 1).setOutdeg(m_vertexCnt - 1);
                 } else {
                     vertexMap.get(i + 1).setOutdeg(outDegrees[i]);
                 }
