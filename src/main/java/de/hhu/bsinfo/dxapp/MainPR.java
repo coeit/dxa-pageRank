@@ -66,7 +66,7 @@ public class MainPR extends AbstractApplication {
         chunkService.put().put(cntChunk);
         Stopwatch stopwatch = new Stopwatch();
         System.out.println("len: "  + p_args.length);
-        if (p_args.length > 2) {
+        /*if (p_args.length > 2) {
             File input_file = new File(filename);
             File dir = new File(input_file.getParentFile().getAbsolutePath());
             System.out.println(dir.getName());
@@ -94,9 +94,9 @@ public class MainPR extends AbstractApplication {
             InputPrJob inputPrJob = new InputPrJob(filename,N);
             jobService.pushJobRemote(inputPrJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
             jobService.waitForAllJobsToFinish();
-        }
+        }*/
 
-        /*ReadPartitionInEdgeListTask readPartitionInEdgeListTask = new ReadPartitionInEdgeListTask(filename,N);
+        ReadPartitionInEdgeListTask readPartitionInEdgeListTask = new ReadPartitionInEdgeListTask(filename,N);
         TaskScript inputTaskScript = new TaskScript(readPartitionInEdgeListTask);
         TaskScriptState inputState = computeService.submitTaskScript(inputTaskScript,(short) 0 );
         stopwatch.start();
@@ -106,7 +106,7 @@ public class MainPR extends AbstractApplication {
             } catch (final InterruptedException ignore) {
 
             }
-        }*/
+        }
 
         stopwatch.stop();
         //System.out.println("Timer InputJob: " + stopwatch.getTimeStr());
