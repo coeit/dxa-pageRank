@@ -78,6 +78,7 @@ public class PRInfoTask implements Task {
         {
             Stream.of(localVertices).forEach(localVertex -> {
                 try {
+                    printInfo(localVertex, writer);
                     writer.write(localVertex.get_name() + " " + BigDecimal.valueOf(localVertex.getPageRank(0)).toPlainString() + "\n");
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -91,16 +92,11 @@ public class PRInfoTask implements Task {
     }
 
     public void printInfo(Vertex vertex, Writer writer) throws IOException {
-        /*ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
-        ChunkLocalService chunkLocalService = p_ctx.getDXRAMServiceAccessor().getService(ChunkLocalService.class);
-
-        Vertex vert = new Vertex(p_cid);
-        chunkLocalService.getLocal().get(vert);
-        */
-        BigDecimal b = new BigDecimal(vertex.getPageRank(0));
-        //System.out.println(vert.get_name() + " * " + BigDecimal.valueOf(vert.getM_currPR()).toPlainString());
-        //System.out.println(vertex.get_name() + " * " + b.toString());
-        writer.write(vertex.get_name() + " " + BigDecimal.valueOf(vertex.getPageRank(0)).toPlainString() + "\n");
+        writer.write(vertex.get_name() + " - " + ChunkID.toHexString(vertex.getID()) + " - " + vertex.getOutDeg() + " : ");
+        for (int i = 0; i < vertex.getM_inEdges().length; i++) {
+            writer.write(ChunkID.toHexString(vertex.getM_inEdges()[i]) + " ");
+        }
+        writer.write("\n");
     }
 
     @Override
