@@ -122,6 +122,7 @@ public class ReadPartitionInEdgeListTask implements Task {
             }
             vertex.addInEdges(tmpEdges);
             vertex.setOutDeg(readVertex.m_outdeg);
+            vertex.invokeVertexPR(m_vertexCnt);
             chunkLocalService.createLocal().create(vertex);
             chunkService.put().put(vertex);
             System.out.print(vertex.get_name() + " " + ChunkID.toHexString(vertex.getID()) + " " + vertex.getOutDeg() + " ++ ");

@@ -78,7 +78,7 @@ public class PRInfoTask implements Task {
         {
             Stream.of(localVertices).forEach(localVertex -> {
                 try {
-                    printInfo(localVertex, writer);
+                    //printInfo(localVertex, writer);
                     writer.write(localVertex.get_name() + " " + BigDecimal.valueOf(localVertex.getPageRank(0)).toPlainString() + "\n");
                 } catch (IOException e) {
                     e.printStackTrace();
