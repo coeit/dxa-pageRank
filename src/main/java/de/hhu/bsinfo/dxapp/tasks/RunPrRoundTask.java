@@ -73,8 +73,8 @@ public class RunPrRoundTask implements Task {
             localVertices[i] = new Vertex(localchunks.next());
         }
 
-        chunkService.get().get(localVertices);
-        //chunkLocalService.getLocal().get(localVertices);
+        //chunkService.get().get(localVertices);
+        chunkLocalService.getLocal().get(localVertices);
 
         Stream.of(localVertices).parallel().forEach(localVertex -> getIncomingPR(localVertex,chunkService));
         //System.out.println(System.currentTimeMillis());
@@ -92,10 +92,17 @@ public class RunPrRoundTask implements Task {
     public void getIncomingPR(Vertex p_vertex, ChunkService p_chunkService){
 
         long incidenceList[] = p_vertex.getM_inEdges();
-        Vertex[] neighbors = new Vertex[incidenceList.length];
+        //Vertex[] neighbors = new Vertex[incidenceList.length];
         double tmpPR = 0.0;
 
         for (int i = 0; i < incidenceList.length; i++) {
+            Vertex neighbor = new Vertex(incidenceList[i]);
+            p_chunkService.get().get(neighbor);
+            tmpPR += neighbor.getPageRank(m_round)/(double)neighbor.getOutDeg();
+        }
+        p_vertex.calcPageRank(N,m_damp,tmpPR, Math.abs(m_round - 1));
+
+        /*for (int i = 0; i < incidenceList.length; i++) {
             neighbors[i] = new Vertex(incidenceList[i]);
         }
 
@@ -104,7 +111,7 @@ public class RunPrRoundTask implements Task {
             tmpPR += tmp.getPageRank(m_round)/(double)tmp.getOutDeg();
         }
         p_vertex.calcPageRank(N,m_damp,tmpPR, Math.abs(m_round - 1));
-
+        */
 
         //m_PRsum.add(p_vertex.getPageRank(Math.abs(m_round -1)));
         m_PRerr.add(Math.abs(p_vertex.getPageRank(Math.abs(m_round - 1)) - p_vertex.getPageRank(m_round)));
