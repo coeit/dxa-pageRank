@@ -112,9 +112,13 @@ public class ReadPartitionInEdgeListTask implements Task {
                 }
 
             }
+            if(i % 100000 == 0){
+                System.out.print(".");
+            }
+
         }
 
-        System.out.println("Outdegrees added!");
+        System.out.println("\nOutdegrees added!");
 
 
         for (int vertexNum : vertexMap.keySet()){
