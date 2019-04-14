@@ -77,6 +77,10 @@ public class ReadPartitionInEdgeListTask implements Task {
 
                 }
 
+                if(vertexNumber % 100000 == 0){
+                    System.out.println(vertexNumber);
+                }
+
                 vertexNumber++;
             }
 
@@ -110,6 +114,8 @@ public class ReadPartitionInEdgeListTask implements Task {
             }
         }
 
+        System.out.println("Outdegrees added!");
+
 
         for (int vertexNum : vertexMap.keySet()){
             //System.out.println(vertexNum + " " + vertexMap.get(vertexNum).m_outdeg + " :: " + vertexMap.get(vertexNum).m_inEdges.toString());
@@ -132,6 +138,7 @@ public class ReadPartitionInEdgeListTask implements Task {
             //System.out.println(vertex.getPageRank(0));
             //vertexMap.remove(vertexNum);
         }
+        System.out.println("Chunks created!");
 
 
 
