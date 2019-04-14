@@ -104,7 +104,7 @@ public class ReadPartitionInEdgeListTask implements Task {
                     }
                 }
             }
-            if (vertexMap.get(i + 1) != null){
+            if (vertexMap.containsKey(i + 1)){
                 if(outDegrees[i] == 0) {
                     vertexMap.get(i + 1).setOutdeg(m_vertexCnt - 1);
                 } else {
