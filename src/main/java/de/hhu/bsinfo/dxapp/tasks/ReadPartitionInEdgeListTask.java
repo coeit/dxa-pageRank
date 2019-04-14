@@ -188,12 +188,13 @@ public class ReadPartitionInEdgeListTask implements Task {
             //danglingReadVertex.m_inEdges.add(vertexNumber);
             danglingReadVertex.m_outdeg = 1;
 
-            Vertex danglingVertex = new Vertex(vertexNumber);
+            Vertex danglingVertex = new Vertex(vertexNumber + 1);
             long[] tmpEdges = new long[danglingReadVertex.m_inEdges.size() + 1];
             for (int i = 0; i < tmpEdges.length - 1; i++) {
                 tmpEdges[i] = correspondingChunkID(partitionIndex[danglingReadVertex.m_inEdges.get(i) - 1], slaveIDs);
             }
             tmpEdges[tmpEdges.length - 1] = lastID + 1;
+            danglingVertex.setOutDeg(1);
             danglingVertex.invokeVertexPR(m_vertexCnt);
             chunkLocalService.createLocal().create(danglingVertex);
             chunkService.put().put(danglingVertex);
