@@ -5,6 +5,7 @@ import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
 import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 
 public class Vertex extends AbstractChunk {
@@ -59,8 +60,12 @@ public class Vertex extends AbstractChunk {
 
     }
 
-    public void addInEdges(final long[] p_neighbors){
-        m_inEdges = p_neighbors;
+    public void addInEdges(final long[] p_neighbors, boolean p_cut){
+        if(p_cut){
+            m_inEdges = Arrays.copyOf(p_neighbors, p_neighbors.length - 1);
+        } else {
+            m_inEdges = p_neighbors;
+        }
     }
 
     public void calcPageRank(int N, double D, double p_sum, int p_round){

@@ -162,7 +162,7 @@ public class ReadPartitionInEdgeListTask implements Task {
             for (int i = 0; i < vertex.getM_inEdges().length; i++) {
                 System.out.print(ChunkID.toHexString(vertex.getM_inEdges()[i]) + " ");
             }
-            //System.out.println(vertex.getPageRank(0));
+            System.out.println(vertex.getPageRank(0));
             //vertexMap.remove(vertexNum);
         }
         System.out.println("Chunks created!");
