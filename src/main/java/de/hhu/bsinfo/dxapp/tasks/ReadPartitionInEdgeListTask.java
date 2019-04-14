@@ -190,7 +190,7 @@ public class ReadPartitionInEdgeListTask implements Task {
 
             Vertex danglingVertex = new Vertex(vertexNumber);
             long[] tmpEdges = new long[danglingReadVertex.m_inEdges.size() + 1];
-            for (int i = 0; i < tmpEdges.length; i++) {
+            for (int i = 0; i < tmpEdges.length - 1; i++) {
                 tmpEdges[i] = correspondingChunkID(partitionIndex[danglingReadVertex.m_inEdges.get(i) - 1], slaveIDs);
             }
             tmpEdges[tmpEdges.length - 1] = lastID + 1;
