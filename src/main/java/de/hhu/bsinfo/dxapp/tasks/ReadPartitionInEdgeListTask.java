@@ -152,6 +152,7 @@ public class ReadPartitionInEdgeListTask implements Task {
                 if(readVertex.m_inEdges.get(i) != vertexNum){
                     long correspondingCid = correspondingChunkID(partitionIndex[readVertex.m_inEdges.get(i) - 1], slaveIDs);
                     tmpEdges[i] = correspondingCid;
+                } else {
                     cutInEdges = true;
                 }
             }
