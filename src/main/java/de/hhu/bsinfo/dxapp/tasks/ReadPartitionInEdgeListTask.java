@@ -112,7 +112,7 @@ public class ReadPartitionInEdgeListTask implements Task {
                 }
 
             }
-            if(i % 100000 == 0){
+            if(i % 10 == 0){
                 System.out.print(".");
             }
 
