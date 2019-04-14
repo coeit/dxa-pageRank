@@ -139,7 +139,7 @@ public class ReadPartitionInEdgeListTask implements Task {
 
         }*/
 
-        System.out.println("\nOutdegrees added!");
+        System.out.println("Outdegrees added!");
 
         boolean cutInEdges;
         for (int vertexNum : vertexMap.keySet()){
@@ -161,11 +161,11 @@ public class ReadPartitionInEdgeListTask implements Task {
             vertex.invokeVertexPR(m_vertexCnt);
             chunkLocalService.createLocal().create(vertex);
             chunkService.put().put(vertex);
-            System.out.print(vertex.get_name() + " " + ChunkID.toHexString(vertex.getID()) + " " + vertex.getOutDeg() + " ++ ");
+            /*System.out.print(vertex.get_name() + " " + ChunkID.toHexString(vertex.getID()) + " " + vertex.getOutDeg() + " ++ ");
             for (int i = 0; i < vertex.getM_inEdges().length; i++) {
                 System.out.print(ChunkID.toHexString(vertex.getM_inEdges()[i]) + " ");
             }
-            System.out.println(vertex.getPageRank(0));
+            System.out.println(vertex.getPageRank(0));*/
             //vertexMap.remove(vertexNum);
         }
         System.out.println("Chunks created!");
