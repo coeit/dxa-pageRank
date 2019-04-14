@@ -141,8 +141,9 @@ public class ReadPartitionInEdgeListTask implements Task {
 
         System.out.println("\nOutdegrees added!");
 
-
+        boolean cutInEdges;
         for (int vertexNum : vertexMap.keySet()){
+            cutInEdges = false;
             System.out.println(vertexNum + " " + vertexMap.get(vertexNum).m_outdeg + " :: " + vertexMap.get(vertexNum).m_inEdges.toString());
             ReadVertex readVertex = vertexMap.get(vertexNum);
             Vertex vertex = new Vertex(vertexNum);
@@ -151,9 +152,10 @@ public class ReadPartitionInEdgeListTask implements Task {
                 if(readVertex.m_inEdges.get(i) != vertexNum){
                     long correspondingCid = correspondingChunkID(partitionIndex[readVertex.m_inEdges.get(i) - 1], slaveIDs);
                     tmpEdges[i] = correspondingCid;
+                    cutInEdges = true;
                 }
             }
-            vertex.addInEdges(tmpEdges);
+            vertex.addInEdges(tmpEdges,cutInEdges);
             vertex.setOutDeg(readVertex.m_outdeg);
             vertex.invokeVertexPR(m_vertexCnt);
             chunkLocalService.createLocal().create(vertex);
