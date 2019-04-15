@@ -41,7 +41,7 @@ public class ReadLumpInEdgeListTask implements Task {
         short[] slaveIDs = taskContext.getCtxData().getSlaveNodeIds();
 
         int[] outDegrees = new int[m_vertexCnt];
-        Vertex[] localVertices = new Vertex[m_vertexCnt / slaveIDs.length];
+        Vertex[] localVertices = new Vertex[localVertexCnt(m_vertexCnt,mySlaveID,slaveIDs.length)];
         int vertexNum = 0;
         int localVertexCount = 0;
         try(BufferedReader br = new BufferedReader(new FileReader(m_file))){
@@ -49,7 +49,7 @@ public class ReadLumpInEdgeListTask implements Task {
 
             while ((line = br.readLine()) != null){
                 String[] split = line.split(" ");
-                for (int i = 0; i < split.length; i++) {
+                for (int i = 0; i < split.length && split.length > 1; i++) {
                     outDegrees[Integer.parseInt(split[i]) - 1]++;
                 }
                 if (vertexNum % slaveIDs.length == mySlaveID){
@@ -147,6 +147,15 @@ public class ReadLumpInEdgeListTask implements Task {
         short nid = slaveIDs[((short) ((p_vertex-1) % slaveCnt))];
         long lid = (long) (((p_vertex-1) / slaveCnt) + 1);
         return ChunkID.getChunkID(nid,lid);
+    }
+
+    public int localVertexCnt(int p_totalVertexCnt, int p_slaveID, int p_numSlaves){
+        int mod = p_totalVertexCnt % p_numSlaves;
+        double div = (double)p_totalVertexCnt/(double)p_numSlaves;
+        if(p_slaveID <= mod && p_slaveID != 0){
+            return (int) Math.ceil(div);
+        }
+        return (int) Math.floor(div);
     }
 
     @Override
