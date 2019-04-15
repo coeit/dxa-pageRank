@@ -53,13 +53,17 @@ public class ReadLumpInEdgeListTask implements Task {
 
             while ((line = br.readLine()) != null){
                 String[] split = line.split(" ");
-                for (int i = 0; i < split.length; i++) {
-                    outDegrees[Integer.parseInt(split[i]) - 1]++;
-                }
                 if (vertexNum % slaveIDs.length == mySlaveID){
                     localVertices[localVertexCount] = new Vertex(vertexNum + 1);
                     localVertexCount++;
                 }
+                if (Integer.parseInt(split[0]) == 0){
+                    continue;
+                }
+                for (int i = 0; i < split.length; i++) {
+                    outDegrees[Integer.parseInt(split[i]) - 1]++;
+                }
+
                 vertexNum++;
             }
 
@@ -82,6 +86,11 @@ public class ReadLumpInEdgeListTask implements Task {
                     String[] split = line.split(" ");
                     if (outDegrees[vertexNum] != 0){
                         localNonDanglingChunks.add(correspondingChunkID(vertexNum + 1, slaveIDs));
+
+                        if (Integer.parseInt(split[0]) == 0){
+                            continue;
+                        }
+
                         for (int i = 0; i < split.length; i++) {
                             inVertex = Integer.parseInt(split[i]);
                             if (outDegrees[inVertex - 1] != 0){
@@ -90,6 +99,11 @@ public class ReadLumpInEdgeListTask implements Task {
                         }
                     } else {
                         localDanglingChunks.add(correspondingChunkID(vertexNum + 1, slaveIDs));
+
+                        if (Integer.parseInt(split[0]) == 0){
+                            continue;
+                        }
+
                         for (int i = 0; i < split.length; i++) {
                             inVertex = Integer.parseInt(split[i]);
                             localVertices[localVertexCount].addInEdge(correspondingChunkID(inVertex,slaveIDs));

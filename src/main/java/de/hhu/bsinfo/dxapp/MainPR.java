@@ -121,7 +121,7 @@ public class MainPR extends AbstractApplication {
 
             }
         }
-
+        stopwatch.stop();
         //System.out.println("Timer InputJob: " + stopwatch.getTimeStr());
         long InputTime = stopwatch.getTime();
         VoteChunk voteChunk = new VoteChunk(N);
