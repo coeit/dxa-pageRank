@@ -95,6 +95,7 @@ public class ReadLumpInEdgeListTask implements Task {
                         localNonDanglingChunks.add(correspondingChunkID(vertexNum + 1, slaveIDs));
 
                         if (Integer.parseInt(split[0]) == 0){
+                            vertexNum++;
                             localVertexCount++;
                             continue;
                         }
