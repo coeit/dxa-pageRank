@@ -56,10 +56,12 @@ public class ReadLumpInEdgeListTask implements Task {
                 if (vertexNum % slaveIDs.length == mySlaveID){
                     localVertices[localVertexCount] = new Vertex(vertexNum + 1);
                     localVertexCount++;
+                    if (Integer.parseInt(split[0]) == 0){
+                        vertexNum++;
+                        continue;
+                    }
                 }
-                if (Integer.parseInt(split[0]) == 0){
-                    continue;
-                }
+
                 for (int i = 0; i < split.length; i++) {
                     outDegrees[Integer.parseInt(split[i]) - 1]++;
                 }
@@ -83,11 +85,16 @@ public class ReadLumpInEdgeListTask implements Task {
 
             while ((line = br.readLine()) != null){
                 if (vertexNum % slaveIDs.length == mySlaveID){
+
+                    localVertices[localVertexCount].setOutDeg(outDegrees[vertexNum]);
+                    localVertices[localVertexCount].invokeVertexPR(m_vertexCnt);
+
                     String[] split = line.split(" ");
                     if (outDegrees[vertexNum] != 0){
                         localNonDanglingChunks.add(correspondingChunkID(vertexNum + 1, slaveIDs));
 
                         if (Integer.parseInt(split[0]) == 0){
+                            localVertexCount++;
                             continue;
                         }
 
@@ -101,6 +108,7 @@ public class ReadLumpInEdgeListTask implements Task {
                         localDanglingChunks.add(correspondingChunkID(vertexNum + 1, slaveIDs));
 
                         if (Integer.parseInt(split[0]) == 0){
+                            localVertexCount++;
                             continue;
                         }
 
@@ -109,8 +117,6 @@ public class ReadLumpInEdgeListTask implements Task {
                             localVertices[localVertexCount].addInEdge(correspondingChunkID(inVertex,slaveIDs));
                         }
                     }
-                    localVertices[localVertexCount].setOutDeg(outDegrees[vertexNum]);
-                    localVertices[localVertexCount].invokeVertexPR(m_vertexCnt);
                     localVertexCount++;
                 }
 
