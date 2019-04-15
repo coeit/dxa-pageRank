@@ -53,7 +53,7 @@ public class Vertex extends AbstractChunk {
         m_inEdges[m_inEdges.length - 1] = p_neighbour;
     }
 
-    public void setInCnt(final int p_cnt) {
+    private void setInCnt(final int p_cnt) {
         if (p_cnt != m_inEdges.length) {
             m_inEdges = Arrays.copyOf(m_inEdges, p_cnt);
         }

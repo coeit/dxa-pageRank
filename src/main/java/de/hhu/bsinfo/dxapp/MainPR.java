@@ -96,7 +96,7 @@ public class MainPR extends AbstractApplication {
             jobService.waitForAllJobsToFinish();
         }*/
 
-        ReadPartitionInEdgeListTask readPartitionInEdgeListTask = new ReadPartitionInEdgeListTask(filename,N);
+        /*ReadPartitionInEdgeListTask readPartitionInEdgeListTask = new ReadPartitionInEdgeListTask(filename,N);
         TaskScript inputTaskScript = new TaskScript(readPartitionInEdgeListTask);
         TaskScriptState inputState = computeService.submitTaskScript(inputTaskScript,(short) 0 );
         stopwatch.start();
@@ -108,7 +108,20 @@ public class MainPR extends AbstractApplication {
             }
         }
 
-        stopwatch.stop();
+        stopwatch.stop();*/
+
+        ReadLumpInEdgeListTask readLumpInEdgeListTask = new ReadLumpInEdgeListTask(filename,N);
+        TaskScript inputTaskScript = new TaskScript(readLumpInEdgeListTask);
+        TaskScriptState inputState = computeService.submitTaskScript(inputTaskScript,(short) 0 );
+        stopwatch.start();
+        while(!inputState.hasTaskCompleted()){
+            try {
+                Thread.sleep(100);
+            } catch (final InterruptedException ignore) {
+
+            }
+        }
+
         //System.out.println("Timer InputJob: " + stopwatch.getTimeStr());
         long InputTime = stopwatch.getTime();
         VoteChunk voteChunk = new VoteChunk();
@@ -153,7 +166,7 @@ public class MainPR extends AbstractApplication {
         double PRerr = 0.0;
         stopwatch.start();
         TaskScriptState state;
-        for (int i = 0; i < 30; i++) {
+        /*for (int i = 0; i < 30; i++) {
             if(i % 2 == 0){
                 state = computeService.submitTaskScript(taskScriptRun1, (short) 0, listener);
             } else {
@@ -180,13 +193,11 @@ public class MainPR extends AbstractApplication {
             if (PRerr <= 1e-4) {
                 break;
             }
-
-
-        }
+        }*/
         stopwatch.stop();
         //System.out.println("Timer Computation: " + stopwatch.getTimeStr());
         long ExecutionTime = stopwatch.getTime();
-        PRInfoTask PRInfo = new PRInfoTask(outDir);
+        /*PRInfoTask PRInfo = new PRInfoTask(outDir);
 	    TaskScript PRInfoTaskScript = new TaskScript(PRInfo);
 	    TaskScriptState PRInfoTaskScriptState = computeService.submitTaskScript(PRInfoTaskScript, (short) 0, listener);
         while (!PRInfoTaskScriptState.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0) {
@@ -204,7 +215,7 @@ public class MainPR extends AbstractApplication {
 
         PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,InputTime,ExecutionTime,NumRounds,roundPRerrArr);
         jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
-        jobService.waitForAllJobsToFinish();
+        jobService.waitForAllJobsToFinish();*/
 
     }
 
