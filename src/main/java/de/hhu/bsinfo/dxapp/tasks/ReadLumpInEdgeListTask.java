@@ -38,6 +38,7 @@ public class ReadLumpInEdgeListTask implements Task {
         MasterSlaveComputeService computeService = taskContext.getDXRAMServiceAccessor().getService(MasterSlaveComputeService.class);
 
         short mySlaveID = taskContext.getCtxData().getSlaveId();
+        System.out.println("myID:" + mySlaveID);
         short[] slaveIDs = taskContext.getCtxData().getSlaveNodeIds();
 
         int[] outDegrees = new int[m_vertexCnt];
@@ -58,7 +59,7 @@ public class ReadLumpInEdgeListTask implements Task {
                     localVertices[localVertexCount] = new Vertex(vertexNum + 1);
                     localVertexCount++;
                 }
-
+                vertexNum++;
             }
 
         } catch (IOException e) {
