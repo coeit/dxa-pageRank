@@ -126,14 +126,14 @@ public class ReadLumpInEdgeListTask implements Task {
         chunkService.put().put(localVertices);
         System.out.println("Chunks created!");
 
-        for (int i = 0; i < localVertices.length; i++) {
+        /*for (int i = 0; i < localVertices.length; i++) {
             System.out.print(localVertices[i].get_name() + " " + ChunkID.toHexString(localVertices[i].getID()) + " " + localVertices[i].getOutDeg() + " ++ ");
 
             for (int j = 0; j < localVertices[i].getM_inEdges().length; j++) {
                 System.out.print(ChunkID.toHexString(localVertices[i].getM_inEdges()[j]) + " ");
             }
             System.out.println();
-        }
+        }*/
 
         LocalNonDanglingChunks ndChunks = new LocalNonDanglingChunks(localNonDanglingChunks.stream().mapToLong(i -> i).toArray());
         LocalDanglingChunks dChunks = new LocalDanglingChunks(localDanglingChunks.stream().mapToLong(i -> i).toArray());
@@ -141,7 +141,7 @@ public class ReadLumpInEdgeListTask implements Task {
         chunkLocalService.createLocal().create(ndChunks);
         nameService.register(ndChunks,mySlaveID + "nd");
         chunkService.put().put(ndChunks);
-        System.out.println(ndChunks.getID());
+        //System.out.println(ndChunks.getID());
 
         chunkLocalService.createLocal().create(dChunks);
         nameService.register(dChunks,mySlaveID + "d");
@@ -150,7 +150,7 @@ public class ReadLumpInEdgeListTask implements Task {
 
         System.out.println("ChunkLists created!");
 
-        System.out.println("NonDangling:");
+        /*System.out.println("NonDangling:");
         for (int i = 0; i < ndChunks.getLocalNonDanglingChunks().length; i++) {
             System.out.print(ChunkID.toHexString(ndChunks.getLocalNonDanglingChunks()[i]) + " ");
         }
@@ -160,7 +160,7 @@ public class ReadLumpInEdgeListTask implements Task {
         for (int i = 0; i < dChunks.getLocalDanglingChunks().length; i++) {
             System.out.print(ChunkID.toHexString(dChunks.getLocalDanglingChunks()[i]) + " ");
         }
-        System.out.println();
+        System.out.println();*/
 
         return 0;
     }

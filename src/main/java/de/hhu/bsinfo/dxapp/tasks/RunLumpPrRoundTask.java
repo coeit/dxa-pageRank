@@ -77,8 +77,8 @@ public class RunLumpPrRoundTask implements Task {
 
         Stream.of(localVertices).parallel().forEach(localVertex -> pageRankIter(localVertex,danglingPR,chunkService));
 
-        System.out.println("danglingPR:" + danglingPR);
-        System.out.println("sum: " + m_PRSum.sum());
+        //System.out.println("danglingPR:" + danglingPR);
+        //System.out.println("sum: " + m_PRSum.sum());
 
         chunkService.get().get(voteChunk, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
         voteChunk.incPRsum(m_PRSum.sum(), Math.abs(m_round - 1));
@@ -107,7 +107,7 @@ public class RunLumpPrRoundTask implements Task {
         m_PRErr.add(Math.abs(p_vertex.getPageRank(Math.abs(m_round - 1)) - p_vertex.getPageRank(m_round)));
 
 
-        System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPageRank(Math.abs(m_round - 1)) + " " + p_vertex.getPageRank(m_round));
+        //System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPageRank(Math.abs(m_round - 1)) + " " + p_vertex.getPageRank(m_round));
 
         p_chunkService.put().put(p_vertex);
 
