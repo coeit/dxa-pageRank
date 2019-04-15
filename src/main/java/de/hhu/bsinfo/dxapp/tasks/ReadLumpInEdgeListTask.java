@@ -42,6 +42,7 @@ public class ReadLumpInEdgeListTask implements Task {
 
         int[] outDegrees = new int[m_vertexCnt];
         Vertex[] localVertices = new Vertex[localVertexCnt(m_vertexCnt,mySlaveID,slaveIDs.length)];
+        System.out.println("LocalVertices: " + localVertices.length);
         int vertexNum = 0;
         int localVertexCount = 0;
         try(BufferedReader br = new BufferedReader(new FileReader(m_file))){
