@@ -147,8 +147,8 @@ public class MainPR extends AbstractApplication {
             }
         };
 
-        RunLumpPrRoundTask Run1 = new RunLumpPrRoundTask(N,DAMPING_FACTOR,voteChunk.getID(),0);
-        RunLumpPrRoundTask Run2 = new RunLumpPrRoundTask(N,DAMPING_FACTOR,voteChunk.getID(),1);
+        RunLumpPrRoundTask Run1 = new RunLumpPrRoundTask(N,DAMPING_FACTOR,voteChunk.getID(),0,false);
+        RunLumpPrRoundTask Run2 = new RunLumpPrRoundTask(N,DAMPING_FACTOR,voteChunk.getID(),1,false);
 
         //TaskScript taskScript = new TaskScript(Run1,Run2);
 
@@ -178,19 +178,32 @@ public class MainPR extends AbstractApplication {
             }
 
             chunkService.get().get(voteChunk,ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
-            //PRerr = voteChunk.getPRerr();
+            PRerr = voteChunk.getPRerr();
             danglingPR = 1 - voteChunk.getPRsum(Math.abs(i % 2 - 1));
             voteChunk.resetSum(i % 2, danglingPR);
             chunkService.put().put(voteChunk,ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
             System.out.println("Sum: " + danglingPR);
-            //roundPRerr.add(PRerr);
+            roundPRerr.add(PRerr);
             //roundPRsum.add(PRsum);
             NumRounds++;
 
-            /*if (PRerr <= 1e-4) {
+            if (PRerr <= 1e-4) {
                 break;
-            }*/
+            }
         }
+
+        RunLumpPrRoundTask calcDanglingPR = new RunLumpPrRoundTask(N,DAMPING_FACTOR,voteChunk.getID(),NumRounds % 2,true);
+        TaskScript taskScriptCalcDanglingPR = new TaskScript(calcDanglingPR);
+        state = computeService.submitTaskScript(taskScriptCalcDanglingPR,(short) 0, listener);
+        while (!state.hasTaskCompleted()) {
+            try {
+                Thread.sleep(100);
+            } catch (final InterruptedException ignore) {
+
+            }
+        }
+
+
 
 
 
@@ -242,7 +255,7 @@ public class MainPR extends AbstractApplication {
         stopwatch.stop();
         //System.out.println("Timer Computation: " + stopwatch.getTimeStr());
         long ExecutionTime = stopwatch.getTime();
-        /*PRInfoTask PRInfo = new PRInfoTask(outDir);
+        PRInfoTask PRInfo = new PRInfoTask(outDir);
 	    TaskScript PRInfoTaskScript = new TaskScript(PRInfo);
 	    TaskScriptState PRInfoTaskScriptState = computeService.submitTaskScript(PRInfoTaskScript, (short) 0, listener);
         while (!PRInfoTaskScriptState.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0) {
@@ -260,7 +273,7 @@ public class MainPR extends AbstractApplication {
 
         PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,InputTime,ExecutionTime,NumRounds,roundPRerrArr);
         jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
-        jobService.waitForAllJobsToFinish();*/
+        jobService.waitForAllJobsToFinish();
 
     }
 

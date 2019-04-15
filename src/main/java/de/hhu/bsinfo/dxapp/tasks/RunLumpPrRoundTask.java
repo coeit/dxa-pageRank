@@ -3,6 +3,7 @@ package de.hhu.bsinfo.dxapp.tasks;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.stream.Stream;
 
+import de.hhu.bsinfo.dxapp.chunk.LocalDanglingChunks;
 import de.hhu.bsinfo.dxapp.chunk.LocalNonDanglingChunks;
 import de.hhu.bsinfo.dxapp.chunk.Vertex;
 import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
@@ -24,16 +25,19 @@ public class RunLumpPrRoundTask implements Task {
     private double m_damp;
     private int m_round;
     private long m_voteChunkID;
+    private boolean m_calcDanglingPR;
 
+    private DoubleAdder m_PRErr = new DoubleAdder();
     private DoubleAdder m_PRSum = new DoubleAdder();
 
     public RunLumpPrRoundTask(){}
 
-    public RunLumpPrRoundTask(int p_vertexCnt, double p_damp, long p_voteChunkID, int p_round){
+    public RunLumpPrRoundTask(int p_vertexCnt, double p_damp, long p_voteChunkID, int p_round, boolean p_calcDanglingPR){
         m_vertexCnt = p_vertexCnt;
         m_damp = p_damp;
         m_voteChunkID = p_voteChunkID;
         m_round = p_round;
+        m_calcDanglingPR = p_calcDanglingPR;
     }
 
     @Override
@@ -44,11 +48,20 @@ public class RunLumpPrRoundTask implements Task {
         NameserviceService nameService = taskContext.getDXRAMServiceAccessor().getService(NameserviceService.class);
 
         short mySlaveID = taskContext.getCtxData().getSlaveId();
-        System.out.println(mySlaveID + "nd");
-        LocalNonDanglingChunks localNonDanglingChunks = new LocalNonDanglingChunks(nameService.getChunkID(mySlaveID + "nd",333));
-        chunkService.get().get(localNonDanglingChunks);
-        System.out.println(localNonDanglingChunks.getID());
-        long[] localChunks = localNonDanglingChunks.getLocalNonDanglingChunks();
+        long[] localChunks;
+        if(!m_calcDanglingPR){
+            LocalNonDanglingChunks localNonDanglingChunks = new LocalNonDanglingChunks(nameService.getChunkID(mySlaveID + "nd",333));
+            chunkService.get().get(localNonDanglingChunks);
+            localChunks = localNonDanglingChunks.getLocalNonDanglingChunks();
+        } else {
+            LocalDanglingChunks localDanglingChunks = new LocalDanglingChunks(nameService.getChunkID(mySlaveID + "d",333));
+            chunkService.get().get(localDanglingChunks);
+            localChunks = localDanglingChunks.getLocalDanglingChunks();
+        }
+
+        if(localChunks.length == 0){
+            return 0;
+        }
 
         Vertex[] localVertices = new Vertex[localChunks.length];
 
@@ -69,6 +82,7 @@ public class RunLumpPrRoundTask implements Task {
 
         chunkService.get().get(voteChunk, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
         voteChunk.incPRsum(m_PRSum.sum(), Math.abs(m_round - 1));
+        voteChunk.incPRerr(m_PRErr.sum());
         chunkService.put().put(voteChunk, ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
 
         return 0;
@@ -90,6 +104,8 @@ public class RunLumpPrRoundTask implements Task {
         p_vertex.calcLumpPageRank(m_vertexCnt, m_damp, tmpPR, p_danglingPR ,Math.abs(m_round - 1));
 
         m_PRSum.add(p_vertex.getPageRank(Math.abs(m_round - 1)));
+        m_PRErr.add(Math.abs(p_vertex.getPageRank(Math.abs(m_round - 1)) - p_vertex.getPageRank(m_round)));
+
 
         System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPageRank(Math.abs(m_round - 1)) + " " + p_vertex.getPageRank(m_round));
 
