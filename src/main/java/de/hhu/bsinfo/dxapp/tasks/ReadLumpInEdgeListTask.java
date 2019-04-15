@@ -56,10 +56,11 @@ public class ReadLumpInEdgeListTask implements Task {
                 if (vertexNum % slaveIDs.length == mySlaveID){
                     localVertices[localVertexCount] = new Vertex(vertexNum + 1);
                     localVertexCount++;
-                    if (Integer.parseInt(split[0]) == 0){
-                        vertexNum++;
-                        continue;
-                    }
+                }
+
+                if (Integer.parseInt(split[0]) == 0){
+                    vertexNum++;
+                    continue;
                 }
 
                 for (int i = 0; i < split.length; i++) {
