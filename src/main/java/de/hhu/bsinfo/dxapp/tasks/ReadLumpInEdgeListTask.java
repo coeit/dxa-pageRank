@@ -125,24 +125,26 @@ public class ReadLumpInEdgeListTask implements Task {
         LocalDanglingChunks dChunks = new LocalDanglingChunks(localDanglingChunks.stream().mapToLong(i -> i).toArray());
 
         chunkLocalService.createLocal().create(ndChunks);
-        chunkService.put().put(ndChunks);
         nameService.register(ndChunks,mySlaveID + "nd");
+        chunkService.put().put(ndChunks);
+        System.out.println(mySlaveID + "nd");
 
         chunkLocalService.createLocal().create(dChunks);
-        chunkService.put().put(dChunks);
         nameService.register(dChunks,mySlaveID + "d");
+        chunkService.put().put(dChunks);
+
 
         System.out.println("ChunkLists created!");
 
         System.out.println("NonDangling:");
-        for (int i = 0; i < localNonDanglingChunks.size(); i++) {
-            System.out.print(ChunkID.toHexString(localNonDanglingChunks.get(i)) + " ");
+        for (int i = 0; i < ndChunks.getLocalNonDanglingChunks().length; i++) {
+            System.out.print(ChunkID.toHexString(ndChunks.getLocalNonDanglingChunks()[i]) + " ");
         }
         System.out.println();
 
         System.out.println("Dangling:");
-        for (int i = 0; i < localDanglingChunks.size(); i++) {
-            System.out.print(ChunkID.toHexString(localDanglingChunks.get(i)) + " ");
+        for (int i = 0; i < dChunks.getLocalDanglingChunks().length; i++) {
+            System.out.print(ChunkID.toHexString(dChunks.getLocalDanglingChunks()[i]) + " ");
         }
         System.out.println();
 

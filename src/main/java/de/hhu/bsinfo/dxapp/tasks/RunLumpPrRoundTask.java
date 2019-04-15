@@ -43,8 +43,10 @@ public class RunLumpPrRoundTask implements Task {
         NameserviceService nameService = taskContext.getDXRAMServiceAccessor().getService(NameserviceService.class);
 
         short mySlaveID = taskContext.getCtxData().getSlaveId();
+        System.out.println(mySlaveID + "nd");
+        LocalNonDanglingChunks localNonDanglingChunks = new LocalNonDanglingChunks(nameService.getChunkID(mySlaveID + "nd",333));
 
-        long[] localChunks = new LocalNonDanglingChunks(nameService.getChunkID(mySlaveID + "nd",333)).getLocalNonDanglingChunks();
+        long[] localChunks = localNonDanglingChunks.getLocalNonDanglingChunks();
 
         Vertex[] localVertices = new Vertex[localChunks.length];
 
@@ -92,16 +94,22 @@ public class RunLumpPrRoundTask implements Task {
 
     @Override
     public void exportObject(Exporter p_exporter) {
-
+        p_exporter.writeInt(m_vertexCnt);
+        p_exporter.writeDouble(m_damp);
+        p_exporter.writeInt(m_round);
+        p_exporter.writeLong(m_voteChunkID);
     }
 
     @Override
     public void importObject(Importer p_importer) {
-
+        m_vertexCnt = p_importer.readInt(m_vertexCnt);
+        m_damp = p_importer.readDouble(m_damp);
+        m_round = p_importer.readInt(m_round);
+        m_voteChunkID = p_importer.readLong(m_voteChunkID);
     }
 
     @Override
     public int sizeofObject() {
-        return 0;
+        return Integer.BYTES * 2 + Double.BYTES + Long.BYTES;
     }
 }
