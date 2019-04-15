@@ -93,6 +93,8 @@ public class RunLumpPrRoundTask implements Task {
 
         System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPageRank(Math.abs(m_round - 1)) + " " + p_vertex.getPageRank(m_round));
 
+        p_chunkService.put().put(p_vertex);
+
     }
 
     @Override
