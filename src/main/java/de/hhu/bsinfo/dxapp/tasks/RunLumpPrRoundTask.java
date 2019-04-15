@@ -25,7 +25,7 @@ public class RunLumpPrRoundTask implements Task {
     private int m_round;
     private long m_voteChunkID;
 
-    private DoubleAdder m_PRSum;
+    private DoubleAdder m_PRSum = new DoubleAdder();
 
     public RunLumpPrRoundTask(){}
 
