@@ -54,6 +54,7 @@ public class ReadLumpInEdgeListTask implements Task {
                     outDegrees[Integer.parseInt(split[i]) - 1]++;
                 }
                 if (vertexNum % slaveIDs.length == mySlaveID){
+                    System.out.println(localVertexCount + " :: " + line);
                     localVertices[localVertexCount] = new Vertex(vertexNum + 1);
                     localVertexCount++;
                 }
