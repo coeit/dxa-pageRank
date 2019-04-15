@@ -51,7 +51,7 @@ public class ReadLumpInEdgeListTask implements Task {
 
             while ((line = br.readLine()) != null){
                 String[] split = line.split(" ");
-                for (int i = 0; i < split.length && split.length > 1; i++) {
+                for (int i = 0; i < split.length; i++) {
                     outDegrees[Integer.parseInt(split[i]) - 1]++;
                 }
                 if (vertexNum % slaveIDs.length == mySlaveID){
@@ -81,7 +81,7 @@ public class ReadLumpInEdgeListTask implements Task {
                     String[] split = line.split(" ");
                     if (outDegrees[vertexNum] != 0){
                         localNonDanglingChunks.add(correspondingChunkID(vertexNum + 1, slaveIDs));
-                        for (int i = 0; i < split.length && split.length > 1; i++) {
+                        for (int i = 0; i < split.length; i++) {
                             inVertex = Integer.parseInt(split[i]);
                             if (outDegrees[inVertex - 1] != 0){
                                 localVertices[localVertexCount].addInEdge(correspondingChunkID(inVertex,slaveIDs));
@@ -133,13 +133,13 @@ public class ReadLumpInEdgeListTask implements Task {
 
         System.out.println("NonDangling:");
         for (int i = 0; i < localNonDanglingChunks.size(); i++) {
-            System.out.print(localNonDanglingChunks.get(i) + " ");
+            System.out.print(ChunkID.toHexString(localNonDanglingChunks.get(i)) + " ");
         }
         System.out.println();
 
         System.out.println("Dangling:");
         for (int i = 0; i < localDanglingChunks.size(); i++) {
-            System.out.print(localDanglingChunks.get(i) + " ");
+            System.out.print(ChunkID.toHexString(localDanglingChunks.get(i)) + " ");
         }
         System.out.println();
 
