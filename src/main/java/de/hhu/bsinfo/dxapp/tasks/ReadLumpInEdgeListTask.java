@@ -115,6 +115,7 @@ public class ReadLumpInEdgeListTask implements Task {
             for (int j = 0; j < localVertices[i].getM_inEdges().length; i++) {
                 System.out.print(ChunkID.toHexString(localVertices[i].getM_inEdges()[j]) + " ");
             }
+            System.out.println();
         }
 
         LocalNonDanglingChunks ndChunks = new LocalNonDanglingChunks(localNonDanglingChunks.stream().mapToLong(i -> i).toArray());
@@ -143,17 +144,17 @@ public class ReadLumpInEdgeListTask implements Task {
         return 0;
     }
 
-    public long correspondingChunkID(int p_vertex, short[] slaveIDs){
+    private long correspondingChunkID(int p_vertex, short[] slaveIDs){
         int slaveCnt = slaveIDs.length;
         short nid = slaveIDs[((short) ((p_vertex-1) % slaveCnt))];
         long lid = (long) (((p_vertex-1) / slaveCnt) + 1);
         return ChunkID.getChunkID(nid,lid);
     }
 
-    public int localVertexCnt(int p_totalVertexCnt, int p_slaveID, int p_numSlaves){
+    private int localVertexCnt(int p_totalVertexCnt, int p_slaveID, int p_numSlaves){
         int mod = p_totalVertexCnt % p_numSlaves;
         double div = (double)p_totalVertexCnt/(double)p_numSlaves;
-        if(p_slaveID <= mod && p_slaveID != 0){
+        if(p_slaveID < mod){
             return (int) Math.ceil(div);
         }
         return (int) Math.floor(div);
