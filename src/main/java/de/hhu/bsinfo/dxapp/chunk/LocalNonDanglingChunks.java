@@ -20,6 +20,9 @@ public class LocalNonDanglingChunks extends AbstractChunk {
         m_localNonDanglingChunks = p_chunks;
     }
 
+    public long[] getLocalNonDanglingChunks() {
+        return m_localNonDanglingChunks;
+    }
 
     @Override
     public void exportObject(Exporter p_exporter) {

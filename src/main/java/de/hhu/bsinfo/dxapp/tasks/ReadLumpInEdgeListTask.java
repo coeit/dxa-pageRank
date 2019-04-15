@@ -15,6 +15,7 @@ import de.hhu.bsinfo.dxram.ms.MasterSlaveComputeService;
 import de.hhu.bsinfo.dxram.ms.Signal;
 import de.hhu.bsinfo.dxram.ms.Task;
 import de.hhu.bsinfo.dxram.ms.TaskContext;
+import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
 import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
@@ -36,6 +37,7 @@ public class ReadLumpInEdgeListTask implements Task {
         ChunkService chunkService = taskContext.getDXRAMServiceAccessor().getService(ChunkService.class);
         ChunkLocalService chunkLocalService = taskContext.getDXRAMServiceAccessor().getService(ChunkLocalService.class);
         MasterSlaveComputeService computeService = taskContext.getDXRAMServiceAccessor().getService(MasterSlaveComputeService.class);
+        NameserviceService nameService = taskContext.getDXRAMServiceAccessor().getService(NameserviceService.class);
 
         short mySlaveID = taskContext.getCtxData().getSlaveId();
         System.out.println("myID:" + mySlaveID);
@@ -55,7 +57,6 @@ public class ReadLumpInEdgeListTask implements Task {
                     outDegrees[Integer.parseInt(split[i]) - 1]++;
                 }
                 if (vertexNum % slaveIDs.length == mySlaveID){
-                    System.out.println(localVertexCount + " :: " + line);
                     localVertices[localVertexCount] = new Vertex(vertexNum + 1);
                     localVertexCount++;
                 }
@@ -125,9 +126,11 @@ public class ReadLumpInEdgeListTask implements Task {
 
         chunkLocalService.createLocal().create(ndChunks);
         chunkService.put().put(ndChunks);
+        nameService.register(ndChunks,mySlaveID + "nd");
 
         chunkLocalService.createLocal().create(dChunks);
         chunkService.put().put(dChunks);
+        nameService.register(dChunks,mySlaveID + "d");
 
         System.out.println("ChunkLists created!");
 

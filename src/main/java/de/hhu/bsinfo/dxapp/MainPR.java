@@ -124,7 +124,7 @@ public class MainPR extends AbstractApplication {
 
         //System.out.println("Timer InputJob: " + stopwatch.getTimeStr());
         long InputTime = stopwatch.getTime();
-        VoteChunk voteChunk = new VoteChunk();
+        VoteChunk voteChunk = new VoteChunk(N);
         chunkService.create().create(bootService.getNodeID(),voteChunk);
         chunkService.put().put(voteChunk);
         /*for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
@@ -147,10 +147,55 @@ public class MainPR extends AbstractApplication {
             }
         };
 
-        SendPrTask SendPRpar = new SendPrTask(N,DAMPING_FACTOR);
-        UpdatePrTask updatePR = new UpdatePrTask();
+        RunLumpPrRoundTask Run1 = new RunLumpPrRoundTask(N,DAMPING_FACTOR,voteChunk.getID(),0);
+        RunLumpPrRoundTask Run2 = new RunLumpPrRoundTask(N,DAMPING_FACTOR,voteChunk.getID(),1);
 
-        RunPrRoundTask Run1 = new RunPrRoundTask(N,DAMPING_FACTOR,0,voteChunk.getID());
+        //TaskScript taskScript = new TaskScript(Run1,Run2);
+
+        TaskScript taskScriptRun1 = new TaskScript(Run1);
+        TaskScript taskScriptRun2 = new TaskScript(Run2);
+
+        ArrayList<Double> roundPRsum = new ArrayList<>();
+        ArrayList<Double> roundPRerr = new ArrayList<>();
+
+        int NumRounds = 0;
+        double danglingPR = 0.0;
+        double PRerr = 0.0;
+        stopwatch.start();
+        TaskScriptState state;
+        for (int i = 0; i < 30; i++) {
+            if(i % 2 == 0){
+                state = computeService.submitTaskScript(taskScriptRun1, (short) 0, listener);
+            } else {
+                state = computeService.submitTaskScript(taskScriptRun2, (short) 0, listener);
+            }
+            while (!state.hasTaskCompleted()) {
+                try {
+                    Thread.sleep(100);
+                } catch (final InterruptedException ignore) {
+
+                }
+            }
+
+            chunkService.get().get(voteChunk,ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
+            //PRerr = voteChunk.getPRerr();
+            danglingPR = 1 - voteChunk.getPRsum(i % 2);
+            voteChunk.resetSum(i % 2, danglingPR);
+            chunkService.put().put(voteChunk,ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
+            System.out.println("Sum: " + danglingPR);
+            //roundPRerr.add(PRerr);
+            //roundPRsum.add(PRsum);
+            NumRounds++;
+
+            /*if (PRerr <= 1e-4) {
+                break;
+            }*/
+        }
+
+
+
+
+        /*RunPrRoundTask Run1 = new RunPrRoundTask(N,DAMPING_FACTOR,0,voteChunk.getID());
         RunPrRoundTask Run2 = new RunPrRoundTask(N,DAMPING_FACTOR,1,voteChunk.getID());
 
         //TaskScript taskScript = new TaskScript(Run1,Run2);
@@ -166,7 +211,7 @@ public class MainPR extends AbstractApplication {
         double PRerr = 0.0;
         stopwatch.start();
         TaskScriptState state;
-        /*for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 30; i++) {
             if(i % 2 == 0){
                 state = computeService.submitTaskScript(taskScriptRun1, (short) 0, listener);
             } else {
