@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 import de.hhu.bsinfo.dxapp.chunk.LocalNonDanglingChunks;
 import de.hhu.bsinfo.dxapp.chunk.Vertex;
 import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
+import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxram.boot.BootService;
 import de.hhu.bsinfo.dxram.chunk.ChunkLocalService;
@@ -45,7 +46,8 @@ public class RunLumpPrRoundTask implements Task {
         short mySlaveID = taskContext.getCtxData().getSlaveId();
         System.out.println(mySlaveID + "nd");
         LocalNonDanglingChunks localNonDanglingChunks = new LocalNonDanglingChunks(nameService.getChunkID(mySlaveID + "nd",333));
-
+        chunkService.get().get(localNonDanglingChunks);
+        System.out.println(localNonDanglingChunks.getID());
         long[] localChunks = localNonDanglingChunks.getLocalNonDanglingChunks();
 
         Vertex[] localVertices = new Vertex[localChunks.length];

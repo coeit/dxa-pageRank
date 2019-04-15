@@ -127,7 +127,7 @@ public class ReadLumpInEdgeListTask implements Task {
         chunkLocalService.createLocal().create(ndChunks);
         nameService.register(ndChunks,mySlaveID + "nd");
         chunkService.put().put(ndChunks);
-        System.out.println(mySlaveID + "nd");
+        System.out.println(ndChunks.getID());
 
         chunkLocalService.createLocal().create(dChunks);
         nameService.register(dChunks,mySlaveID + "d");

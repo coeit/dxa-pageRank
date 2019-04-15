@@ -13,7 +13,7 @@ public class LocalNonDanglingChunks extends AbstractChunk {
         super();
     }
 
-    public LocalNonDanglingChunks(long p_id){
+    public LocalNonDanglingChunks(final long p_id){
         super(p_id);
     }
 
