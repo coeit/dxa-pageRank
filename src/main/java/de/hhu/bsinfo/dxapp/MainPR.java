@@ -181,6 +181,7 @@ public class MainPR extends AbstractApplication {
             PRerr = voteChunk.getPRerr();
             danglingPR = 1 - voteChunk.getPRsum(Math.abs(i % 2 - 1));
             voteChunk.resetSum(i % 2, danglingPR);
+            voteChunk.resetErr();
             chunkService.put().put(voteChunk,ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
             System.out.println("Sum: " + danglingPR);
             roundPRerr.add(PRerr);
