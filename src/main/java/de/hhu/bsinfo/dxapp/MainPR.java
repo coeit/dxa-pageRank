@@ -256,7 +256,7 @@ public class MainPR extends AbstractApplication {
         stopwatch.stop();
         //System.out.println("Timer Computation: " + stopwatch.getTimeStr());
         long ExecutionTime = stopwatch.getTime();
-        PRInfoTask PRInfo = new PRInfoTask(outDir);
+        PRInfoTask PRInfo = new PRInfoTask(outDir,NumRounds % 2);
 	    TaskScript PRInfoTaskScript = new TaskScript(PRInfo);
 	    TaskScriptState PRInfoTaskScriptState = computeService.submitTaskScript(PRInfoTaskScript, (short) 0, listener);
         while (!PRInfoTaskScriptState.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0) {

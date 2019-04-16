@@ -40,12 +40,14 @@ import java.math.BigDecimal;
 public class PRInfoTask implements Task {
 
     String m_outDir;
+    int m_round;
 
     public PRInfoTask(){
     }
 
-    public PRInfoTask(String p_outDir){
+    public PRInfoTask(String p_outDir, int p_round){
         m_outDir = p_outDir;
+        m_round = p_round;
     }
 
     @Override
@@ -79,7 +81,7 @@ public class PRInfoTask implements Task {
             Stream.of(localVertices).forEach(localVertex -> {
                 try {
                     //printInfo(localVertex, writer);
-                    writer.write(localVertex.get_name() + " " + BigDecimal.valueOf(localVertex.getPageRank(0)).toPlainString() + "\n");
+                    writer.write(localVertex.get_name() + " " + BigDecimal.valueOf(localVertex.getPageRank(m_round)).toPlainString() + "\n");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -107,15 +109,17 @@ public class PRInfoTask implements Task {
     @Override
     public void exportObject(Exporter p_exporter) {
         p_exporter.writeString(m_outDir);
+        p_exporter.writeInt(m_round);
     }
 
     @Override
     public void importObject(Importer p_importer) {
         m_outDir = p_importer.readString(m_outDir);
+        m_round = p_importer.readInt(m_round);
     }
 
     @Override
     public int sizeofObject() {
-        return ObjectSizeUtil.sizeofString(m_outDir);
+        return ObjectSizeUtil.sizeofString(m_outDir) + Integer.BYTES;
     }
 }
