@@ -64,6 +64,10 @@ public class Vertex extends AbstractChunk {
         m_inEdges = p_neighbors;
     }
 
+    public void setPageRank(int p_round){
+        m_pageRank[p_round] = m_pageRank[Math.abs(p_round - 1)];
+    }
+
     public void calcPageRank(int N, double D, double p_sum, int p_round){
         m_pageRank[p_round] = (1 - D)/(double) N + D * p_sum;
     }
