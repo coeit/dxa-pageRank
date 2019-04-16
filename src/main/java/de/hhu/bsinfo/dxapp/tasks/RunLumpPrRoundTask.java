@@ -18,6 +18,7 @@ import de.hhu.bsinfo.dxram.ms.TaskContext;
 import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
+import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 
 public class RunLumpPrRoundTask implements Task {
 
@@ -129,6 +130,7 @@ public class RunLumpPrRoundTask implements Task {
         p_exporter.writeDouble(m_damp);
         p_exporter.writeInt(m_round);
         p_exporter.writeLong(m_voteChunkID);
+        p_exporter.writeBoolean(m_calcDanglingPR);
     }
 
     @Override
@@ -137,10 +139,11 @@ public class RunLumpPrRoundTask implements Task {
         m_damp = p_importer.readDouble(m_damp);
         m_round = p_importer.readInt(m_round);
         m_voteChunkID = p_importer.readLong(m_voteChunkID);
+        m_calcDanglingPR = p_importer.readBoolean(m_calcDanglingPR);
     }
 
     @Override
     public int sizeofObject() {
-        return Integer.BYTES * 2 + Double.BYTES + Long.BYTES;
+        return Integer.BYTES * 2 + Double.BYTES + Long.BYTES + ObjectSizeUtil.sizeofBoolean();
     }
 }
