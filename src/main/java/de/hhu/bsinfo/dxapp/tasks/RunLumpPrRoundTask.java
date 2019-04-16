@@ -107,6 +107,8 @@ public class RunLumpPrRoundTask implements Task {
         m_PRErr.add(Math.abs(p_vertex.getPageRank(Math.abs(m_round - 1)) - p_vertex.getPageRank(m_round)));
 
         if(m_calcDanglingPR){
+            System.out.println(p_vertex.getPageRank(m_round));
+            System.out.println(p_vertex.getPageRank(Math.abs(m_round-1)));
             p_vertex.setPageRank(m_round);
         }
 
