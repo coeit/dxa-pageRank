@@ -157,6 +157,7 @@ public class ReadLumpInEdgeListTask implements Task {
 
 
         System.out.println("ChunkLists created!");
+        System.out.println("NonDangling: " + localNonDanglingChunks.size() + ", Dangling: " + localDanglingChunks.size());
 
         /*System.out.println("NonDangling:");
         for (int i = 0; i < ndChunks.getLocalNonDanglingChunks().length; i++) {
