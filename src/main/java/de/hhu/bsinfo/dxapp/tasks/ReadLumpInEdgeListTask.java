@@ -111,6 +111,7 @@ public class ReadLumpInEdgeListTask implements Task {
 
                         if (Integer.parseInt(split[0]) == 0){
                             localVertexCount++;
+                            vertexNum++;
                             continue;
                         }
 
