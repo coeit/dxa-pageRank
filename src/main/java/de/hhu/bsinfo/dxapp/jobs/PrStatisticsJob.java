@@ -72,7 +72,7 @@ public class PrStatisticsJob extends AbstractJob {
             writer.write("Round\tError\tTime\n");
             for (int i = 0; i < m_PRerrs.length; i++) {
                 //String PRsum = String.format("%.4f", m_PRsums[i]);
-                String PRerr = String.format("%.8f", m_PRerrs[i]);
+                String PRerr = String.format("%.12f", m_PRerrs[i]);
                 String time = String.format("%.4f",(double)m_ExecutionTimes[i]/(double)1000000000);
                 //String voteRatio = String.format("%.2f", (double)m_votes[i]/(double)m_vertexCount);
                 writer.write((i+1) + "\t" + PRerr + "\t" + time + "s\n");
