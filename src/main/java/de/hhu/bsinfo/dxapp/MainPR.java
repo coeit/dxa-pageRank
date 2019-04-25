@@ -285,7 +285,7 @@ public class MainPR extends AbstractApplication {
         ArrayList<Short> slaves = computeService.getStatusMaster((short)0).getConnectedSlaves();
         long memUsage = 0;
         for (short slave : slaves){
-           memUsage += chunkService.status().getStatus(slave).getHeapStatus().getTotalSize().getMB();
+           memUsage += chunkService.status().getStatus(slave).getHeapStatus().getAllocatedPayload().getMB();
         }
 
         PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,DAMPING_FACTOR,THRESHOLD,InputTime,iterationTimesArr,memUsage,roundPRerrArr);
