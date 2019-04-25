@@ -41,16 +41,22 @@ public class MainPR extends AbstractApplication {
 
     @Override
     public void main(final String[] p_args) {
-        double DAMPING_FACTOR = 0.85;
 
-        if (p_args.length < 2){
+
+        if (p_args.length < 4){
             System.out.println("Not enough Arguments ... shutting down");
+            System.out.println("Arguments: graphfile vertexcnt dampingfactor errorthreshold (maxrounds:default=30)");
             signalShutdown();
         }
         String filename = p_args[0];
         int N = Integer.parseInt(p_args[1]);
+        double DAMPING_FACTOR = Double.parseDouble(p_args[2]);
+        double THRESHOLD = Double.parseDouble(p_args[3]);
+        int MAX_ROUNDS = 30;
 
-
+        if(p_args.length == 5){
+            MAX_ROUNDS = Integer.parseInt(p_args[4]);
+        }
 
 
         BootService bootService = getService(BootService.class);
@@ -59,7 +65,7 @@ public class MainPR extends AbstractApplication {
         MasterSlaveComputeService computeService = getService(MasterSlaveComputeService.class);
         JobService jobService = getService(JobService.class);
 
-        String outDir = createOutputDirs();
+
 
         IntegerChunk cntChunk = new IntegerChunk();
         chunkService.create().create(computeService.getStatusMaster((short) 0 ).getMasterNodeId(),cntChunk);
@@ -161,9 +167,10 @@ public class MainPR extends AbstractApplication {
         int NumRounds = 0;
         double danglingPR = 0.0;
         double PRerr = 0.0;
-        stopwatch.start();
+        ArrayList<Long> iterationTimes = new ArrayList<>();
         TaskScriptState state;
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < MAX_ROUNDS; i++) {
+            stopwatch.start();
             if(i % 2 == 0){
                 state = computeService.submitTaskScript(taskScriptRun1, (short) 0, listener);
             } else {
@@ -188,9 +195,11 @@ public class MainPR extends AbstractApplication {
             //roundPRsum.add(PRsum);
             NumRounds++;
 
-            if (PRerr <= 1e-4) {
+            if (PRerr <= THRESHOLD) {
                 break;
             }
+            stopwatch.stop();
+            iterationTimes.add(stopwatch.getTime());
         }
 
         RunLumpPrRoundTask calcDanglingPR = new RunLumpPrRoundTask(N,DAMPING_FACTOR,voteChunk.getID(),NumRounds % 2,true);
@@ -253,9 +262,9 @@ public class MainPR extends AbstractApplication {
                 break;
             }
         }*/
-        stopwatch.stop();
         //System.out.println("Timer Computation: " + stopwatch.getTimeStr());
-        long ExecutionTime = stopwatch.getTime();
+        String outDir = createOutputDirs();
+
         PRInfoTask PRInfo = new PRInfoTask(outDir,NumRounds % 2);
 	    TaskScript PRInfoTaskScript = new TaskScript(PRInfo);
 	    TaskScriptState PRInfoTaskScriptState = computeService.submitTaskScript(PRInfoTaskScript, (short) 0, listener);
@@ -271,8 +280,9 @@ public class MainPR extends AbstractApplication {
 
         //double[] roundPRsumArr = roundPRsum.stream().mapToDouble(i -> i).toArray();
         double[] roundPRerrArr = roundPRerr.stream().mapToDouble(i -> i).toArray();
+        long[] iterationTimesArr = iterationTimes.stream().mapToLong(i -> i).toArray();
 
-        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,InputTime,ExecutionTime,NumRounds,roundPRerrArr);
+        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,DAMPING_FACTOR,THRESHOLD,InputTime,iterationTimesArr,NumRounds,roundPRerrArr);
         jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();
 
@@ -292,6 +302,8 @@ public class MainPR extends AbstractApplication {
         String ret = new String(PrOutDir + "/" + out);
         return ret;
     }
+
+
 
 
     @Override
