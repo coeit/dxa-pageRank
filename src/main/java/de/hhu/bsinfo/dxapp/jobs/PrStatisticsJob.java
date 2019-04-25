@@ -22,20 +22,21 @@ public class PrStatisticsJob extends AbstractJob {
     private double m_thr;
     private long m_InputTime;
     private long[] m_ExecutionTimes;
-    private int m_NumRounds;
+    private long m_memUsage;
     private double[] m_PRerrs;
 
     public PrStatisticsJob() {
     }
 
-    public PrStatisticsJob(String p_outDir,int p_vertexCount, double p_damp, double p_thr ,long p_InputTime, long[] p_ExecutionTimes, int p_NumRounds,double[] p_PRerrs) {
+    public PrStatisticsJob(String p_outDir,int p_vertexCount, double p_damp, double p_thr ,long p_InputTime,
+            long[] p_ExecutionTimes, long p_memUsage, double[] p_PRerrs) {
         m_outDir = p_outDir;
         m_vertexCount = p_vertexCount;
         m_damp = p_damp;
         m_thr = p_thr;
         m_InputTime = p_InputTime;
         m_ExecutionTimes = p_ExecutionTimes;
-        m_NumRounds = p_NumRounds;
+        m_memUsage = p_memUsage;
         m_PRerrs = p_PRerrs;
 
     }
@@ -58,15 +59,15 @@ public class PrStatisticsJob extends AbstractJob {
             writer.write("#Statistics for PageRank Run " + m_outDir + "\n\n");
             writer.write("NUM_SLAVES\t" + num_slaves + "\n");
             writer.write("NUM_VERTICES\t" + m_vertexCount + "\n");
-            writer.write("DAMPING\t" + m_damp + "\n");
+            writer.write("DAMPING_VAL\t" + m_damp + "\n");
             writer.write("THRESHOLD\t" + m_thr + "\n");
-            writer.write("NUM_ROUNDS\t" + m_NumRounds + "\n");
+            writer.write("NUM_ROUNDS\t" + m_ExecutionTimes.length + "\n");
             long timeSum = timeSum(m_ExecutionTimes);
             String InputTime = String.format("%.4f",(double)m_InputTime/(double)1000000000);
             String ExecutionTime = String.format("%.4f",(double)timeSum/(double)1000000000);
             writer.write("INPUT_TIME\t" + InputTime + "s" + "\n");
             writer.write("EXECUTION_TIME\t" + ExecutionTime + "s" + "\n");
-
+            writer.write("MEM_USAGE\t" + m_memUsage + "MB" + "\n");
             writer.write("--------ROUNDS--------\n");
             writer.write("Round\tError\tTime\n");
             for (int i = 0; i < m_PRerrs.length; i++) {
@@ -98,7 +99,7 @@ public class PrStatisticsJob extends AbstractJob {
         m_thr = p_importer.readDouble(m_thr);
         m_InputTime = p_importer.readLong(m_InputTime);
         m_ExecutionTimes = p_importer.readLongArray(m_ExecutionTimes);
-        m_NumRounds = p_importer.readInt(m_NumRounds);
+        m_memUsage = p_importer.readLong(m_memUsage);
         m_PRerrs = p_importer.readDoubleArray(m_PRerrs);
     }
 
@@ -111,13 +112,13 @@ public class PrStatisticsJob extends AbstractJob {
         p_exporter.writeDouble(m_thr);
         p_exporter.writeLong(m_InputTime);
         p_exporter.writeLongArray(m_ExecutionTimes);
-        p_exporter.writeInt(m_NumRounds);
+        p_exporter.writeLong(m_memUsage);
         p_exporter.writeDoubleArray(m_PRerrs);
     }
 
     @Override
     public int sizeofObject() {
-        return super.sizeofObject() + ObjectSizeUtil.sizeofString(m_outDir) + Integer.BYTES * 2
-                + Long.BYTES + ObjectSizeUtil.sizeofLongArray(m_ExecutionTimes) + Double.BYTES * 2 + ObjectSizeUtil.sizeofDoubleArray(m_PRerrs);
+        return super.sizeofObject() + ObjectSizeUtil.sizeofString(m_outDir) + Integer.BYTES
+                + Long.BYTES * 2 + ObjectSizeUtil.sizeofLongArray(m_ExecutionTimes) + Double.BYTES * 2 + ObjectSizeUtil.sizeofDoubleArray(m_PRerrs);
     }
 }

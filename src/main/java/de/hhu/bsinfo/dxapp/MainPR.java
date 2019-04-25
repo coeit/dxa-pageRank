@@ -282,7 +282,13 @@ public class MainPR extends AbstractApplication {
         double[] roundPRerrArr = roundPRerr.stream().mapToDouble(i -> i).toArray();
         long[] iterationTimesArr = iterationTimes.stream().mapToLong(i -> i).toArray();
 
-        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,DAMPING_FACTOR,THRESHOLD,InputTime,iterationTimesArr,NumRounds,roundPRerrArr);
+        ArrayList<Short> slaves = computeService.getStatusMaster((short)0).getConnectedSlaves();
+        long memUsage = 0;
+        for (short slave : slaves){
+           memUsage += chunkService.status().getStatus(slave).getHeapStatus().getTotalSize().getMB();
+        }
+
+        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,DAMPING_FACTOR,THRESHOLD,InputTime,iterationTimesArr,memUsage,roundPRerrArr);
         jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();
 
