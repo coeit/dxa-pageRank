@@ -194,12 +194,12 @@ public class MainPR extends AbstractApplication {
             roundPRerr.add(PRerr);
             //roundPRsum.add(PRsum);
             NumRounds++;
-
+            stopwatch.stop();
+            iterationTimes.add(stopwatch.getTime());
             if (PRerr <= THRESHOLD) {
                 break;
             }
-            stopwatch.stop();
-            iterationTimes.add(stopwatch.getTime());
+
         }
 
         RunLumpPrRoundTask calcDanglingPR = new RunLumpPrRoundTask(N,DAMPING_FACTOR,voteChunk.getID(),NumRounds % 2,true);
