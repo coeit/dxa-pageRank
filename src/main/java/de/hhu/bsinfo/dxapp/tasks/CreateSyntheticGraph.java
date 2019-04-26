@@ -18,13 +18,14 @@ import de.hhu.bsinfo.dxram.ms.TaskContext;
 import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
+import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 
 public class CreateSyntheticGraph implements Task {
 
     private int m_vertexCnt;
-    private boolean m_isTest;
-    private int m_inDegMean;
     private double m_locality;
+    private int m_inDegMean;
+    private boolean m_isTest;
     private long m_rdyCntCID;
 
     public CreateSyntheticGraph(){
@@ -60,7 +61,8 @@ public class CreateSyntheticGraph implements Task {
         for (int i = 0; i < localVertices.length; i++) {
             HashSet<Long> randIDs = new HashSet<>();
             int j = 0;
-            while(j < getExpRandNumber(m_isTest,random)){
+            int indeg = getExpRandNumber(m_isTest,random);
+            while(j < indeg){
                 long randCID = randCID(i + 1,m_locality,localVertices.length,random,mySlaveID,slaveIDs);
                 if(randIDs.add(randCID)){
                     localVertices[i].addInEdge(randCID);
@@ -158,16 +160,24 @@ public class CreateSyntheticGraph implements Task {
 
     @Override
     public void exportObject(Exporter exporter) {
-
+        exporter.writeInt(m_vertexCnt);
+        exporter.writeInt(m_inDegMean);
+        exporter.writeDouble(m_locality);
+        exporter.writeLong(m_rdyCntCID);
+        exporter.writeBoolean(m_isTest);
     }
 
     @Override
     public void importObject(Importer importer) {
-
+        m_vertexCnt = importer.readInt(m_vertexCnt);
+        m_inDegMean = importer.readInt(m_inDegMean);
+        m_locality = importer.readDouble(m_locality);
+        m_rdyCntCID = importer.readLong(m_rdyCntCID);
+        m_isTest = importer.readBoolean(m_isTest);
     }
 
     @Override
     public int sizeofObject() {
-        return 0;
+        return Integer.BYTES * 2 + Double.BYTES + Long.BYTES + ObjectSizeUtil.sizeofBoolean();
     }
 }
