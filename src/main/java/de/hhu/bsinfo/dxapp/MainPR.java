@@ -51,10 +51,10 @@ public class MainPR extends AbstractApplication {
             signalShutdown();
         }
 
-        int N = Integer.parseInt(p_args[1]);
-        double DAMPING_FACTOR = Double.parseDouble(p_args[2]);
-        double THRESHOLD = Double.parseDouble(p_args[3]);
-        int MAX_ROUNDS = Integer.parseInt(p_args[4]);
+        int N = Integer.parseInt(p_args[0]);
+        double DAMPING_FACTOR = Double.parseDouble(p_args[1]);
+        double THRESHOLD = Double.parseDouble(p_args[2]);
+        int MAX_ROUNDS = Integer.parseInt(p_args[3]);
 
 
 
