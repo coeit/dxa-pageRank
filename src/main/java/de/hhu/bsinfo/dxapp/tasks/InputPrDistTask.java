@@ -126,7 +126,7 @@ public class InputPrDistTask implements Task {
             }
             Vertex vertex = new Vertex(correspondingChunkID(i+1, slaveIDs));
             chunkService.get().get(vertex, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
-            vertex.increment_outDeg(outDegrees[i],m_vertexCnt);
+            vertex.increment_outDeg(outDegrees[i]);
             chunkService.put().put(vertex,ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
         }
 

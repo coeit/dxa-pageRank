@@ -68,7 +68,7 @@ public class InputPrJob extends AbstractJob {
                     vertices[v2].invokeVertexPR(m_vertexCnt);
                 }
 
-                vertices[v1].increment_outDeg(1,m_vertexCnt);
+                vertices[v1].increment_outDeg(1);
                 vertices[v2].addInEdge(correspondingChunkID(v1 + 1, slaveIDs));
                 //System.out.println(ChunkID.toHexString(correspondingChunkID(v1 + 1, slaveIDs)) + " " + ChunkID.toHexString(correspondingChunkID(v2 + 1, slaveIDs)));
             }
