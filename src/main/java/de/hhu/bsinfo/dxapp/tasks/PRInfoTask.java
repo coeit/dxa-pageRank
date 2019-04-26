@@ -118,16 +118,18 @@ public class PRInfoTask implements Task {
     public void exportObject(Exporter p_exporter) {
         p_exporter.writeString(m_outDir);
         p_exporter.writeInt(m_round);
+        p_exporter.writeBoolean(m_synthetic);
     }
 
     @Override
     public void importObject(Importer p_importer) {
         m_outDir = p_importer.readString(m_outDir);
         m_round = p_importer.readInt(m_round);
+        m_synthetic = p_importer.readBoolean(m_synthetic);
     }
 
     @Override
     public int sizeofObject() {
-        return ObjectSizeUtil.sizeofString(m_outDir) + Integer.BYTES;
+        return ObjectSizeUtil.sizeofString(m_outDir) + Integer.BYTES + ObjectSizeUtil.sizeofBoolean();
     }
 }
