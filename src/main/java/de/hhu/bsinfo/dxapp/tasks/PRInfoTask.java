@@ -68,7 +68,7 @@ public class PRInfoTask implements Task {
         //Spliterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).spliterator();
         localchunks.next();
 
-        Vertex[] localVertices = new Vertex[(int)chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getCurrentLIDCounter() - 2];
+        Vertex[] localVertices = new Vertex[(int)chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getCurrentLIDCounter()];
 
         for (int i = 0; i < localVertices.length; i++) {
             localVertices[i] = new Vertex(localchunks.next());

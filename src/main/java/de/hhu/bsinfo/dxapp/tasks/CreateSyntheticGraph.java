@@ -25,19 +25,19 @@ public class CreateSyntheticGraph implements Task {
     private int m_vertexCnt;
     private double m_locality;
     private int m_inDegMean;
-    private boolean m_isTest;
+    private int m_randomSeed;
     private long m_rdyCntCID;
 
     public CreateSyntheticGraph(){
         
     }
     
-    public CreateSyntheticGraph(int p_vertexCnt, double p_locality, int p_inDegMean, long p_rdyCntCID, boolean p_isTest){
+    public CreateSyntheticGraph(int p_vertexCnt, double p_locality, int p_inDegMean, long p_rdyCntCID, int p_randomSeed){
         m_vertexCnt = p_vertexCnt;
         m_inDegMean = p_inDegMean;
         m_locality = p_locality;
         m_rdyCntCID = p_rdyCntCID;
-        m_isTest = p_isTest;
+        m_randomSeed = p_randomSeed;
     }
     
     @Override
@@ -52,8 +52,8 @@ public class CreateSyntheticGraph implements Task {
         HashMap<Long, Integer> remoteInEdges = new HashMap<>();
 
         Random random;
-        if (m_isTest){
-            random = new Random(2);
+        if (m_randomSeed != 0){
+            random = new Random(m_randomSeed);
         } else {
             random = new Random();
         }
@@ -64,7 +64,7 @@ public class CreateSyntheticGraph implements Task {
             }
             HashSet<Long> randIDs = new HashSet<>();
             int j = 0;
-            int indeg = getExpRandNumber(m_isTest,random);
+            int indeg = getExpRandNumber(random);
             while(j < indeg){
                 long randCID = randCID(i + 1,m_locality,localVertices.length,random,mySlaveID,slaveIDs);
                 int randLID = (int)ChunkID.getLocalID(randCID) - 1;
@@ -150,7 +150,7 @@ public class CreateSyntheticGraph implements Task {
         return ChunkID.getChunkID(nid, lid);
     }
 
-    private int getExpRandNumber(boolean p_isTest, Random p_random){
+    private int getExpRandNumber(Random p_random){
         return (int) (Math.log(1 - p_random.nextDouble())/(- Math.pow(m_inDegMean,-1)));
     }
 
@@ -174,7 +174,7 @@ public class CreateSyntheticGraph implements Task {
         exporter.writeInt(m_inDegMean);
         exporter.writeDouble(m_locality);
         exporter.writeLong(m_rdyCntCID);
-        exporter.writeBoolean(m_isTest);
+        exporter.writeInt(m_randomSeed);
     }
 
     @Override
@@ -183,11 +183,11 @@ public class CreateSyntheticGraph implements Task {
         m_inDegMean = importer.readInt(m_inDegMean);
         m_locality = importer.readDouble(m_locality);
         m_rdyCntCID = importer.readLong(m_rdyCntCID);
-        m_isTest = importer.readBoolean(m_isTest);
+        m_randomSeed = importer.readInt(m_randomSeed);
     }
 
     @Override
     public int sizeofObject() {
-        return Integer.BYTES * 2 + Double.BYTES + Long.BYTES + ObjectSizeUtil.sizeofBoolean();
+        return Integer.BYTES * 3 + Double.BYTES + Long.BYTES;
     }
 }

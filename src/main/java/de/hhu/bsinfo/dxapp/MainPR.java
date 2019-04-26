@@ -46,7 +46,7 @@ public class MainPR extends AbstractApplication {
         if (p_args.length < 5){
             System.out.println("Not enough Arguments ... shutting down");
             System.out.println("Arguments: graphfile vertexcnt dampingfactor errorthreshold (maxrounds:default=30)");
-            System.out.println("Arguments: vertexcnt dampingfactor errorthreshold maxrounds (graphfile) (locality MeanIndegree isTest)");
+            System.out.println("Arguments: vertexcnt dampingfactor errorthreshold maxrounds (graphfile) / (locality MeanIndegree (randomSeed))");
 
             signalShutdown();
         }
@@ -89,8 +89,13 @@ public class MainPR extends AbstractApplication {
             }
             stopwatch.stop();
         } else {
-            CreateSyntheticGraph createSyntheticGraph = new CreateSyntheticGraph(N,Double.parseDouble(p_args[4]),
-                    Integer.parseInt(p_args[5]), rdyCnt.getID(), Boolean.parseBoolean(p_args[6]));
+            CreateSyntheticGraph createSyntheticGraph;
+            if(p_args.length == 7){
+                createSyntheticGraph = new CreateSyntheticGraph(N,Double.parseDouble(p_args[4]),Integer.parseInt(p_args[5]), rdyCnt.getID(), Integer.parseInt(p_args[6]));
+            } else {
+                createSyntheticGraph = new CreateSyntheticGraph(N,Double.parseDouble(p_args[4]),Integer.parseInt(p_args[5]), rdyCnt.getID(), 0);
+            }
+
             TaskScript inputTaskScript = new TaskScript(createSyntheticGraph);
             TaskScriptState inputState = computeService.submitTaskScript(inputTaskScript, (short) 0);
             stopwatch.start();
