@@ -132,6 +132,9 @@ public class CreateSyntheticGraph implements Task {
                 otherSlaveIDs.add(p_slaveIDs[i]);
             }
         }
+        if(p_slaveIDs.length == 1){
+            otherSlaveIDs.add(p_slaveIDs[p_mySlaveID]);
+        }
 
         long lid = p_random.nextInt(p_localVertexCnt) + 1;
         short nid;
