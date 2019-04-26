@@ -55,7 +55,7 @@ public class MainPR extends AbstractApplication {
         double DAMPING_FACTOR = Double.parseDouble(p_args[1]);
         double THRESHOLD = Double.parseDouble(p_args[2]);
         int MAX_ROUNDS = Integer.parseInt(p_args[3]);
-
+        boolean isSynthetic = false;
 
 
         BootService bootService = getService(BootService.class);
@@ -89,6 +89,7 @@ public class MainPR extends AbstractApplication {
             }
             stopwatch.stop();
         } else {
+            isSynthetic = true;
             CreateSyntheticGraph createSyntheticGraph;
             if(p_args.length == 7){
                 createSyntheticGraph = new CreateSyntheticGraph(N,Double.parseDouble(p_args[4]),Integer.parseInt(p_args[5]), rdyCnt.getID(), Integer.parseInt(p_args[6]));
@@ -245,7 +246,7 @@ public class MainPR extends AbstractApplication {
         //System.out.println("Timer Computation: " + stopwatch.getTimeStr());
         String outDir = createOutputDirs();
 
-        PRInfoTask PRInfo = new PRInfoTask(outDir,NumRounds % 2);
+        PRInfoTask PRInfo = new PRInfoTask(outDir,NumRounds % 2, isSynthetic);
 	    TaskScript PRInfoTaskScript = new TaskScript(PRInfo);
 	    TaskScriptState PRInfoTaskScriptState = computeService.submitTaskScript(PRInfoTaskScript, (short) 0, listener);
         while (!PRInfoTaskScriptState.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0) {
@@ -263,9 +264,9 @@ public class MainPR extends AbstractApplication {
         long[] iterationTimesArr = iterationTimes.stream().mapToLong(i -> i).toArray();
 
         ArrayList<Short> slaves = computeService.getStatusMaster((short)0).getConnectedSlaves();
-        long memUsage = 0;
+        double memUsage = 0.0;
         for (short slave : slaves){
-           memUsage += chunkService.status().getStatus(slave).getHeapStatus().getAllocatedPayload().getMB();
+           memUsage += chunkService.status().getStatus(slave).getHeapStatus().getAllocatedPayload().getMBDouble();
         }
 
         PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,DAMPING_FACTOR,THRESHOLD,InputTime,iterationTimesArr,memUsage,roundPRerrArr);

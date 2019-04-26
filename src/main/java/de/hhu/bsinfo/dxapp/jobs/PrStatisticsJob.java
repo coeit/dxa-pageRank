@@ -22,14 +22,14 @@ public class PrStatisticsJob extends AbstractJob {
     private double m_thr;
     private long m_InputTime;
     private long[] m_ExecutionTimes;
-    private long m_memUsage;
+    private double m_memUsage;
     private double[] m_PRerrs;
 
     public PrStatisticsJob() {
     }
 
     public PrStatisticsJob(String p_outDir,int p_vertexCount, double p_damp, double p_thr ,long p_InputTime,
-            long[] p_ExecutionTimes, long p_memUsage, double[] p_PRerrs) {
+            long[] p_ExecutionTimes, double p_memUsage, double[] p_PRerrs) {
         m_outDir = p_outDir;
         m_vertexCount = p_vertexCount;
         m_damp = p_damp;
@@ -67,7 +67,9 @@ public class PrStatisticsJob extends AbstractJob {
             String ExecutionTime = String.format("%.4f",(double)timeSum/(double)1000000000);
             writer.write("INPUT_TIME\t" + InputTime + "s" + "\n");
             writer.write("EXECUTION_TIME\t" + ExecutionTime + "s" + "\n");
-            writer.write("MEM_USAGE\t" + m_memUsage + "MB" + "\n");
+            String memUse = String.format("%.4f",m_memUsage);
+
+            writer.write("MEM_USAGE\t" + memUse + "MB" + "\n");
             writer.write("--------ROUNDS--------\n");
             writer.write("Round\tError\tTime\n");
             for (int i = 0; i < m_PRerrs.length; i++) {
@@ -99,7 +101,7 @@ public class PrStatisticsJob extends AbstractJob {
         m_thr = p_importer.readDouble(m_thr);
         m_InputTime = p_importer.readLong(m_InputTime);
         m_ExecutionTimes = p_importer.readLongArray(m_ExecutionTimes);
-        m_memUsage = p_importer.readLong(m_memUsage);
+        m_memUsage = p_importer.readDouble(m_memUsage);
         m_PRerrs = p_importer.readDoubleArray(m_PRerrs);
     }
 
@@ -112,13 +114,13 @@ public class PrStatisticsJob extends AbstractJob {
         p_exporter.writeDouble(m_thr);
         p_exporter.writeLong(m_InputTime);
         p_exporter.writeLongArray(m_ExecutionTimes);
-        p_exporter.writeLong(m_memUsage);
+        p_exporter.writeDouble(m_memUsage);
         p_exporter.writeDoubleArray(m_PRerrs);
     }
 
     @Override
     public int sizeofObject() {
         return super.sizeofObject() + ObjectSizeUtil.sizeofString(m_outDir) + Integer.BYTES
-                + Long.BYTES * 2 + ObjectSizeUtil.sizeofLongArray(m_ExecutionTimes) + Double.BYTES * 2 + ObjectSizeUtil.sizeofDoubleArray(m_PRerrs);
+                + Long.BYTES + ObjectSizeUtil.sizeofLongArray(m_ExecutionTimes) + Double.BYTES * 3 + ObjectSizeUtil.sizeofDoubleArray(m_PRerrs);
     }
 }

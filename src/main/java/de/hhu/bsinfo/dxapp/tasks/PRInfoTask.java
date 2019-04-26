@@ -41,13 +41,15 @@ public class PRInfoTask implements Task {
 
     String m_outDir;
     int m_round;
+    boolean m_synthetic;
 
     public PRInfoTask(){
     }
 
-    public PRInfoTask(String p_outDir, int p_round){
+    public PRInfoTask(String p_outDir, int p_round, boolean p_synthetic){
         m_outDir = p_outDir;
         m_round = p_round;
+        m_synthetic = p_synthetic;
     }
 
     @Override
@@ -81,7 +83,13 @@ public class PRInfoTask implements Task {
             Stream.of(localVertices).forEach(localVertex -> {
                 try {
                     //printInfo(localVertex, writer);
-                    writer.write(localVertex.get_name() + " " + BigDecimal.valueOf(localVertex.getPageRank(m_round)).toPlainString() + "\n");
+                    if (!m_synthetic){
+                        writer.write(localVertex.get_name() + " " + BigDecimal.valueOf(localVertex.getPageRank(m_round)).toPlainString() + "\n");
+
+                    } else {
+                        writer.write(ChunkID.toHexString(localVertex.getID()) + " " + BigDecimal.valueOf(localVertex.getPageRank(m_round)).toPlainString() + "\n");
+
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
