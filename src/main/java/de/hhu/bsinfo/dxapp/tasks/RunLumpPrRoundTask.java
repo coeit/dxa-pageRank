@@ -81,6 +81,15 @@ public class RunLumpPrRoundTask implements Task {
 
         chunkService.get().get(localVertices);
 
+        for (int i = 0; i < localVertices.length; i++) {
+            System.out.print(ChunkID.toHexString(localVertices[i].getID()) + " " + localVertices[i].getOutDeg() + " ++ ");
+
+            for (int j = 0; j < localVertices[i].getM_inEdges().length; j++) {
+                System.out.print(ChunkID.toHexString(localVertices[i].getM_inEdges()[j]) + " ");
+            }
+            System.out.println();
+        }
+
         VoteChunk voteChunk = new VoteChunk(m_voteChunkID);
         chunkService.get().get(voteChunk);
         double danglingPR = voteChunk.getPRsum(m_round);
@@ -133,7 +142,7 @@ public class RunLumpPrRoundTask implements Task {
             p_vertex.setPageRank(m_round);
         }
 
-        //System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPageRank(Math.abs(m_round - 1)) + " " + p_vertex.getPageRank(m_round));
+        System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPageRank(Math.abs(m_round - 1)) + " " + p_vertex.getPageRank(m_round));
 
         p_chunkService.put().put(p_vertex);
 
