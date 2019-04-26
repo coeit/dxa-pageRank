@@ -144,7 +144,7 @@ public class ReadLumpInEdgeListTask implements Task {
             System.out.println();
         }*/
 
-        LocalNonDanglingChunks ndChunks = new LocalNonDanglingChunks(localNonDanglingChunks.stream().mapToLong(i -> i).toArray());
+        /*LocalNonDanglingChunks ndChunks = new LocalNonDanglingChunks(localNonDanglingChunks.stream().mapToLong(i -> i).toArray());
         LocalDanglingChunks dChunks = new LocalDanglingChunks(localDanglingChunks.stream().mapToLong(i -> i).toArray());
 
         chunkLocalService.createLocal().create(ndChunks);
@@ -159,7 +159,7 @@ public class ReadLumpInEdgeListTask implements Task {
 
         System.out.println("ChunkLists created!");
         System.out.println("NonDangling: " + localNonDanglingChunks.size() + ", Dangling: " + localDanglingChunks.size());
-
+        */
         /*System.out.println("NonDangling:");
         for (int i = 0; i < ndChunks.getLocalNonDanglingChunks().length; i++) {
             System.out.print(ChunkID.toHexString(ndChunks.getLocalNonDanglingChunks()[i]) + " ");
