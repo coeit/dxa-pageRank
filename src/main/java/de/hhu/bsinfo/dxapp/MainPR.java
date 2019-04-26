@@ -43,20 +43,19 @@ public class MainPR extends AbstractApplication {
     public void main(final String[] p_args) {
 
 
-        if (p_args.length < 4){
+        if (p_args.length < 5){
             System.out.println("Not enough Arguments ... shutting down");
             System.out.println("Arguments: graphfile vertexcnt dampingfactor errorthreshold (maxrounds:default=30)");
+            System.out.println("Arguments: vertexcnt dampingfactor errorthreshold maxrounds (graphfile) (locality MeanIndegree isTest)");
+
             signalShutdown();
         }
-        String filename = p_args[0];
+
         int N = Integer.parseInt(p_args[1]);
         double DAMPING_FACTOR = Double.parseDouble(p_args[2]);
         double THRESHOLD = Double.parseDouble(p_args[3]);
-        int MAX_ROUNDS = 30;
+        int MAX_ROUNDS = Integer.parseInt(p_args[4]);
 
-        if(p_args.length == 5){
-            MAX_ROUNDS = Integer.parseInt(p_args[4]);
-        }
 
 
         BootService bootService = getService(BootService.class);
@@ -67,68 +66,44 @@ public class MainPR extends AbstractApplication {
 
 
 
-        IntegerChunk cntChunk = new IntegerChunk();
-        chunkService.create().create(computeService.getStatusMaster((short) 0 ).getMasterNodeId(),cntChunk);
-        chunkService.put().put(cntChunk);
+        IntegerChunk rdyCnt = new IntegerChunk();
+        chunkService.create().create(bootService.getNodeID(),rdyCnt);
+        chunkService.put().put(rdyCnt);
+
         Stopwatch stopwatch = new Stopwatch();
         System.out.println("len: "  + p_args.length);
-        /*if (p_args.length > 2) {
-            File input_file = new File(filename);
-            File dir = new File(input_file.getParentFile().getAbsolutePath());
-            System.out.println(dir.getName());
-            File[] files = dir.listFiles((d, name) -> name.contains(input_file.getName() + "_split"));
-            StringBuilder builder = new StringBuilder();
-            for (File file : files){
-                    builder.append(file.getAbsolutePath() + "@");
-            }
-            InputPrDistTask inputPrDistTask = new InputPrDistTask(builder.toString(),N);
-            TaskScript inputPrDistTaskScript = new TaskScript(inputPrDistTask);
-            TaskScriptState inputPrDistTaskScriptState = computeService.submitTaskScript(inputPrDistTaskScript,(short) 0);
+
+
+        if(p_args.length == 5) {
+            String filename = p_args[4];
+            ReadLumpInEdgeListTask readLumpInEdgeListTask = new ReadLumpInEdgeListTask(filename, N);
+            TaskScript inputTaskScript = new TaskScript(readLumpInEdgeListTask);
+            TaskScriptState inputState = computeService.submitTaskScript(inputTaskScript, (short) 0);
             stopwatch.start();
-            while(!inputPrDistTaskScriptState.hasTaskCompleted()){
+            while (!inputState.hasTaskCompleted()) {
                 try {
                     Thread.sleep(100);
                 } catch (final InterruptedException ignore) {
 
                 }
             }
-
+            stopwatch.stop();
         } else {
-                        //System.out.println("nid: " + bootService.getNodeID() + " VERTEX COUNT: " + N);
+            CreateSyntheticGraph createSyntheticGraph = new CreateSyntheticGraph(N,Double.parseDouble(p_args[4]),
+                    Integer.parseInt(p_args[5]), rdyCnt.getID(), Boolean.parseBoolean(p_args[6]));
+            TaskScript inputTaskScript = new TaskScript(createSyntheticGraph);
+            TaskScriptState inputState = computeService.submitTaskScript(inputTaskScript, (short) 0);
             stopwatch.start();
-            //InputJob inputJob = new InputJob(p_args[0],cntChunk.getID());
-            InputPrJob inputPrJob = new InputPrJob(filename,N);
-            jobService.pushJobRemote(inputPrJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
-            jobService.waitForAllJobsToFinish();
-        }*/
+            while (!inputState.hasTaskCompleted()) {
+                try {
+                    Thread.sleep(100);
+                } catch (final InterruptedException ignore) {
 
-        /*ReadPartitionInEdgeListTask readPartitionInEdgeListTask = new ReadPartitionInEdgeListTask(filename,N);
-        TaskScript inputTaskScript = new TaskScript(readPartitionInEdgeListTask);
-        TaskScriptState inputState = computeService.submitTaskScript(inputTaskScript,(short) 0 );
-        stopwatch.start();
-        while(!inputState.hasTaskCompleted()){
-            try {
-                Thread.sleep(100);
-            } catch (final InterruptedException ignore) {
-
+                }
             }
+            stopwatch.stop();
         }
 
-        stopwatch.stop();*/
-
-        ReadLumpInEdgeListTask readLumpInEdgeListTask = new ReadLumpInEdgeListTask(filename,N);
-        TaskScript inputTaskScript = new TaskScript(readLumpInEdgeListTask);
-        TaskScriptState inputState = computeService.submitTaskScript(inputTaskScript,(short) 0 );
-        stopwatch.start();
-        while(!inputState.hasTaskCompleted()){
-            try {
-                Thread.sleep(100);
-            } catch (final InterruptedException ignore) {
-
-            }
-        }
-        stopwatch.stop();
-        //System.out.println("Timer InputJob: " + stopwatch.getTimeStr());
         long InputTime = stopwatch.getTime();
         VoteChunk voteChunk = new VoteChunk(N);
         chunkService.create().create(bootService.getNodeID(),voteChunk);

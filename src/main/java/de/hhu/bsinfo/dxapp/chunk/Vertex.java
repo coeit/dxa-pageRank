@@ -19,9 +19,11 @@ public class Vertex extends AbstractChunk {
         super();
     }
 
-    public Vertex(int p_name) {
+    public Vertex(int p_name, int N) {
         super();
         m_name = p_name;
+        m_pageRank[0] = 1/(double) N;
+        m_pageRank[1] = 1/(double) N;
     }
 
     public Vertex(final long p_id){
@@ -31,17 +33,15 @@ public class Vertex extends AbstractChunk {
     public void invokeVertexPR(int N) {
         m_pageRank[0] = 1/(double) N;
         m_pageRank[1] = 1/(double) N;
-        if(m_outDeg == 0){
-            m_outDeg = N - 1;
-        }
     }
 
-    public void increment_outDeg(int p_num, int N){
-        if(m_outDeg  == N - 1){
-            m_outDeg = 0;
-        }
+    public void increment_outDeg(int p_num){
         m_outDeg += p_num;
 
+    }
+
+    public void increment_outDeg(){
+        m_outDeg++;
     }
 
     public void setOutDeg(int p_outDeg){

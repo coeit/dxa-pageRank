@@ -1,5 +1,6 @@
 package de.hhu.bsinfo.dxapp.tasks;
 
+import java.util.Iterator;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.stream.Stream;
 
@@ -50,7 +51,7 @@ public class RunLumpPrRoundTask implements Task {
 
         short mySlaveID = taskContext.getCtxData().getSlaveId();
         long[] localChunks;
-        if(!m_calcDanglingPR){
+        /*if(!m_calcDanglingPR){
             LocalNonDanglingChunks localNonDanglingChunks = new LocalNonDanglingChunks(nameService.getChunkID(mySlaveID + "nd",333));
             chunkService.get().get(localNonDanglingChunks);
             localChunks = localNonDanglingChunks.getLocalNonDanglingChunks();
@@ -68,6 +69,14 @@ public class RunLumpPrRoundTask implements Task {
 
         for (int i = 0; i < localVertices.length; i++) {
             localVertices[i] = new Vertex(localChunks[i]);
+        }*/
+
+        Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
+        localchunks.next();
+
+        Vertex[] localVertices = new Vertex[(int)chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getCurrentLIDCounter()];
+        for (int i = 0; i < localVertices.length; i++) {
+            localVertices[i] = new Vertex(localchunks.next());
         }
 
         chunkService.get().get(localVertices);
@@ -76,7 +85,20 @@ public class RunLumpPrRoundTask implements Task {
         chunkService.get().get(voteChunk);
         double danglingPR = voteChunk.getPRsum(m_round);
 
-        Stream.of(localVertices).parallel().forEach(localVertex -> pageRankIter(localVertex,danglingPR,chunkService));
+        if(!m_calcDanglingPR){
+            Stream.of(localVertices).parallel().forEach(localVertex -> {
+                if(localVertex.getOutDeg() != 0){
+                    pageRankIter(localVertex,danglingPR,chunkService);
+                }
+            });
+        } else {
+            Stream.of(localVertices).parallel().forEach(localVertex -> {
+                if(localVertex.getOutDeg() == 0){
+                    pageRankIter(localVertex,danglingPR,chunkService);
+                }
+            });
+        }
+
 
         //System.out.println("danglingPR:" + danglingPR);
         //System.out.println("sum: " + m_PRSum.sum());
