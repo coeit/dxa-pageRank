@@ -59,15 +59,22 @@ public class CreateSyntheticGraph implements Task {
         }
 
         for (int i = 0; i < localVertices.length; i++) {
+            if (localVertices[i] == null){
+                localVertices[i] = new Vertex();
+            }
             HashSet<Long> randIDs = new HashSet<>();
             int j = 0;
             int indeg = getExpRandNumber(m_isTest,random);
             while(j < indeg){
                 long randCID = randCID(i + 1,m_locality,localVertices.length,random,mySlaveID,slaveIDs);
+                int randLID = (int)ChunkID.getLocalID(randCID) - 1;
                 if(randIDs.add(randCID)){
+                    if (localVertices[randLID] == null){
+                        localVertices[randLID] = new Vertex();
+                    }
                     localVertices[i].addInEdge(randCID);
                     if(ChunkID.getCreatorID(randCID) == taskContext.getCtxData().getOwnNodeId()){
-                        localVertices[(int)ChunkID.getLocalID(randCID) - 1].increment_outDeg();
+                        localVertices[randLID].increment_outDeg();
                     } else {
                         remoteInEdges.put(randCID, remoteInEdges.get(randCID) + 1);
                     }
