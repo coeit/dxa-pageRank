@@ -131,7 +131,7 @@ public class MainPR extends AbstractApplication {
             chunkService.create().create(computeService.getStatusMaster().getConnectedSlaves().get(k),chunk);
             chunkService.put().put(chunk);
             voteChunks[k] = chunk;
-            System.out.println(voteChunks[k].getID());
+            System.out.println(voteChunks[k].getID() + " " + chunk.getPRsum());
             k++;
         }
         //System.out.println("nid: " + bootService.getNodeID() + " VERTEX COUNT: " + N);
