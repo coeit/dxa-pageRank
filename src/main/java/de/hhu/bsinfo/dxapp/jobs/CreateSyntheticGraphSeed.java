@@ -166,6 +166,7 @@ public class CreateSyntheticGraphSeed extends AbstractJob {
         }
         int start = cuts[p_mySlaveID];
         int end = cuts[p_mySlaveID + 1];
+        System.out.println(start + " " + end);
         int otherNodeIdx;
         boolean otherNode = false;
         long gid;
@@ -180,8 +181,8 @@ public class CreateSyntheticGraphSeed extends AbstractJob {
             end = cuts[otherNodeIdx + 1];
             gid = (long) (p_random.nextDouble() * (end - start) + start);
         }
-        while (localIndex(gid,p_slaveIDs,p_slaveLocalCnts) != p_Id && !otherNode){
-            System.out.print("a");
+        System.out.println(start + " " +end);
+        while (localIndex(gid,p_slaveIDs,p_slaveLocalCnts) == p_Id && !otherNode){
             gid = (long) (p_random.nextDouble() * (end - start) + start);
         }
         return  gid;
