@@ -107,8 +107,23 @@ public class CreateSyntheticGraph implements Task {
             }
             chunkService.get().get(rdyCnt);
         }
-        int cnt = 0;
-        for (long remoteInEdge : remoteInEdges.keySet()){
+        int i = 0;
+        Vertex[] remoteVertices = new Vertex[remoteInEdges.keySet().size()];
+        for (long remoteInEdge : remoteInEdges.keySet()) {
+            remoteVertices[i] = new Vertex(remoteInEdge);
+            i++;
+        }
+
+        chunkService.get().get(remoteVertices);
+        System.out.println("OutDegree ChunkGet Done...");
+        i = 0;
+        for (long remoteInEdge : remoteInEdges.keySet()) {
+            remoteVertices[i].increment_outDeg(remoteInEdges.get(remoteInEdge));
+            i++;
+        }
+        chunkService.put().put(remoteVertices);
+
+        /*for (long remoteInEdge : remoteInEdges.keySet()){
             Vertex remoteVertex = new Vertex(remoteInEdge);
             chunkService.get().get(remoteVertex);
             remoteVertex.increment_outDeg(remoteInEdges.get(remoteInEdge));
@@ -117,7 +132,7 @@ public class CreateSyntheticGraph implements Task {
             if(cnt % 1000000 == 0){
                 System.out.print(".");
             }
-        }
+        }*/
         System.out.println("\nOutDegrees added...");
         IntegerChunk edgeCnt = new IntegerChunk(m_edgeCntCID);
         chunkService.get().get(edgeCnt, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
