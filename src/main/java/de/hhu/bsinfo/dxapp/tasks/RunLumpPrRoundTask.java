@@ -113,24 +113,24 @@ public class RunLumpPrRoundTask implements Task {
 
     public void pageRankIter(Vertex p_vertex, double p_danglingPR, ChunkService p_chunkService){
         long incidenceList[] = p_vertex.getM_inEdges();
-        //Vertex[] neighbors = new Vertex[incidenceList.length];
+        Vertex[] neighbors = new Vertex[incidenceList.length];
         Vertex neighbor;
         double tmpPR = 0.0;
 
-        for (int i = 0; i < incidenceList.length; i++) {
+        /*for (int i = 0; i < incidenceList.length; i++) {
             neighbor = new Vertex(incidenceList[i]);
             p_chunkService.get().get(neighbor);
             tmpPR += neighbor.getPageRank(m_round)/(double)neighbor.getOutDeg();
-        }
+        }*/
 
-        /*for (int i = 0; i < incidenceList.length; i++) {
+        for (int i = 0; i < incidenceList.length; i++) {
             neighbors[i] = new Vertex(incidenceList[i]);
         }
 
         p_chunkService.get().get(neighbors);
         for(Vertex tmp : neighbors){
             tmpPR += tmp.getPageRank(m_round)/(double)tmp.getOutDeg();
-        }*/
+        }
         p_vertex.calcLumpPageRank(m_vertexCnt, m_damp, tmpPR, p_danglingPR ,Math.abs(m_round - 1));
 
         m_PRSum.add(p_vertex.getPageRank(Math.abs(m_round - 1)));
