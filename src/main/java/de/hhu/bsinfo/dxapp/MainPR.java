@@ -131,7 +131,7 @@ public class MainPR extends AbstractApplication {
             chunkService.create().create(nodeID,chunk);
             chunkService.put().put(chunk);
             voteChunks[k] = chunk;
-            System.out.println(voteChunks[k].getID() + " " + chunk.getPRsum());
+            //System.out.println(voteChunks[k].getID() + " " + chunk.getPRsum());
             k++;
         }
         //System.out.println("nid: " + bootService.getNodeID() + " VERTEX COUNT: " + N);
@@ -177,7 +177,7 @@ public class MainPR extends AbstractApplication {
                 voteChunk.setPRsum(danglingPR);
             }
             chunkService.put().put(voteChunks);
-            System.out.println(danglingPR);
+            //System.out.println(danglingPR);
             /*chunkService.get().get(voteChunk,ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
             PRerr = voteChunk.getPRerr();
             danglingPR = 1 - voteChunk.getPRsum(Math.abs(i % 2 - 1));
