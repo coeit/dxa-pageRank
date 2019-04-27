@@ -128,7 +128,7 @@ public class MainPR extends AbstractApplication {
         int k = 0;
         for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
             VoteChunk chunk = new VoteChunk(N);
-            chunkService.create().create(bootService.getNodeID(),chunk);
+            chunkService.create().create(computeService.getStatusMaster().getConnectedSlaves().get(k),chunk);
             chunkService.put().put(chunk);
             voteChunks[k] = chunk;
             k++;
