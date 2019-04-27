@@ -77,6 +77,9 @@ public class CreateSyntheticGraph implements Task {
             HashSet<Long> randIDs = new HashSet<>();
             int j = 0;
             int indeg = getExpRandNumber(random);
+            if(indeg >= m_vertexCnt){
+                indeg = m_vertexCnt - 1;
+            }
             while(j < indeg){
                 long randCID = randCID(i + 1,m_locality,localVertices.length,random,mySlaveID,slaveIDs);
                 int randLID = (int)ChunkID.getLocalID(randCID) - 1;

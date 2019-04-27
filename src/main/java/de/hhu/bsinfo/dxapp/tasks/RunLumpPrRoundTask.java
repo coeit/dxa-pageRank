@@ -51,6 +51,7 @@ public class RunLumpPrRoundTask implements Task {
 
         short mySlaveID = taskContext.getCtxData().getSlaveId();
         long[] localChunks;
+        short mySlaveNodeID = taskContext.getCtxData().getOwnNodeId();
         /*if(!m_calcDanglingPR){
             LocalNonDanglingChunks localNonDanglingChunks = new LocalNonDanglingChunks(nameService.getChunkID(mySlaveID + "nd",333));
             chunkService.get().get(localNonDanglingChunks);
@@ -71,12 +72,12 @@ public class RunLumpPrRoundTask implements Task {
             localVertices[i] = new Vertex(localChunks[i]);
         }*/
 
-        Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
-        localchunks.next();
+        /*Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
+        localchunks.next();*/
 
         Vertex[] localVertices = new Vertex[(int)chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getCurrentLIDCounter()];
         for (int i = 0; i < localVertices.length; i++) {
-            localVertices[i] = new Vertex(localchunks.next());
+            localVertices[i] = new Vertex(ChunkID.getChunkID(mySlaveNodeID,(short) i + 1));
         }
 
         chunkService.get().get(localVertices);
