@@ -68,9 +68,13 @@ public class PRInfoTask implements Task {
 
         short mySlaveNodeID = p_ctx.getCtxData().getOwnNodeId();
 
+        Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
+        localchunks.next();
+
         Vertex[] localVertices = new Vertex[(int)chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getCurrentLIDCounter() - 1];
         for (int i = 0; i < localVertices.length; i++) {
-            localVertices[i] = new Vertex(ChunkID.getChunkID(mySlaveNodeID,(short) i + 1));
+            //localVertices[i] = new Vertex(ChunkID.getChunkID(mySlaveNodeID,(short) i + 1));
+            localVertices[i] = new Vertex(localchunks.next());
         }
 
         chunkService.get().get(localVertices);
