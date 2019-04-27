@@ -71,9 +71,11 @@ public class CreateSyntheticGraphSeed extends AbstractJob {
                 if(indeg >= m_vertexCnt){
                     indeg = m_vertexCnt - 1;
                 }
+                System.out.println("--"+indeg);
 
                 while(k < indeg){
                     long randCID = randCID(j + 1, m_locality, random, i, slaveIDs, slaveLocalVertexCnts);
+                    System.out.println("++"+randCID);
                     /*short randNID = randNID(m_locality, random, i, slaveIDs);
                     boolean otherID = false;
                     if(getIndex(slaveIDs, randNID) != i){
