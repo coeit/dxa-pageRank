@@ -81,7 +81,7 @@ public class RunLumpPrRoundTask implements Task {
         chunkService.get().get(localVertices);
 
         VoteChunk voteChunk = new VoteChunk(ChunkID.getChunkID(mySlaveNodeID,localVertices.length + 2));
-        System.out.println(ChunkID.getChunkID(mySlaveNodeID,localVertices.length + 2));
+        System.out.println(ChunkID.getChunkID(mySlaveNodeID,localVertices.length + 1));
         chunkService.get().get(voteChunk);
         double danglingPR = voteChunk.getPRsum();
         System.out.println(danglingPR);
