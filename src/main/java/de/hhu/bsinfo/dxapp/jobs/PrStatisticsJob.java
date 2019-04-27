@@ -53,6 +53,7 @@ public class PrStatisticsJob extends AbstractJob {
         MasterSlaveComputeService computeService = getService(MasterSlaveComputeService.class);
         int num_slaves = computeService.getStatusMaster((short) 0).getConnectedSlaves().size();
         String filename = m_outDir + "/" + "statistics.out";
+        System.out.println(filename);
         File outFile = new File(filename);
         try {
             outFile.createNewFile();
