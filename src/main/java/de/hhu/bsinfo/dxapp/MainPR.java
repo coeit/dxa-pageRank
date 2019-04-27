@@ -79,6 +79,8 @@ public class MainPR extends AbstractApplication {
         System.out.println("len: "  + p_args.length);
 
         String filename = "SYNTHETIC";
+        double locality = 0.0;
+        int meanInDeg = 0;
         if(p_args.length == 6) {
             filename = p_args[5];
             ReadLumpInEdgeListTask readLumpInEdgeListTask = new ReadLumpInEdgeListTask(filename, N, edgeCnt.getID());
@@ -96,10 +98,12 @@ public class MainPR extends AbstractApplication {
         } else {
             isSynthetic = true;
             CreateSyntheticGraph createSyntheticGraph;
+            locality = Double.parseDouble(p_args[5]);
+            meanInDeg = Integer.parseInt(p_args[6]);
             if(p_args.length == 8){
-                createSyntheticGraph = new CreateSyntheticGraph(N,Double.parseDouble(p_args[5]),Integer.parseInt(p_args[6]), rdyCnt.getID(), edgeCnt.getID(), Integer.parseInt(p_args[7]));
+                createSyntheticGraph = new CreateSyntheticGraph(N, locality, meanInDeg, rdyCnt.getID(), edgeCnt.getID(), Integer.parseInt(p_args[7]));
             } else {
-                createSyntheticGraph = new CreateSyntheticGraph(N,Double.parseDouble(p_args[5]),Integer.parseInt(p_args[6]), rdyCnt.getID(), edgeCnt.getID(), 0);
+                createSyntheticGraph = new CreateSyntheticGraph(N,locality, meanInDeg, rdyCnt.getID(), edgeCnt.getID(), 0);
             }
 
             TaskScript inputTaskScript = new TaskScript(createSyntheticGraph);
@@ -270,7 +274,7 @@ public class MainPR extends AbstractApplication {
 
         chunkService.get().get(edgeCnt);
         //System.out.println("EdgeCnt:" + edgeCnt.get_value());
-        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,filename,N,edgeCnt.get_value(),DAMPING_FACTOR,THRESHOLD,InputTime,iterationTimesArr,memUsage,roundPRerrArr,Double.parseDouble(p_args[5]),Integer.parseInt(p_args[6]));
+        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,filename,N,edgeCnt.get_value(),DAMPING_FACTOR,THRESHOLD,InputTime,iterationTimesArr,memUsage,roundPRerrArr,locality,meanInDeg);
         jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();
 
