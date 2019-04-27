@@ -67,9 +67,9 @@ public class MainPR extends AbstractApplication {
 
 
 
-        IntegerChunk rdyCnt = new IntegerChunk();
+        /*IntegerChunk rdyCnt = new IntegerChunk();
         chunkService.create().create(bootService.getNodeID(),rdyCnt);
-        chunkService.put().put(rdyCnt);
+        chunkService.put().put(rdyCnt);*/
 
         IntegerChunk edgeCnt = new IntegerChunk();
         chunkService.create().create(bootService.getNodeID(),edgeCnt);
@@ -106,7 +106,7 @@ public class MainPR extends AbstractApplication {
             } else {
                 createSyntheticGraph = new CreateSyntheticGraphSeed(N,locality, meanInDeg, edgeCnt.getID(), 0);
             }
-            
+            stopwatch.start();
             jobService.pushJobRemote(createSyntheticGraph, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
             jobService.waitForAllJobsToFinish();
             /*if(p_args.length == 8){
