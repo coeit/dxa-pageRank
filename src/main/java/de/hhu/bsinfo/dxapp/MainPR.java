@@ -266,9 +266,12 @@ public class MainPR extends AbstractApplication {
         ArrayList<Short> slaves = computeService.getStatusMaster((short)0).getConnectedSlaves();
         double memUsage = 0.0;
         for (short slave : slaves){
-           memUsage += chunkService.status().getStatus(slave).getHeapStatus().getAllocatedPayload().getMBDouble();
+            memUsage += chunkService.status().getStatus(slave).getHeapStatus().getUsedSize().getMBDouble();
         }
 
+        chunkService.get().get(rdyCnt);
+        int edgeCnt = rdyCnt.get_value() - slaves.size();
+        System.out.println("EdgeCnt:" + edgeCnt);
         PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,DAMPING_FACTOR,THRESHOLD,InputTime,iterationTimesArr,memUsage,roundPRerrArr);
         jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();

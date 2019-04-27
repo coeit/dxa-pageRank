@@ -35,6 +35,10 @@ public class IntegerChunk extends AbstractChunk {
         m_value++;
     }
 
+    public void increment(int p_val) {
+        m_value += p_val;
+    }
+
     @Override
     public void exportObject(Exporter p_exporter) {
         p_exporter.writeInt(m_value);

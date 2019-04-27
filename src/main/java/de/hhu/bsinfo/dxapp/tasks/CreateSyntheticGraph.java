@@ -58,6 +58,8 @@ public class CreateSyntheticGraph implements Task {
             random = new Random();
         }
 
+        int edgeCnt = 0;
+
         for (int i = 0; i < localVertices.length; i++) {
             if (localVertices[i] == null){
                 localVertices[i] = new Vertex();
@@ -80,6 +82,7 @@ public class CreateSyntheticGraph implements Task {
                         remoteInEdges.put(randCID, remoteInEdges.get(randCID) + 1);
                     }
                     j++;
+                    edgeCnt++;
                 }
             }
             localVertices[i].invokeVertexPR(m_vertexCnt);
@@ -108,6 +111,10 @@ public class CreateSyntheticGraph implements Task {
             remoteVertex.increment_outDeg(remoteInEdges.get(remoteInEdge));
             chunkService.put().put(remoteVertex);
         }
+
+        chunkService.get().get(rdyCnt, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
+        rdyCnt.increment(edgeCnt);
+        chunkService.put().put(rdyCnt, ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
 
 
 
