@@ -181,6 +181,7 @@ public class CreateSyntheticGraphSeed extends AbstractJob {
             gid = (long) (p_random.nextDouble() * (end - start) + start);
         }
         while (localIndex(gid,p_slaveIDs,p_slaveLocalCnts) != p_Id && !otherNode){
+            System.out.print("a");
             gid = (long) (p_random.nextDouble() * (end - start) + start);
         }
         return  gid;
