@@ -9,6 +9,8 @@ import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxram.app.AbstractApplication;
 //import de.hhu.bsinfo.dxram.app.Application;
+import de.hhu.bsinfo.dxram.app.ApplicationCallbackHandler;
+import de.hhu.bsinfo.dxram.app.ApplicationService;
 import de.hhu.bsinfo.dxram.boot.BootService;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
 import de.hhu.bsinfo.dxapp.chunk.IntegerChunk;
@@ -42,11 +44,9 @@ public class MainPR extends AbstractApplication {
     @Override
     public void main(final String[] p_args) {
 
-
-        if (p_args.length < 5){
+        if (p_args.length < 6){
             System.out.println("Not enough Arguments ... shutting down");
-            System.out.println("Arguments: graphfile vertexcnt dampingfactor errorthreshold (maxrounds:default=30)");
-            System.out.println("Arguments: vertexcnt dampingfactor errorthreshold maxrounds (graphfile) / (locality MeanIndegree (randomSeed))");
+            System.out.println("Arguments: int vertexcnt double dampingfactor double errorthreshold int maxrounds boolean printPageRanks (String graphfile) / (double locality int MeanIndegree (int randomSeed))");
 
             signalShutdown();
         }
@@ -55,6 +55,7 @@ public class MainPR extends AbstractApplication {
         double DAMPING_FACTOR = Double.parseDouble(p_args[1]);
         double THRESHOLD = Double.parseDouble(p_args[2]);
         int MAX_ROUNDS = Integer.parseInt(p_args[3]);
+        boolean printPR = Boolean.parseBoolean(p_args[4]);
         boolean isSynthetic = false;
 
 
@@ -77,10 +78,10 @@ public class MainPR extends AbstractApplication {
         Stopwatch stopwatch = new Stopwatch();
         System.out.println("len: "  + p_args.length);
 
-
-        if(p_args.length == 5) {
-            String filename = p_args[4];
-            ReadLumpInEdgeListTask readLumpInEdgeListTask = new ReadLumpInEdgeListTask(filename, N);
+        String filename = "SYNTHETIC";
+        if(p_args.length == 6) {
+            filename = p_args[5];
+            ReadLumpInEdgeListTask readLumpInEdgeListTask = new ReadLumpInEdgeListTask(filename, N, edgeCnt.getID());
             TaskScript inputTaskScript = new TaskScript(readLumpInEdgeListTask);
             TaskScriptState inputState = computeService.submitTaskScript(inputTaskScript, (short) 0);
             stopwatch.start();
@@ -95,10 +96,10 @@ public class MainPR extends AbstractApplication {
         } else {
             isSynthetic = true;
             CreateSyntheticGraph createSyntheticGraph;
-            if(p_args.length == 7){
-                createSyntheticGraph = new CreateSyntheticGraph(N,Double.parseDouble(p_args[4]),Integer.parseInt(p_args[5]), rdyCnt.getID(), edgeCnt.getID(), Integer.parseInt(p_args[6]));
+            if(p_args.length == 8){
+                createSyntheticGraph = new CreateSyntheticGraph(N,Double.parseDouble(p_args[5]),Integer.parseInt(p_args[6]), rdyCnt.getID(), edgeCnt.getID(), Integer.parseInt(p_args[7]));
             } else {
-                createSyntheticGraph = new CreateSyntheticGraph(N,Double.parseDouble(p_args[4]),Integer.parseInt(p_args[5]), rdyCnt.getID(), edgeCnt.getID(), 0);
+                createSyntheticGraph = new CreateSyntheticGraph(N,Double.parseDouble(p_args[5]),Integer.parseInt(p_args[6]), rdyCnt.getID(), edgeCnt.getID(), 0);
             }
 
             TaskScript inputTaskScript = new TaskScript(createSyntheticGraph);
@@ -124,19 +125,7 @@ public class MainPR extends AbstractApplication {
             nameService.register(chunk,NodeID.toHexString(nodeID).substring(2,6));
             chunkService.put().put(chunk);
         }*/
-        System.out.println("nid: " + bootService.getNodeID() + " VERTEX COUNT: " + N);
-
-        TaskListener listener = new TaskListener() {
-            @Override
-            public void taskBeforeExecution(final TaskScriptState p_taskScriptState) {
-                System.out.println("ComputeTask: Starting execution");
-            }
-
-            @Override
-            public void taskCompleted(final TaskScriptState p_taskScriptState) {
-                System.out.println("ComputeTask: Finished execution");
-            }
-        };
+        //System.out.println("nid: " + bootService.getNodeID() + " VERTEX COUNT: " + N);
 
         RunLumpPrRoundTask Run1 = new RunLumpPrRoundTask(N,DAMPING_FACTOR,voteChunk.getID(),0,false);
         RunLumpPrRoundTask Run2 = new RunLumpPrRoundTask(N,DAMPING_FACTOR,voteChunk.getID(),1,false);
@@ -157,9 +146,9 @@ public class MainPR extends AbstractApplication {
         for (int i = 0; i < MAX_ROUNDS; i++) {
             stopwatch.start();
             if(i % 2 == 0){
-                state = computeService.submitTaskScript(taskScriptRun1, (short) 0, listener);
+                state = computeService.submitTaskScript(taskScriptRun1, (short) 0);
             } else {
-                state = computeService.submitTaskScript(taskScriptRun2, (short) 0, listener);
+                state = computeService.submitTaskScript(taskScriptRun2, (short) 0);
             }
             while (!state.hasTaskCompleted()) {
                 try {
@@ -175,12 +164,17 @@ public class MainPR extends AbstractApplication {
             voteChunk.resetSum(i % 2, danglingPR);
             voteChunk.resetErr();
             chunkService.put().put(voteChunk,ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
-            System.out.println("Sum: " + danglingPR);
-            roundPRerr.add(PRerr);
-            //roundPRsum.add(PRsum);
-            NumRounds++;
             stopwatch.stop();
+
+            roundPRerr.add(PRerr);
             iterationTimes.add(stopwatch.getTime());
+
+            NumRounds++;
+
+            System.out.println("ROUND\t" + NumRounds);
+            System.out.println("TIME\t" + stopwatch.getTime());
+            System.out.println("ERROR\t" + PRerr);
+
             if (PRerr <= THRESHOLD) {
                 break;
             }
@@ -189,7 +183,7 @@ public class MainPR extends AbstractApplication {
 
         RunLumpPrRoundTask calcDanglingPR = new RunLumpPrRoundTask(N,DAMPING_FACTOR,voteChunk.getID(),NumRounds % 2,true);
         TaskScript taskScriptCalcDanglingPR = new TaskScript(calcDanglingPR);
-        state = computeService.submitTaskScript(taskScriptCalcDanglingPR,(short) 0, listener);
+        state = computeService.submitTaskScript(taskScriptCalcDanglingPR,(short) 0);
         while (!state.hasTaskCompleted()) {
             try {
                 Thread.sleep(100);
@@ -250,17 +244,18 @@ public class MainPR extends AbstractApplication {
         //System.out.println("Timer Computation: " + stopwatch.getTimeStr());
         String outDir = createOutputDirs();
 
-        PRInfoTask PRInfo = new PRInfoTask(outDir,NumRounds % 2, isSynthetic);
-	    TaskScript PRInfoTaskScript = new TaskScript(PRInfo);
-	    TaskScriptState PRInfoTaskScriptState = computeService.submitTaskScript(PRInfoTaskScript, (short) 0, listener);
-        while (!PRInfoTaskScriptState.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0) {
-            try {
-                Thread.sleep(100);
-            } catch (final InterruptedException ignore) {
+        if(printPR){
+            PRInfoTask PRInfo = new PRInfoTask(outDir,NumRounds % 2, isSynthetic);
+            TaskScript PRInfoTaskScript = new TaskScript(PRInfo);
+            TaskScriptState PRInfoTaskScriptState = computeService.submitTaskScript(PRInfoTaskScript, (short) 0);
+            while (!PRInfoTaskScriptState.hasTaskCompleted() && computeService.getStatusMaster((short) 0).getNumTasksQueued() != 0) {
+                try {
+                    Thread.sleep(100);
+                } catch (final InterruptedException ignore) {
 
+                }
             }
         }
-
 
 
         //double[] roundPRsumArr = roundPRsum.stream().mapToDouble(i -> i).toArray();
@@ -274,8 +269,8 @@ public class MainPR extends AbstractApplication {
         }
 
         chunkService.get().get(edgeCnt);
-        System.out.println("EdgeCnt:" + edgeCnt.get_value());
-        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,DAMPING_FACTOR,THRESHOLD,InputTime,iterationTimesArr,memUsage,roundPRerrArr);
+        //System.out.println("EdgeCnt:" + edgeCnt.get_value());
+        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,filename,N,edgeCnt.get_value(),DAMPING_FACTOR,THRESHOLD,InputTime,iterationTimesArr,memUsage,roundPRerrArr,Double.parseDouble(p_args[5]),Integer.parseInt(p_args[6]));
         jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();
 
