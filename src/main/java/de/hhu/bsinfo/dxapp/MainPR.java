@@ -97,10 +97,19 @@ public class MainPR extends AbstractApplication {
             stopwatch.stop();
         } else {
             isSynthetic = true;
-            CreateSyntheticGraph createSyntheticGraph;
+            CreateSyntheticGraphSeed createSyntheticGraph;
             locality = Double.parseDouble(p_args[5]);
             meanInDeg = Integer.parseInt(p_args[6]);
+
             if(p_args.length == 8){
+                createSyntheticGraph = new CreateSyntheticGraphSeed(N, locality, meanInDeg, edgeCnt.getID(), Integer.parseInt(p_args[7]));
+            } else {
+                createSyntheticGraph = new CreateSyntheticGraphSeed(N,locality, meanInDeg, edgeCnt.getID(), 0);
+            }
+            
+            jobService.pushJobRemote(createSyntheticGraph, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
+            jobService.waitForAllJobsToFinish();
+            /*if(p_args.length == 8){
                 createSyntheticGraph = new CreateSyntheticGraph(N, locality, meanInDeg, rdyCnt.getID(), edgeCnt.getID(), Integer.parseInt(p_args[7]));
             } else {
                 createSyntheticGraph = new CreateSyntheticGraph(N,locality, meanInDeg, rdyCnt.getID(), edgeCnt.getID(), 0);
@@ -115,7 +124,7 @@ public class MainPR extends AbstractApplication {
                 } catch (final InterruptedException ignore) {
 
                 }
-            }
+            }*/
             stopwatch.stop();
         }
 

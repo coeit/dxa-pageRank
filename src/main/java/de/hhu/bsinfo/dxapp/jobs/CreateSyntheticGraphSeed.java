@@ -1,0 +1,215 @@
+package de.hhu.bsinfo.dxapp.jobs;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Random;
+
+import de.hhu.bsinfo.dxapp.chunk.IntegerChunk;
+import de.hhu.bsinfo.dxapp.chunk.Vertex;
+import de.hhu.bsinfo.dxmem.data.ChunkID;
+import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
+import de.hhu.bsinfo.dxram.chunk.ChunkLocalService;
+import de.hhu.bsinfo.dxram.chunk.ChunkService;
+import de.hhu.bsinfo.dxram.job.AbstractJob;
+import de.hhu.bsinfo.dxram.ms.MasterSlaveComputeService;
+import de.hhu.bsinfo.dxram.ms.Signal;
+import de.hhu.bsinfo.dxram.ms.Task;
+import de.hhu.bsinfo.dxram.ms.TaskContext;
+import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
+import de.hhu.bsinfo.dxutils.serialization.Exporter;
+import de.hhu.bsinfo.dxutils.serialization.Importer;
+import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
+
+public class CreateSyntheticGraphSeed extends AbstractJob {
+
+    private int m_vertexCnt;
+    private double m_locality;
+    private int m_inDegMean;
+    private int m_randomSeed;
+    private long m_edgeCntCID;
+
+    public CreateSyntheticGraphSeed() {}
+
+
+    public CreateSyntheticGraphSeed(int p_vertexCnt, double p_locality, int p_inDegMean, long p_edgeCntCID ,int p_randomSeed){
+        m_vertexCnt = p_vertexCnt;
+        m_inDegMean = p_inDegMean;
+        m_locality = p_locality;
+        m_edgeCntCID = p_edgeCntCID;
+        m_randomSeed = p_randomSeed;
+    }
+
+    @Override
+    public void execute() {
+        ChunkService chunkService = getService(ChunkService.class);
+        MasterSlaveComputeService computeService = getService(MasterSlaveComputeService.class);
+
+        ArrayList<Short> slaveIDs = computeService.getStatusMaster((short) 0).getConnectedSlaves();
+
+        int[] slaveLocalVertexCnts = slaveLocalVertexCnts(m_vertexCnt,slaveIDs.size());
+
+        Vertex[] vertices = new Vertex[m_vertexCnt];
+
+        Random random;
+        if (m_randomSeed != 0){
+            random = new Random(m_randomSeed);
+        } else {
+            random = new Random();
+        }
+        int cnt = 0;
+        int edges = 0;
+        for (int i = 0; i < slaveIDs.size(); i++) {
+            for (int j = 0; j < slaveLocalVertexCnts[i]; j++) {
+                if (vertices[cnt] == null){
+                    vertices[cnt] = new Vertex();
+                }
+                HashSet<Long> randCIDs = new HashSet<>();
+                int k = 0;
+                int indeg = getExpRandNumber(random);
+                if(indeg >= m_vertexCnt){
+                    indeg = m_vertexCnt - 1;
+                }
+
+                while(k < indeg){
+                    long randCID = randCID(j + 1, m_locality, random, i, slaveIDs, slaveLocalVertexCnts);
+                    if (randCIDs.add(randCID)){
+                        int globalIndex = globalIndex(randCID,slaveIDs,slaveLocalVertexCnts);
+                        if (vertices[globalIndex] == null){
+                            vertices[globalIndex] = new Vertex();
+                        }
+                        vertices[cnt].addInEdge(randCID);
+                        vertices[globalIndex].increment_outDeg();
+                        k++;
+                        edges++;
+                    }
+                }
+                cnt++;
+            }
+        }
+        cnt = 0;
+        for (int i = 0; i < slaveIDs.size(); i++) {
+            for (int j = 0; j < slaveLocalVertexCnts[i]; j++) {
+                chunkService.create().create(slaveIDs.get(i), vertices[cnt]);
+                chunkService.put().put(vertices[cnt]);
+                cnt++;
+            }
+        }
+
+
+        IntegerChunk edgeCnt = new IntegerChunk(m_edgeCntCID);
+        chunkService.get().get(edgeCnt, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
+        edgeCnt.increment(edges);
+        chunkService.put().put(edgeCnt, ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
+
+
+
+        for (int i = 0; i < vertices.length; i++) {
+            System.out.print(ChunkID.toHexString(vertices[i].getID()) + " " + vertices[i].getOutDeg() + " ++ ");
+
+            for (int j = 0; j < vertices[i].getM_inEdges().length; j++) {
+                System.out.print(ChunkID.toHexString(vertices[i].getM_inEdges()[j]) + " ");
+            }
+            System.out.println();
+        }
+
+
+    }
+
+    private long randCID(int p_Id, double p_locality, Random p_random, int p_mySlaveID ,ArrayList<Short> p_slaveIDs, int[] p_slaveLocalCnts){
+
+        ArrayList<Short> otherSlaveIDs = new ArrayList<>();
+        for (int i = 0; i < p_slaveIDs.size(); i++) {
+            if(i != p_mySlaveID){
+                otherSlaveIDs.add(p_slaveIDs.get(i));
+            }
+        }
+        if(p_slaveIDs.size() == 1){
+            otherSlaveIDs.add(p_slaveIDs.get(p_mySlaveID));
+        }
+
+        short nid;
+        boolean otherID = false;
+        if(p_random.nextDouble() <= p_locality){
+            nid = p_slaveIDs.get(p_mySlaveID);
+        } else {
+            nid = otherSlaveIDs.get(p_random.nextInt(otherSlaveIDs.size()));
+            otherID = true;
+        }
+        int index = getIndex(p_slaveIDs,nid);
+        long lid = p_random.nextInt(p_slaveLocalCnts[index]) + 1;
+
+        while (lid == p_Id && !otherID){
+            lid = p_random.nextInt(p_slaveLocalCnts[index]) + 1;
+        }
+
+        return ChunkID.getChunkID(nid, lid);
+    }
+
+    private int getExpRandNumber(Random p_random){
+        return (int) (Math.log(1 - p_random.nextDouble())/(- Math.pow(m_inDegMean,-1)));
+    }
+
+    private int localVertexCnt(int p_totalVertexCnt, int p_slaveID, int p_numSlaves){
+        int mod = p_totalVertexCnt % p_numSlaves;
+        double div = (double)p_totalVertexCnt/(double)p_numSlaves;
+        if(p_slaveID < mod){
+            return (int) Math.ceil(div);
+        }
+        return (int) Math.floor(div);
+    }
+
+    private int[] slaveLocalVertexCnts(int p_totalVertexCnt, int p_numSlaves){
+        int[] ret = new int[p_numSlaves];
+        for (int i = 0; i < p_numSlaves; i++) {
+            ret[i] = localVertexCnt(p_totalVertexCnt,i,p_numSlaves);
+        }
+        return ret;
+    }
+
+    private int getIndex(ArrayList<Short> p_slaveIDs, short p_nid){
+        for (int i = 0; i < p_slaveIDs.size(); i++) {
+            if(p_slaveIDs.get(i) == p_nid){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private int globalIndex(long p_cid, ArrayList<Short> p_slaveIDs, int[] p_slaveLocalCnts){
+        short nid = ChunkID.getCreatorID(p_cid);
+        long lid = ChunkID.getLocalID(p_cid);
+
+        int index = getIndex(p_slaveIDs, nid);
+        int count = 0;
+        for (int i = 0; i < index; i++) {
+            count += p_slaveLocalCnts[i];
+        }
+        return count + (int) lid - 1;
+    }
+
+    @Override
+    public void exportObject(Exporter exporter) {
+        super.exportObject(exporter);
+        exporter.writeInt(m_vertexCnt);
+        exporter.writeInt(m_inDegMean);
+        exporter.writeDouble(m_locality);
+        exporter.writeLong(m_edgeCntCID);
+        exporter.writeInt(m_randomSeed);
+    }
+
+    @Override
+    public void importObject(Importer importer) {
+        super.importObject(importer);
+        m_vertexCnt = importer.readInt(m_vertexCnt);
+        m_inDegMean = importer.readInt(m_inDegMean);
+        m_locality = importer.readDouble(m_locality);
+        m_edgeCntCID = importer.readLong(m_edgeCntCID);
+        m_randomSeed = importer.readInt(m_randomSeed);
+    }
+
+    @Override
+    public int sizeofObject() {
+        return super.sizeofObject() + Integer.BYTES * 3 + Double.BYTES + Long.BYTES;
+    }
+}
