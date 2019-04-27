@@ -149,11 +149,12 @@ public class MainPR extends AbstractApplication {
 
         int NumRounds = 0;
         double danglingPR;
-        double PRerr = 0.0;
+        double PRerr;
         ArrayList<Long> iterationTimes = new ArrayList<>();
         TaskScriptState state;
         for (int i = 0; i < MAX_ROUNDS; i++) {
             danglingPR = 1;
+            PRerr = 0;
             stopwatch.start();
             if(i % 2 == 0){
                 state = computeService.submitTaskScript(taskScriptRun1, (short) 0);
