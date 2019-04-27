@@ -137,11 +137,12 @@ public class CreateSyntheticGraphSeed extends AbstractJob {
         int slaveIndex = 0;
         for (int i = 0; i < p_slaveLocalCnts.length; i++) {
             count += p_slaveLocalCnts[i];
-            if(p_gid > count){
+            if(p_gid >= count){
                 lid = lid - p_slaveLocalCnts[i];
                 slaveIndex = i;
             }
         }
+        lid += 1;
         short nid = p_slaveIDs.get(slaveIndex);
         return ChunkID.getChunkID(nid,lid);
     }
@@ -265,7 +266,7 @@ public class CreateSyntheticGraphSeed extends AbstractJob {
         for (int i = 0; i < p_slaveLocalCnts.length; i++) {
             count += p_slaveLocalCnts[i];
             if(gid >= count){
-                lid = lid - p_slaveLocalCnts[i] + 1;
+                lid = lid - p_slaveLocalCnts[i];
             }
         }
         return lid;
