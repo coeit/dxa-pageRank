@@ -80,22 +80,22 @@ public class RunLumpPrRoundTask implements Task {
 
         chunkService.get().get(localVertices);
 
-        VoteChunk voteChunk = new VoteChunk(ChunkID.getChunkID(mySlaveNodeID,localVertices.length + 1));
+        /*VoteChunk voteChunk = new VoteChunk(ChunkID.getChunkID(mySlaveNodeID,localVertices.length + 1));
         //System.out.println(ChunkID.getChunkID(mySlaveNodeID,localVertices.length + 1));
         chunkService.get().get(voteChunk);
-        double danglingPR = voteChunk.getPRsum();
+        double danglingPR = voteChunk.getPRsum();*/
         //System.out.println(danglingPR);
 
         if(!m_calcDanglingPR){
             Stream.of(localVertices).parallel().forEach(localVertex -> {
                 if(localVertex.getOutDeg() != 0){
-                    pageRankIter(localVertex,danglingPR,chunkService);
+                    pageRankIter(localVertex,0.1,chunkService);
                 }
             });
         } else {
             Stream.of(localVertices).parallel().forEach(localVertex -> {
                 if(localVertex.getOutDeg() == 0){
-                    pageRankIter(localVertex,danglingPR,chunkService);
+                    pageRankIter(localVertex,0.1,chunkService);
                 }
             });
         }
@@ -104,10 +104,10 @@ public class RunLumpPrRoundTask implements Task {
         //System.out.println("danglingPR:" + danglingPR);
         //System.out.println("sum: " + m_PRSum.sum());
 
-        voteChunk.setPRsum(m_PRSum.sum());
+        /*voteChunk.setPRsum(m_PRSum.sum());
         voteChunk.setPRerr(m_PRErr.sum());
         //System.out.println(m_PRSum + " " + m_PRErr);
-        chunkService.put().put(voteChunk);
+        chunkService.put().put(voteChunk);*/
         return 0;
     }
 
