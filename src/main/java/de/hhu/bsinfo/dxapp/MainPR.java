@@ -70,6 +70,10 @@ public class MainPR extends AbstractApplication {
         chunkService.create().create(bootService.getNodeID(),rdyCnt);
         chunkService.put().put(rdyCnt);
 
+        IntegerChunk edgeCnt = new IntegerChunk();
+        chunkService.create().create(bootService.getNodeID(),edgeCnt);
+        chunkService.put().put(edgeCnt);
+
         Stopwatch stopwatch = new Stopwatch();
         System.out.println("len: "  + p_args.length);
 
@@ -92,9 +96,9 @@ public class MainPR extends AbstractApplication {
             isSynthetic = true;
             CreateSyntheticGraph createSyntheticGraph;
             if(p_args.length == 7){
-                createSyntheticGraph = new CreateSyntheticGraph(N,Double.parseDouble(p_args[4]),Integer.parseInt(p_args[5]), rdyCnt.getID(), Integer.parseInt(p_args[6]));
+                createSyntheticGraph = new CreateSyntheticGraph(N,Double.parseDouble(p_args[4]),Integer.parseInt(p_args[5]), rdyCnt.getID(), edgeCnt.getID(), Integer.parseInt(p_args[6]));
             } else {
-                createSyntheticGraph = new CreateSyntheticGraph(N,Double.parseDouble(p_args[4]),Integer.parseInt(p_args[5]), rdyCnt.getID(), 0);
+                createSyntheticGraph = new CreateSyntheticGraph(N,Double.parseDouble(p_args[4]),Integer.parseInt(p_args[5]), rdyCnt.getID(), edgeCnt.getID(), 0);
             }
 
             TaskScript inputTaskScript = new TaskScript(createSyntheticGraph);
@@ -269,9 +273,8 @@ public class MainPR extends AbstractApplication {
             memUsage += chunkService.status().getStatus(slave).getHeapStatus().getUsedSize().getMBDouble();
         }
 
-        chunkService.get().get(rdyCnt);
-        int edgeCnt = rdyCnt.get_value() - slaves.size();
-        System.out.println("EdgeCnt:" + edgeCnt);
+        chunkService.get().get(edgeCnt);
+        System.out.println("EdgeCnt:" + edgeCnt.get_value());
         PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,N,DAMPING_FACTOR,THRESHOLD,InputTime,iterationTimesArr,memUsage,roundPRerrArr);
         jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();

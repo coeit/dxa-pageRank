@@ -27,16 +27,18 @@ public class CreateSyntheticGraph implements Task {
     private int m_inDegMean;
     private int m_randomSeed;
     private long m_rdyCntCID;
+    private long m_edgeCntCID;
 
     public CreateSyntheticGraph(){
         
     }
     
-    public CreateSyntheticGraph(int p_vertexCnt, double p_locality, int p_inDegMean, long p_rdyCntCID, int p_randomSeed){
+    public CreateSyntheticGraph(int p_vertexCnt, double p_locality, int p_inDegMean, long p_rdyCntCID, long p_edgeCntCID ,int p_randomSeed){
         m_vertexCnt = p_vertexCnt;
         m_inDegMean = p_inDegMean;
         m_locality = p_locality;
         m_rdyCntCID = p_rdyCntCID;
+        m_edgeCntCID = p_edgeCntCID;
         m_randomSeed = p_randomSeed;
     }
     
@@ -58,7 +60,7 @@ public class CreateSyntheticGraph implements Task {
             random = new Random();
         }
 
-        int edgeCnt = 0;
+        int edges = 0;
 
         for (int i = 0; i < localVertices.length; i++) {
             if (localVertices[i] == null){
@@ -82,7 +84,7 @@ public class CreateSyntheticGraph implements Task {
                         remoteInEdges.put(randCID, remoteInEdges.get(randCID) + 1);
                     }
                     j++;
-                    edgeCnt++;
+                    edges++;
                 }
             }
             localVertices[i].invokeVertexPR(m_vertexCnt);
@@ -111,10 +113,10 @@ public class CreateSyntheticGraph implements Task {
             remoteVertex.increment_outDeg(remoteInEdges.get(remoteInEdge));
             chunkService.put().put(remoteVertex);
         }
-
-        chunkService.get().get(rdyCnt, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
-        rdyCnt.increment(edgeCnt);
-        chunkService.put().put(rdyCnt, ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
+        IntegerChunk edgeCnt = new IntegerChunk(m_edgeCntCID);
+        chunkService.get().get(edgeCnt, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
+        rdyCnt.increment(edges);
+        chunkService.put().put(edgeCnt, ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
 
 
 
@@ -182,6 +184,7 @@ public class CreateSyntheticGraph implements Task {
         exporter.writeInt(m_inDegMean);
         exporter.writeDouble(m_locality);
         exporter.writeLong(m_rdyCntCID);
+        exporter.writeLong(m_edgeCntCID);
         exporter.writeInt(m_randomSeed);
     }
 
@@ -191,11 +194,12 @@ public class CreateSyntheticGraph implements Task {
         m_inDegMean = importer.readInt(m_inDegMean);
         m_locality = importer.readDouble(m_locality);
         m_rdyCntCID = importer.readLong(m_rdyCntCID);
+        m_edgeCntCID = importer.readLong(m_edgeCntCID);
         m_randomSeed = importer.readInt(m_randomSeed);
     }
 
     @Override
     public int sizeofObject() {
-        return Integer.BYTES * 3 + Double.BYTES + Long.BYTES;
+        return Integer.BYTES * 3 + Double.BYTES + Long.BYTES * 2;
     }
 }
