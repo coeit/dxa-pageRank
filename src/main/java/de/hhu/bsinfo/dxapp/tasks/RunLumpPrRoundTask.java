@@ -26,7 +26,6 @@ public class RunLumpPrRoundTask implements Task {
     private int m_vertexCnt;
     private double m_damp;
     private int m_round;
-    private long m_voteChunkID;
     private boolean m_calcDanglingPR;
 
     private DoubleAdder m_PRErr = new DoubleAdder();
@@ -34,10 +33,9 @@ public class RunLumpPrRoundTask implements Task {
 
     public RunLumpPrRoundTask(){}
 
-    public RunLumpPrRoundTask(int p_vertexCnt, double p_damp, long p_voteChunkID, int p_round, boolean p_calcDanglingPR){
+    public RunLumpPrRoundTask(int p_vertexCnt, double p_damp, int p_round, boolean p_calcDanglingPR){
         m_vertexCnt = p_vertexCnt;
         m_damp = p_damp;
-        m_voteChunkID = p_voteChunkID;
         m_round = p_round;
         m_calcDanglingPR = p_calcDanglingPR;
     }
@@ -75,16 +73,19 @@ public class RunLumpPrRoundTask implements Task {
         /*Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
         localchunks.next();*/
 
-        Vertex[] localVertices = new Vertex[(int)chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getCurrentLIDCounter()];
+        Vertex[] localVertices = new Vertex[(int)chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getCurrentLIDCounter() - 1];
         for (int i = 0; i < localVertices.length; i++) {
             localVertices[i] = new Vertex(ChunkID.getChunkID(mySlaveNodeID,(short) i + 1));
         }
 
         chunkService.get().get(localVertices);
 
-        VoteChunk voteChunk = new VoteChunk(m_voteChunkID);
+        VoteChunk voteChunk = new VoteChunk(ChunkID.getChunkID(mySlaveNodeID,localVertices.length + 2));
         chunkService.get().get(voteChunk);
-        double danglingPR = voteChunk.getPRsum(m_round);
+        double danglingPR = voteChunk.getPRsum();
+        voteChunk.resetErr();
+        voteChunk.resetSum();
+
 
         if(!m_calcDanglingPR){
             Stream.of(localVertices).parallel().forEach(localVertex -> {
@@ -104,11 +105,9 @@ public class RunLumpPrRoundTask implements Task {
         //System.out.println("danglingPR:" + danglingPR);
         //System.out.println("sum: " + m_PRSum.sum());
 
-        chunkService.get().get(voteChunk, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
-        voteChunk.incPRsum(m_PRSum.sum(), Math.abs(m_round - 1));
+        voteChunk.incPRsum(m_PRSum.sum());
         voteChunk.incPRerr(m_PRErr.sum());
-        chunkService.put().put(voteChunk, ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
-
+        chunkService.put().put(voteChunk);
         return 0;
     }
 
@@ -150,7 +149,6 @@ public class RunLumpPrRoundTask implements Task {
         p_exporter.writeInt(m_vertexCnt);
         p_exporter.writeDouble(m_damp);
         p_exporter.writeInt(m_round);
-        p_exporter.writeLong(m_voteChunkID);
         p_exporter.writeBoolean(m_calcDanglingPR);
     }
 
@@ -159,12 +157,11 @@ public class RunLumpPrRoundTask implements Task {
         m_vertexCnt = p_importer.readInt(m_vertexCnt);
         m_damp = p_importer.readDouble(m_damp);
         m_round = p_importer.readInt(m_round);
-        m_voteChunkID = p_importer.readLong(m_voteChunkID);
         m_calcDanglingPR = p_importer.readBoolean(m_calcDanglingPR);
     }
 
     @Override
     public int sizeofObject() {
-        return Integer.BYTES * 2 + Double.BYTES + Long.BYTES + ObjectSizeUtil.sizeofBoolean();
+        return Integer.BYTES * 2 + Double.BYTES + ObjectSizeUtil.sizeofBoolean();
     }
 }
