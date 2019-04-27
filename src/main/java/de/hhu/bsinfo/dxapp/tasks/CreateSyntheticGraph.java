@@ -89,9 +89,10 @@ public class CreateSyntheticGraph implements Task {
             }
             localVertices[i].invokeVertexPR(m_vertexCnt);
         }
-
         chunkService.create().create(taskContext.getCtxData().getOwnNodeId(),localVertices);
         chunkService.put().put(localVertices);
+
+        System.out.println("Chunk Creation Done...");
 
         IntegerChunk rdyCnt = new IntegerChunk(m_rdyCntCID);
         chunkService.get().get(rdyCnt, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
@@ -106,13 +107,18 @@ public class CreateSyntheticGraph implements Task {
             }
             chunkService.get().get(rdyCnt);
         }
-
+        int cnt = 0;
         for (long remoteInEdge : remoteInEdges.keySet()){
             Vertex remoteVertex = new Vertex(remoteInEdge);
             chunkService.get().get(remoteVertex);
             remoteVertex.increment_outDeg(remoteInEdges.get(remoteInEdge));
             chunkService.put().put(remoteVertex);
+            cnt++;
+            if(cnt % 1000000 == 0){
+                System.out.print(".");
+            }
         }
+        System.out.println("\nOutDegrees added...");
         IntegerChunk edgeCnt = new IntegerChunk(m_edgeCntCID);
         chunkService.get().get(edgeCnt, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
         edgeCnt.increment(edges);
