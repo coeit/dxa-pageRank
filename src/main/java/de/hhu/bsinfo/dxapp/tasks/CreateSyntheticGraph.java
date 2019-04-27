@@ -53,11 +53,19 @@ public class CreateSyntheticGraph implements Task {
         Vertex[] localVertices = new Vertex[localVertexCnt(m_vertexCnt,mySlaveID,slaveIDs.length)];
         HashMap<Long, Integer> remoteInEdges = new HashMap<>();
 
+        int[] outdegs = new int[m_vertexCnt];
+
+
+
         Random random;
         if (m_randomSeed != 0){
             random = new Random(m_randomSeed);
         } else {
             random = new Random();
+        }
+
+        for (int i = 0; i < outdegs.length; i++) {
+            outdegs[i] = getExpRandNumber(random);
         }
 
         int edges = 0;
@@ -107,32 +115,14 @@ public class CreateSyntheticGraph implements Task {
             }
             chunkService.get().get(rdyCnt);
         }
-        int i = 0;
-        Vertex[] remoteVertices = new Vertex[remoteInEdges.keySet().size()];
-        for (long remoteInEdge : remoteInEdges.keySet()) {
-            remoteVertices[i] = new Vertex(remoteInEdge);
-            i++;
-        }
 
-        chunkService.get().get(remoteVertices);
-        System.out.println("OutDegree ChunkGet Done...");
-        i = 0;
-        for (long remoteInEdge : remoteInEdges.keySet()) {
-            remoteVertices[i].increment_outDeg(remoteInEdges.get(remoteInEdge));
-            i++;
-        }
-        chunkService.put().put(remoteVertices);
-
-        /*for (long remoteInEdge : remoteInEdges.keySet()){
+        for (long remoteInEdge : remoteInEdges.keySet()){
             Vertex remoteVertex = new Vertex(remoteInEdge);
             chunkService.get().get(remoteVertex);
             remoteVertex.increment_outDeg(remoteInEdges.get(remoteInEdge));
             chunkService.put().put(remoteVertex);
-            cnt++;
-            if(cnt % 1000000 == 0){
-                System.out.print(".");
-            }
-        }*/
+        }
+
         System.out.println("\nOutDegrees added...");
         IntegerChunk edgeCnt = new IntegerChunk(m_edgeCntCID);
         chunkService.get().get(edgeCnt, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
@@ -141,14 +131,14 @@ public class CreateSyntheticGraph implements Task {
 
 
 
-        /*for (int i = 0; i < localVertices.length; i++) {
+        for (int i = 0; i < localVertices.length; i++) {
             System.out.print(ChunkID.toHexString(localVertices[i].getID()) + " " + localVertices[i].getOutDeg() + " ++ ");
 
             for (int j = 0; j < localVertices[i].getM_inEdges().length; j++) {
                 System.out.print(ChunkID.toHexString(localVertices[i].getM_inEdges()[j]) + " ");
             }
             System.out.println();
-        }*/
+        }
 
 
 
