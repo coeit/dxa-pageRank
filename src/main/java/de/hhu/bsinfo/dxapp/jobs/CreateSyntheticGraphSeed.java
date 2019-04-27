@@ -77,7 +77,7 @@ public class CreateSyntheticGraphSeed extends AbstractJob {
                     //long randCID = randCID(j + 1, m_locality, random, i, slaveIDs, slaveLocalVertexCnts);
                     //System.out.println("++"+randCID);
 
-                    long randGID = random.nextInt(m_vertexCnt);
+                    long randGID = randGID(j,random,m_locality,slaveIDs, i, slaveLocalVertexCnts);
 
                     /*short randNID = randNID(m_locality, random, i, slaveIDs);
                     boolean otherID = false;
@@ -146,14 +146,43 @@ public class CreateSyntheticGraphSeed extends AbstractJob {
         return ChunkID.getChunkID(nid,lid);
     }
 
-    private long randGID(int p_Id, Random p_random, ArrayList<Short> p_slaveIDs, int[] p_slaveLocalCnts, boolean otherNID){
-        long gid = p_random.nextInt(m_vertexCnt) + 1;
+    private long randGID(int p_Id, Random p_random, double p_locality, ArrayList<Short> p_slaveIDs, int p_mySlaveID, int[] p_slaveLocalCnts){
 
-        while (localIndex(gid,p_slaveIDs, p_slaveLocalCnts) == p_Id && !otherNID){
-            gid = p_random.nextInt(m_vertexCnt) + 1;
+        ArrayList<Integer> otherSlaveIndx = new ArrayList<>();
+        for (int i = 0; i < p_slaveIDs.size(); i++) {
+            if(i != p_mySlaveID){
+                otherSlaveIndx.add(i);
+            }
+        }
+        if(p_slaveIDs.size() == 1){
+            otherSlaveIndx.add(p_mySlaveID);
         }
 
-        return gid;
+        int[] cuts = new int[p_slaveLocalCnts.length + 1];
+        cuts[0] = 0;
+        for (int i = 1; i < cuts.length; i++) {
+            cuts[i] = cuts[i - 1] + p_slaveLocalCnts[i - 1];
+        }
+        int start = cuts[p_mySlaveID];
+        int end = cuts[p_mySlaveID + 1];
+        int otherNodeIdx;
+        boolean otherNode = false;
+        long gid;
+        if(p_random.nextDouble() <= p_locality){
+            gid = (long) (p_random.nextDouble() * (end - start) + start);
+        } else {
+            otherNodeIdx = p_random.nextInt(otherSlaveIndx.size());
+            if(otherNodeIdx != p_mySlaveID){
+                otherNode = true;
+            }
+            start = cuts[otherNodeIdx];
+            end = cuts[otherNodeIdx + 1];
+            gid = (long) (p_random.nextDouble() * (end - start) + start);
+        }
+        while (localIndex(gid,p_slaveIDs,p_slaveLocalCnts) != p_Id && !otherNode){
+            gid = (long) (p_random.nextDouble() * (end - start) + start);
+        }
+        return  gid;
     }
 
     private long randCID(int p_Id, double p_locality, Random p_random, int p_mySlaveID ,ArrayList<Short> p_slaveIDs, int[] p_slaveLocalCnts){
@@ -235,8 +264,8 @@ public class CreateSyntheticGraphSeed extends AbstractJob {
         long lid = gid;
         for (int i = 0; i < p_slaveLocalCnts.length; i++) {
             count += p_slaveLocalCnts[i];
-            if(gid > count){
-                lid = lid - p_slaveLocalCnts[i];
+            if(gid >= count){
+                lid = lid - p_slaveLocalCnts[i] + 1;
             }
         }
         return lid;
