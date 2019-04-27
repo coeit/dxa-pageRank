@@ -169,7 +169,7 @@ public class MainPR extends AbstractApplication {
             chunkService.get().get(voteChunks);
             for (VoteChunk voteChunk : voteChunks) {
                 PRerr += voteChunk.getPRerr();
-                danglingPR -= voteChunk.getPRsum();
+                danglingPR = danglingPR - voteChunk.getPRsum();
             }
             for (VoteChunk voteChunk : voteChunks) {
                 voteChunk.setPRsum(danglingPR);

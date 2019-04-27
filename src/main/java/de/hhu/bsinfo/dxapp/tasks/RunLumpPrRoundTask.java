@@ -83,8 +83,6 @@ public class RunLumpPrRoundTask implements Task {
         VoteChunk voteChunk = new VoteChunk(ChunkID.getChunkID(mySlaveNodeID,localVertices.length + 2));
         chunkService.get().get(voteChunk);
         double danglingPR = voteChunk.getPRsum();
-        voteChunk.resetErr();
-        voteChunk.resetSum();
         System.out.println(danglingPR);
 
         if(!m_calcDanglingPR){
@@ -105,8 +103,9 @@ public class RunLumpPrRoundTask implements Task {
         //System.out.println("danglingPR:" + danglingPR);
         //System.out.println("sum: " + m_PRSum.sum());
 
-        voteChunk.incPRsum(m_PRSum.sum());
-        voteChunk.incPRerr(m_PRErr.sum());
+        voteChunk.setPRsum(m_PRSum.sum());
+        voteChunk.setPRerr(m_PRErr.sum());
+        System.out.println(m_PRSum + " " + m_PRErr);
         chunkService.put().put(voteChunk);
         return 0;
     }

@@ -15,7 +15,7 @@ public class VoteChunk extends AbstractChunk {
     public VoteChunk(int p_vertexCnt){
         super();
         m_PRerr = 0.0;
-        m_PRsum = 0.0;
+        m_PRsum = 1/(double) p_vertexCnt;
     }
 
     public VoteChunk(long p_chunkID) {
@@ -36,6 +36,10 @@ public class VoteChunk extends AbstractChunk {
 
     public void setPRsum (double p_PRsum) {
         m_PRsum = p_PRsum;
+    }
+
+    public void setPRerr (double p_PRerr) {
+        m_PRerr = p_PRerr;
     }
 
     public void incPRerr(double p_PRerr) {
