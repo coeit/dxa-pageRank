@@ -74,8 +74,11 @@ public class CreateSyntheticGraphSeed extends AbstractJob {
                 System.out.println("--"+indeg);
 
                 while(k < indeg){
-                    long randCID = randCID(j + 1, m_locality, random, i, slaveIDs, slaveLocalVertexCnts);
-                    System.out.println("++"+randCID);
+                    //long randCID = randCID(j + 1, m_locality, random, i, slaveIDs, slaveLocalVertexCnts);
+                    //System.out.println("++"+randCID);
+
+                    long randGID = random.nextInt(m_vertexCnt);
+
                     /*short randNID = randNID(m_locality, random, i, slaveIDs);
                     boolean otherID = false;
                     if(getIndex(slaveIDs, randNID) != i){
@@ -83,13 +86,15 @@ public class CreateSyntheticGraphSeed extends AbstractJob {
                     }
                     long randGID = randGID(j + 1,random, slaveIDs, slaveLocalVertexCnts, otherID);*/
 
-                    if (randCIDs.add(randCID)){
-                        int globalIndex = globalIndex(randCID,slaveIDs,slaveLocalVertexCnts);
-                        if (vertices[globalIndex] == null){
-                            vertices[globalIndex] = new Vertex();
+                    if (randCIDs.add(randGID)){
+                        //int globalIndex = globalIndex(randCID,slaveIDs,slaveLocalVertexCnts);
+                        //long randLID = localIndex(randGID,slaveIDs,slaveLocalVertexCnts);
+                        long randCID = CIDfromGID(randGID, slaveIDs, slaveLocalVertexCnts);
+                        if (vertices[(int)randGID] == null){
+                            vertices[(int)randGID] = new Vertex();
                         }
                         vertices[cnt].addInEdge(randCID);
-                        vertices[globalIndex].increment_outDeg();
+                        vertices[(int)randGID].increment_outDeg();
                         k++;
                         edges++;
                     }
@@ -126,24 +131,19 @@ public class CreateSyntheticGraphSeed extends AbstractJob {
 
     }
 
-    private short randNID(double p_locality, Random p_random, int p_mySlaveID, ArrayList<Short> p_slaveIDs){
-        ArrayList<Short> otherSlaveIDs = new ArrayList<>();
-        for (int i = 0; i < p_slaveIDs.size(); i++) {
-            if(i != p_mySlaveID){
-                otherSlaveIDs.add(p_slaveIDs.get(i));
+    private long CIDfromGID(long p_gid, ArrayList<Short> p_slaveIDs, int[] p_slaveLocalCnts){
+        int count = 0;
+        long lid = p_gid;
+        int slaveIndex = 0;
+        for (int i = 0; i < p_slaveLocalCnts.length; i++) {
+            count += p_slaveLocalCnts[i];
+            if(p_gid > count){
+                lid = lid - p_slaveLocalCnts[i];
+                slaveIndex = i;
             }
         }
-        if(p_slaveIDs.size() == 1){
-            otherSlaveIDs.add(p_slaveIDs.get(p_mySlaveID));
-        }
-
-        short nid;
-        if(p_random.nextDouble() <= p_locality){
-            nid = p_slaveIDs.get(p_mySlaveID);
-        } else {
-            nid = otherSlaveIDs.get(p_random.nextInt(otherSlaveIDs.size()));
-        }
-        return nid;
+        short nid = p_slaveIDs.get(slaveIndex);
+        return ChunkID.getChunkID(nid,lid);
     }
 
     private long randGID(int p_Id, Random p_random, ArrayList<Short> p_slaveIDs, int[] p_slaveLocalCnts, boolean otherNID){
