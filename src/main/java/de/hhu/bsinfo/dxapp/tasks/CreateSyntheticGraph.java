@@ -115,7 +115,7 @@ public class CreateSyntheticGraph implements Task {
         }
         IntegerChunk edgeCnt = new IntegerChunk(m_edgeCntCID);
         chunkService.get().get(edgeCnt, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
-        rdyCnt.increment(edges);
+        edgeCnt.increment(edges);
         chunkService.put().put(edgeCnt, ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
 
 
