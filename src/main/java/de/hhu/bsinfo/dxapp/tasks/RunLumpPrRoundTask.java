@@ -85,7 +85,7 @@ public class RunLumpPrRoundTask implements Task {
         double danglingPR = voteChunk.getPRsum();
         voteChunk.resetErr();
         voteChunk.resetSum();
-
+        System.out.println(danglingPR);
 
         if(!m_calcDanglingPR){
             Stream.of(localVertices).parallel().forEach(localVertex -> {
