@@ -53,8 +53,10 @@ public class CreateSyntheticGraphSeed extends AbstractJob {
         Vertex[] vertices = new Vertex[m_vertexCnt];
 
         Random random;
+        //Random edgerand;
         if (m_randomSeed != 0){
             random = new Random(m_randomSeed);
+            //edgerand = new Random(m_randomSeed+1);
         } else {
             random = new Random();
         }
@@ -71,13 +73,13 @@ public class CreateSyntheticGraphSeed extends AbstractJob {
                 if(indeg >= m_vertexCnt){
                     indeg = m_vertexCnt - 1;
                 }
-                System.out.println("--"+indeg);
+                //System.out.println("--"+indeg);
 
                 while(k < indeg){
-                    //long randCID = randCID(j + 1, m_locality, random, i, slaveIDs, slaveLocalVertexCnts);
+                    long randCID = randCID(j + 1, m_locality, random, i, slaveIDs, slaveLocalVertexCnts);
                     //System.out.println("++"+randCID);
 
-                    long randGID = randGID(j,random,m_locality,slaveIDs, i, slaveLocalVertexCnts);
+                    //long randGID = randGID(j,random,m_locality,slaveIDs, i, slaveLocalVertexCnts);
 
                     /*short randNID = randNID(m_locality, random, i, slaveIDs);
                     boolean otherID = false;
@@ -86,15 +88,15 @@ public class CreateSyntheticGraphSeed extends AbstractJob {
                     }
                     long randGID = randGID(j + 1,random, slaveIDs, slaveLocalVertexCnts, otherID);*/
 
-                    if (randCIDs.add(randGID)){
-                        //int globalIndex = globalIndex(randCID,slaveIDs,slaveLocalVertexCnts);
+                    if (randCIDs.add(randCID)){
+                        int globalIndex = globalIndex(randCID,slaveIDs,slaveLocalVertexCnts);
                         //long randLID = localIndex(randGID,slaveIDs,slaveLocalVertexCnts);
-                        long randCID = CIDfromGID(randGID, slaveIDs, slaveLocalVertexCnts);
-                        if (vertices[(int)randGID] == null){
-                            vertices[(int)randGID] = new Vertex();
+                        //long randCID = CIDfromGID(randGID, slaveIDs, slaveLocalVertexCnts);
+                        if (vertices[globalIndex] == null){
+                            vertices[globalIndex] = new Vertex();
                         }
                         vertices[cnt].addInEdge(randCID);
-                        vertices[(int)randGID].increment_outDeg();
+                        vertices[globalIndex].increment_outDeg();
                         k++;
                         edges++;
                     }
