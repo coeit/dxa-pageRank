@@ -211,12 +211,12 @@ public class CreateSyntheticGraphSeed extends AbstractJob {
             otherID = true;
         }
 
-        long gid = p_random.nextInt(m_vertexCnt) + 1;
-        long lid = localIndex(gid,p_slaveIDs,p_slaveLocalCnts);
+        long lid = p_random.nextInt(p_slaveLocalCnts[p_mySlaveID]) + 1;
+        //long lid = localIndex(gid,p_slaveIDs,p_slaveLocalCnts);
 
         while (lid == p_Id && !otherID){
-            gid = p_random.nextInt(m_vertexCnt) + 1;
-            lid = localIndex(gid,p_slaveIDs,p_slaveLocalCnts);
+            lid = p_random.nextInt(p_slaveLocalCnts[p_mySlaveID]) + 1;
+            //lid = localIndex(gid,p_slaveIDs,p_slaveLocalCnts);
         }
 
         return ChunkID.getChunkID(nid, lid);
