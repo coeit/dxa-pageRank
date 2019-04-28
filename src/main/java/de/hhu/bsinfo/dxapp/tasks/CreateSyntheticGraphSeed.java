@@ -84,7 +84,7 @@ public class CreateSyntheticGraphSeed implements Task {
                     long randCID = randCID(j + 1, m_locality, random, i, slaveIDs, slaveLocalVertexCnts);
                     if (randCIDs.add(randCID)) {
                         if (ChunkID.getCreatorID(randCID) == myNodeID) {
-                            int lid = (int) ChunkID.getLocalID(randCID);
+                            int lid = (int) ChunkID.getLocalID(randCID) - 1;
                             if (vertices[lid] == null) {
                                 vertices[lid] = new Vertex();
                             }
