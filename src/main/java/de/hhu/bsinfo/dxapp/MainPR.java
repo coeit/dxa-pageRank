@@ -139,14 +139,14 @@ public class MainPR extends AbstractApplication {
         VoteChunk[] voteChunks = new VoteChunk[computeService.getStatusMaster((short) 0).getConnectedSlaves().size()];
         //long[] voteChunkIDs = new long[computeService.getStatusMaster((short) 0).getConnectedSlaves().size()];
         k = 0;
-        /*for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
+        for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
             VoteChunk chunk = new VoteChunk(N);
             chunkService.create().create(nodeID,chunk);
             chunkService.put().put(chunk);
             voteChunks[k] = chunk;
             //System.out.println(voteChunks[k].getID() + " " + chunk.getPRsum());
             k++;
-        }*/
+        }
 
         for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
             VoteChunk chunk = new VoteChunk(nameService.getChunkID(nodeID + "vc",333));
@@ -305,17 +305,13 @@ public class MainPR extends AbstractApplication {
 
         ArrayList<Short> slaves = computeService.getStatusMaster((short)0).getConnectedSlaves();
         double memUsage = 0.0;
-        chunkService.get().get(voteChunks);
-        int l = 0;
-        int edgeCnt = 0;
         for (short slave : slaves){
             memUsage += chunkService.status().getStatus(slave).getHeapStatus().getUsedSize().getMBDouble();
-            edgeCnt += voteChunks[l].getEdgeCnt();
-            l++;
         }
 
+        //chunkService.get().get(edgeCnt);
         //System.out.println("EdgeCnt:" + edgeCnt.get_value());
-        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,filename,N,edgeCnt,DAMPING_FACTOR,THRESHOLD,inputTime,iterationTimesArr,memUsage,roundPRerrArr,locality,meanInDeg);
+        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,filename,N,1,DAMPING_FACTOR,THRESHOLD,inputTime,iterationTimesArr,memUsage,roundPRerrArr,locality,meanInDeg);
         jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();
 

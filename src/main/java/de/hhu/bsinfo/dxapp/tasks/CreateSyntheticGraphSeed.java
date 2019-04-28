@@ -7,7 +7,6 @@ import java.util.Random;
 
 import de.hhu.bsinfo.dxapp.chunk.IntegerChunk;
 import de.hhu.bsinfo.dxapp.chunk.Vertex;
-import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxram.chunk.ChunkLocalService;
@@ -46,7 +45,6 @@ public class CreateSyntheticGraphSeed implements Task {
     public int execute(TaskContext taskContext) {
         ChunkService chunkService = taskContext.getDXRAMServiceAccessor().getService(ChunkService.class);
         MasterSlaveComputeService computeService = taskContext.getDXRAMServiceAccessor().getService(MasterSlaveComputeService.class);
-        NameserviceService nameService = taskContext.getDXRAMServiceAccessor().getService(NameserviceService.class);
 
         short[] slaveIDs = taskContext.getCtxData().getSlaveNodeIds();
         short mySlaveIndex = taskContext.getCtxData().getSlaveId();
@@ -161,15 +159,10 @@ public class CreateSyntheticGraphSeed implements Task {
             }
         }*/
 
-        VoteChunk voteChunk = new VoteChunk(m_vertexCnt);
-        voteChunk.setEdgeCnt(edges);
-        chunkService.create().create(myNodeID,voteChunk);
-        nameService.register(voteChunk,mySlaveIndex + "vc");
-        chunkService.put().put(voteChunk);
 
-
-        /*chunkService.get().get(edgeCnt, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
-
+        /*IntegerChunk edgeCnt = new IntegerChunk(m_edgeCntCID);
+        chunkService.get().get(edgeCnt, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
+        edgeCnt.increment(edges);
         chunkService.put().put(edgeCnt, ChunkLockOperation.WRITE_LOCK_REL_POST_OP);*/
 
 
