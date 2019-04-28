@@ -6,11 +6,8 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
-import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxram.app.AbstractApplication;
 //import de.hhu.bsinfo.dxram.app.Application;
-import de.hhu.bsinfo.dxram.app.ApplicationCallbackHandler;
-import de.hhu.bsinfo.dxram.app.ApplicationService;
 import de.hhu.bsinfo.dxram.boot.BootService;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
 import de.hhu.bsinfo.dxapp.chunk.IntegerChunk;
