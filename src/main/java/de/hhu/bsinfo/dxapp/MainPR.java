@@ -147,14 +147,7 @@ public class MainPR extends AbstractApplication {
             //System.out.println(voteChunks[k].getID() + " " + chunk.getPRsum());
             k++;
         }
-
-        for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
-            VoteChunk chunk = new VoteChunk(nameService.getChunkID(nodeID + "vc",333));
-            voteChunks[k] = chunk;
-            //System.out.println(voteChunks[k].getID() + " " + chunk.getPRsum());
-            k++;
-        }
-
+        
         //System.out.println("nid: " + bootService.getNodeID() + " VERTEX COUNT: " + N);
 
         RunLumpPrRoundTask Run1 = new RunLumpPrRoundTask(N,DAMPING_FACTOR,0,false);
