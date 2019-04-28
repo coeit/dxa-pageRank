@@ -67,10 +67,16 @@ public class MainPR extends AbstractApplication {
         /*IntegerChunk rdyCnt = new IntegerChunk();
         chunkService.create().create(bootService.getNodeID(),rdyCnt);
         chunkService.put().put(rdyCnt);*/
-
-        IntegerChunk edgeCnt = new IntegerChunk();
-        chunkService.create().create(bootService.getNodeID(),edgeCnt);
-        chunkService.put().put(edgeCnt);
+        int k = 0;
+        IntegerChunk[] edgeChunks = new IntegerChunk[computeService.getStatusMaster((short) 0).getConnectedSlaves().size()];
+        for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
+            IntegerChunk edgeCnt = new IntegerChunk();
+            chunkService.create().create(nodeID,edgeCnt);
+            chunkService.put().put(edgeCnt);
+            edgeChunks[k] = edgeCnt;
+            //System.out.println(voteChunks[k].getID() + " " + chunk.getPRsum());
+            k++;
+        }
 
         Stopwatch stopwatch = new Stopwatch();
         System.out.println("len: "  + p_args.length);
@@ -80,7 +86,7 @@ public class MainPR extends AbstractApplication {
         int meanInDeg = 0;
         if(p_args.length == 6) {
             filename = p_args[5];
-            ReadLumpInEdgeListTask readLumpInEdgeListTask = new ReadLumpInEdgeListTask(filename, N, edgeCnt.getID());
+            ReadLumpInEdgeListTask readLumpInEdgeListTask = new ReadLumpInEdgeListTask(filename, N, 1);
             TaskScript inputTaskScript = new TaskScript(readLumpInEdgeListTask);
             TaskScriptState inputState = computeService.submitTaskScript(inputTaskScript, (short) 0);
             stopwatch.start();
@@ -108,9 +114,9 @@ public class MainPR extends AbstractApplication {
             jobService.waitForAllJobsToFinish();*/
             stopwatch.start();
             if(p_args.length == 8){
-                createSyntheticGraph = new CreateSyntheticGraphSeed(N, locality, meanInDeg, edgeCnt.getID(), Integer.parseInt(p_args[7]));
+                createSyntheticGraph = new CreateSyntheticGraphSeed(N, locality, meanInDeg, 1, Integer.parseInt(p_args[7]));
             } else {
-                createSyntheticGraph = new CreateSyntheticGraphSeed(N,locality, meanInDeg, edgeCnt.getID(), 0);
+                createSyntheticGraph = new CreateSyntheticGraphSeed(N,locality, meanInDeg, 1, 0);
             }
 
             TaskScript inputTaskScript = new TaskScript(createSyntheticGraph);
@@ -132,15 +138,23 @@ public class MainPR extends AbstractApplication {
         chunkService.put().put(voteChunk);*/
         VoteChunk[] voteChunks = new VoteChunk[computeService.getStatusMaster((short) 0).getConnectedSlaves().size()];
         //long[] voteChunkIDs = new long[computeService.getStatusMaster((short) 0).getConnectedSlaves().size()];
-        int k = 0;
-        for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
+        k = 0;
+        /*for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
             VoteChunk chunk = new VoteChunk(N);
             chunkService.create().create(nodeID,chunk);
             chunkService.put().put(chunk);
             voteChunks[k] = chunk;
             //System.out.println(voteChunks[k].getID() + " " + chunk.getPRsum());
             k++;
+        }*/
+
+        for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
+            VoteChunk chunk = new VoteChunk(nameService.getChunkID(nodeID + "vc",333));
+            voteChunks[k] = chunk;
+            //System.out.println(voteChunks[k].getID() + " " + chunk.getPRsum());
+            k++;
         }
+
         //System.out.println("nid: " + bootService.getNodeID() + " VERTEX COUNT: " + N);
 
         RunLumpPrRoundTask Run1 = new RunLumpPrRoundTask(N,DAMPING_FACTOR,0,false);
@@ -291,13 +305,17 @@ public class MainPR extends AbstractApplication {
 
         ArrayList<Short> slaves = computeService.getStatusMaster((short)0).getConnectedSlaves();
         double memUsage = 0.0;
+        chunkService.get().get(voteChunks);
+        int l = 0;
+        int edgeCnt = 0;
         for (short slave : slaves){
             memUsage += chunkService.status().getStatus(slave).getHeapStatus().getUsedSize().getMBDouble();
+            edgeCnt += voteChunks[l].getEdgeCnt();
+            l++;
         }
 
-        chunkService.get().get(edgeCnt);
         //System.out.println("EdgeCnt:" + edgeCnt.get_value());
-        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,filename,N,edgeCnt.get_value(),DAMPING_FACTOR,THRESHOLD,inputTime,iterationTimesArr,memUsage,roundPRerrArr,locality,meanInDeg);
+        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,filename,N,edgeCnt,DAMPING_FACTOR,THRESHOLD,inputTime,iterationTimesArr,memUsage,roundPRerrArr,locality,meanInDeg);
         jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();
 
