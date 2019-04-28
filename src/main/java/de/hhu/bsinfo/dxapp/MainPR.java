@@ -67,7 +67,7 @@ public class MainPR extends AbstractApplication {
         /*IntegerChunk rdyCnt = new IntegerChunk();
         chunkService.create().create(bootService.getNodeID(),rdyCnt);
         chunkService.put().put(rdyCnt);*/
-        int k = 0;
+        /*int k = 0;
         IntegerChunk[] edgeChunks = new IntegerChunk[computeService.getStatusMaster((short) 0).getConnectedSlaves().size()];
         for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
             IntegerChunk edgeCnt = new IntegerChunk();
@@ -76,7 +76,7 @@ public class MainPR extends AbstractApplication {
             edgeChunks[k] = edgeCnt;
             //System.out.println(voteChunks[k].getID() + " " + chunk.getPRsum());
             k++;
-        }
+        }*/
 
         Stopwatch stopwatch = new Stopwatch();
         System.out.println("len: "  + p_args.length);
@@ -138,7 +138,7 @@ public class MainPR extends AbstractApplication {
         chunkService.put().put(voteChunk);*/
         VoteChunk[] voteChunks = new VoteChunk[computeService.getStatusMaster((short) 0).getConnectedSlaves().size()];
         //long[] voteChunkIDs = new long[computeService.getStatusMaster((short) 0).getConnectedSlaves().size()];
-        k = 0;
+        int k = 0;
         for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
             VoteChunk chunk = new VoteChunk(N);
             chunkService.create().create(nodeID,chunk);
@@ -147,7 +147,7 @@ public class MainPR extends AbstractApplication {
             //System.out.println(voteChunks[k].getID() + " " + chunk.getPRsum());
             k++;
         }
-        
+
         //System.out.println("nid: " + bootService.getNodeID() + " VERTEX COUNT: " + N);
 
         RunLumpPrRoundTask Run1 = new RunLumpPrRoundTask(N,DAMPING_FACTOR,0,false);
