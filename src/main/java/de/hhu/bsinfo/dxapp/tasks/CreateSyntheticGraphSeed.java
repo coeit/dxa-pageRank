@@ -250,18 +250,21 @@ public class CreateSyntheticGraphSeed implements Task {
 
         short nid;
         boolean otherID = false;
+        int index;
         if(p_random.nextDouble() <= p_locality){
+            index = p_mySlaveID;
             nid = p_slaveIDs[p_mySlaveID];
         } else {
-            nid = otherSlaveIDs.get(p_random.nextInt(otherSlaveIDs.size()));
+            index = p_random.nextInt(otherSlaveIDs.size());
+            nid = otherSlaveIDs.get(index);
             otherID = true;
         }
 
-        long lid = p_random.nextInt(p_slaveLocalCnts[p_mySlaveID]) + 1;
+        long lid = p_random.nextInt(p_slaveLocalCnts[index]) + 1;
         //long lid = localIndex(gid,p_slaveIDs,p_slaveLocalCnts);
 
         while (lid == p_Id && !otherID){
-            lid = p_random.nextInt(p_slaveLocalCnts[p_mySlaveID]) + 1;
+            lid = p_random.nextInt(p_slaveLocalCnts[index]) + 1;
             //lid = localIndex(gid,p_slaveIDs,p_slaveLocalCnts);
         }
 
