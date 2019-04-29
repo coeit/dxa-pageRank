@@ -88,7 +88,7 @@ public class CreateSyntheticGraphSeed implements Task {
                     if (randCIDs.add(randCID)) {
                         if (ChunkID.getCreatorID(randCID) == myNodeID) {
                             int lid = (int) ChunkID.getLocalID(randCID) - 1;
-                            System.out.println(lid + " ");
+                            System.out.print(lid + " ");
                             if (vertices[lid] == null) {/**irgendwas falsch wenn ungerade**/
                                 vertices[lid] = new Vertex();
                             }
@@ -100,6 +100,7 @@ public class CreateSyntheticGraphSeed implements Task {
                         k++;
                         edges++;
                     }
+                    System.out.println();
                 }
             }
         }
