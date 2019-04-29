@@ -152,7 +152,7 @@ public class MainPR extends AbstractApplication {
             memUsage += chunkService.status().getStatus(connectedSlaves.get(i)).getHeapStatus().getUsedSize().getBytes();
             edgeCnt += voteChunks[i].getEdgeCnt();
         }
-
+        chunkService.get().get(voteChunks);
         System.out.println("VERTICES: " + N);
         System.out.println("EDGES: " + edgeCnt);
         System.out.println("Memory: " + memUsage + "B");

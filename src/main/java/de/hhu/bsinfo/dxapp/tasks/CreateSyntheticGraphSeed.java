@@ -112,7 +112,7 @@ public class CreateSyntheticGraphSeed implements Task {
             }
             System.out.println();
         }*/
-
+        //System.out.println(edges);
         VoteChunk vc = new VoteChunk(m_vertexCnt,edges);
         chunkService.create().create(myNodeID,vc);
         chunkService.put().put(vc);
