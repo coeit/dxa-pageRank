@@ -149,10 +149,11 @@ public class MainPR extends AbstractApplication {
             //System.out.println(ChunkID.getChunkID(connectedSlaves.get(i),localVertexCnt(N,i,connectedSlaves.size()) +1));
             voteChunks[i] = new VoteChunk(ChunkID.getChunkID(connectedSlaves.get(i),localVertexCnt(N,i,connectedSlaves.size()) + 1));
             //System.out.println(voteChunks[i].getID());
+            chunkService.get().get(voteChunks[i]);
             memUsage += chunkService.status().getStatus(connectedSlaves.get(i)).getHeapStatus().getUsedSize().getBytes();
             edgeCnt += voteChunks[i].getEdgeCnt();
         }
-        chunkService.get().get(voteChunks);
+
         System.out.println("VERTICES: " + N);
         System.out.println("EDGES: " + edgeCnt);
         System.out.println("Memory: " + memUsage + "B");
