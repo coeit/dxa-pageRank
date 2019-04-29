@@ -149,13 +149,13 @@ public class MainPR extends AbstractApplication {
             //System.out.println(ChunkID.getChunkID(connectedSlaves.get(i),localVertexCnt(N,i,connectedSlaves.size()) +1));
             voteChunks[i] = new VoteChunk(ChunkID.getChunkID(connectedSlaves.get(i),localVertexCnt(N,i,connectedSlaves.size()) + 1));
             //System.out.println(voteChunks[i].getID());
-            memUsage += chunkService.status().getStatus(connectedSlaves.get(i)).getHeapStatus().getUsedSize().getMBDouble();
+            memUsage += chunkService.status().getStatus(connectedSlaves.get(i)).getHeapStatus().getUsedSize().getBytes();
             edgeCnt += voteChunks[i].getEdgeCnt();
         }
 
-        System.out.println("VERTICES:\t" + N);
-        System.out.println("EDGES:\t" + memUsage);
-        System.out.println("Memory:\t" + edgeCnt);
+        System.out.println("VERTICES: " + N);
+        System.out.println("EDGES: " + edgeCnt);
+        System.out.println("Memory: " + memUsage + "B");
         //System.out.println("nid: " + bootService.getNodeID() + " VERTEX COUNT: " + N);
 
         RunLumpPrRoundTask Run1 = new RunLumpPrRoundTask(N,DAMPING_FACTOR,0,false);
