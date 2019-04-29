@@ -142,8 +142,8 @@ public class MainPR extends AbstractApplication {
         }*/
 
         for (int i = 0; i < connectedSlaves.size(); i++) {
-            System.out.println(ChunkID.toHexString(ChunkID.getChunkID(connectedSlaves.get(i),localVertexCnt(N,i,connectedSlaves.size()) + 1)));
-            voteChunks[i] = new VoteChunk(ChunkID.getChunkID(connectedSlaves.get(i),localVertexCnt(N,i,connectedSlaves.size())));
+            System.out.println(ChunkID.getChunkID(connectedSlaves.get(i),localVertexCnt(N,i,connectedSlaves.size()) -1));
+            voteChunks[i] = new VoteChunk(ChunkID.getChunkID(connectedSlaves.get(i),localVertexCnt(N,i,connectedSlaves.size()) - 1));
             System.out.println(voteChunks[i].getID());
         }
 
