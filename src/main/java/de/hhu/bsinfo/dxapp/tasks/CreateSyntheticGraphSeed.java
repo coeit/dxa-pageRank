@@ -1,6 +1,7 @@
 package de.hhu.bsinfo.dxapp.tasks;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
@@ -65,7 +66,7 @@ public class CreateSyntheticGraphSeed implements Task {
         int cnt = 0;
         int edges = 0;
 
-
+        System.out.println(Arrays.toString(slaveLocalVertexCnts));
         for (int i = 0; i < slaveIDs.length; i++) {
             for (int j = 0; j < slaveLocalVertexCnts[i]; j++) {
                 if(mySlaveIndex == i){
@@ -80,12 +81,15 @@ public class CreateSyntheticGraphSeed implements Task {
                 if(indeg >= m_vertexCnt){
                     indeg = m_vertexCnt - 1;
                 }
+                System.out.print(j + " :: ");
                 while(k < indeg) {
                     long randCID = randCID(j + 1, m_locality, random, i, slaveIDs, slaveLocalVertexCnts);
+                    System.out.print(ChunkID.toHexString(randCID) + " ");
                     if (randCIDs.add(randCID)) {
                         if (ChunkID.getCreatorID(randCID) == myNodeID) {
                             int lid = (int) ChunkID.getLocalID(randCID) - 1;
-                            if (vertices[lid] == null) {/**irgendwas falsch wenn ungrade**/
+                            System.out.println(lid + " ");
+                            if (vertices[lid] == null) {/**irgendwas falsch wenn ungerade**/
                                 vertices[lid] = new Vertex();
                             }
                             vertices[lid].increment_outDeg();
@@ -102,70 +106,6 @@ public class CreateSyntheticGraphSeed implements Task {
 
         chunkService.create().create(myNodeID,vertices);
         chunkService.put().put(vertices);
-
-
-
-
-
-        /*for (int i = 0; i < slaveIDs.size(); i++) {
-            for (int j = 0; j < slaveLocalVertexCnts[i]; j++) {
-                if (vertices[cnt] == null){
-                    vertices[cnt] = new Vertex();
-                }
-                HashSet<Long> randCIDs = new HashSet<>();
-                int k = 0;
-                int indeg = getExpRandNumber(random);
-                if(indeg >= m_vertexCnt){
-                    indeg = m_vertexCnt - 1;
-                }
-                //System.out.println("--"+indeg);
-
-                while(k < indeg){
-                    long randCID = randCID(j + 1, m_locality, random, i, slaveIDs, slaveLocalVertexCnts);
-                    //System.out.println("++"+randCID);
-
-                    //long randGID = randGID(j,random,m_locality,slaveIDs, i, slaveLocalVertexCnts);
-
-                    short randNID = randNID(m_locality, random, i, slaveIDs);
-                    boolean otherID = false;
-                    if(getIndex(slaveIDs, randNID) != i){
-                        otherID = true;
-                    }
-                    long randGID = randGID(j + 1,random, slaveIDs, slaveLocalVertexCnts, otherID);
-
-                    if (randCIDs.add(randCID)){
-                        int globalIndex = globalIndex(randCID,slaveIDs,slaveLocalVertexCnts);
-                        //long randLID = localIndex(randGID,slaveIDs,slaveLocalVertexCnts);
-                        //long randCID = CIDfromGID(randGID, slaveIDs, slaveLocalVertexCnts);
-                        if (vertices[globalIndex] == null){
-                            vertices[globalIndex] = new Vertex();
-                        }
-                        vertices[cnt].addInEdge(randCID);
-                        vertices[globalIndex].increment_outDeg();
-                        k++;
-                        edges++;
-                    }
-                }
-                cnt++;
-            }
-        }*/
-        /*
-        cnt = 0;
-        for (int i = 0; i < slaveIDs.size(); i++) {
-            for (int j = 0; j < slaveLocalVertexCnts[i]; j++) {
-                chunkService.create().create(slaveIDs.get(i), vertices[cnt]);
-                chunkService.put().put(vertices[cnt]);
-                cnt++;
-            }
-        }*/
-
-
-        /*IntegerChunk edgeCnt = new IntegerChunk(m_edgeCntCID);
-        chunkService.get().get(edgeCnt, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
-        edgeCnt.increment(edges);
-        chunkService.put().put(edgeCnt, ChunkLockOperation.WRITE_LOCK_REL_POST_OP);*/
-
-
 
         for (int i = 0; i < vertices.length; i++) {
             System.out.print(ChunkID.toHexString(vertices[i].getID()) + " " + vertices[i].getOutDeg() + " ++ ");

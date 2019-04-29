@@ -104,14 +104,6 @@ public class MainPR extends AbstractApplication {
             locality = Double.parseDouble(p_args[5]);
             meanInDeg = Integer.parseInt(p_args[6]);
 
-            /*if(p_args.length == 8){
-                createSyntheticGraph = new CreateSyntheticGraphSeed(N, locality, meanInDeg, edgeCnt.getID(), Integer.parseInt(p_args[7]));
-            } else {
-                createSyntheticGraph = new CreateSyntheticGraphSeed(N,locality, meanInDeg, edgeCnt.getID(), 0);
-            }
-            stopwatch.start();
-            jobService.pushJobRemote(createSyntheticGraph, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
-            jobService.waitForAllJobsToFinish();*/
             stopwatch.start();
             if(p_args.length == 8){
                 createSyntheticGraph = new CreateSyntheticGraphSeed(N, locality, meanInDeg, 1, Integer.parseInt(p_args[7]));
@@ -226,56 +218,6 @@ public class MainPR extends AbstractApplication {
             }
         }
 
-
-
-
-
-
-        /*RunPrRoundTask Run1 = new RunPrRoundTask(N,DAMPING_FACTOR,0,voteChunk.getID());
-        RunPrRoundTask Run2 = new RunPrRoundTask(N,DAMPING_FACTOR,1,voteChunk.getID());
-
-        //TaskScript taskScript = new TaskScript(Run1,Run2);
-
-        TaskScript taskScriptRun1 = new TaskScript(Run1);
-        TaskScript taskScriptRun2 = new TaskScript(Run2);
-
-        ArrayList<Double> roundPRsum = new ArrayList<>();
-        ArrayList<Double> roundPRerr = new ArrayList<>();
-
-        int NumRounds = 0;
-        //double PRsum = 0.0;
-        double PRerr = 0.0;
-        stopwatch.start();
-        TaskScriptState state;
-        for (int i = 0; i < 30; i++) {
-            if(i % 2 == 0){
-                state = computeService.submitTaskScript(taskScriptRun1, (short) 0, listener);
-            } else {
-                state = computeService.submitTaskScript(taskScriptRun2, (short) 0, listener);
-            }
-            while (!state.hasTaskCompleted()) {
-                try {
-                    Thread.sleep(100);
-                } catch (final InterruptedException ignore) {
-
-                }
-            }
-
-            chunkService.get().get(voteChunk,ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
-            PRerr = voteChunk.getPRerr();
-            //PRsum = voteChunk.getPRsum();
-            voteChunk.reset();
-            chunkService.put().put(voteChunk,ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
-            //System.out.println("Err: " + PRerr + " Sum: " + PRsum);
-            roundPRerr.add(PRerr);
-            //roundPRsum.add(PRsum);
-            NumRounds++;
-
-            if (PRerr <= 1e-4) {
-                break;
-            }
-        }*/
-        //System.out.println("Timer Computation: " + stopwatch.getTimeStr());
         String outDir = createOutputDirs();
 
         if(printPR){
