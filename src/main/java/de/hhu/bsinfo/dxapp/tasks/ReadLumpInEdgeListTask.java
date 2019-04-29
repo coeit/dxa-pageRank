@@ -9,6 +9,7 @@ import de.hhu.bsinfo.dxapp.chunk.IntegerChunk;
 import de.hhu.bsinfo.dxapp.chunk.LocalDanglingChunks;
 import de.hhu.bsinfo.dxapp.chunk.LocalNonDanglingChunks;
 import de.hhu.bsinfo.dxapp.chunk.Vertex;
+import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxram.chunk.ChunkLocalService;
@@ -44,6 +45,7 @@ public class ReadLumpInEdgeListTask implements Task {
         NameserviceService nameService = taskContext.getDXRAMServiceAccessor().getService(NameserviceService.class);
 
         short mySlaveID = taskContext.getCtxData().getSlaveId();
+        short myNodeID = taskContext.getCtxData().getOwnNodeId();
         System.out.println("myID:" + mySlaveID);
         short[] slaveIDs = taskContext.getCtxData().getSlaveNodeIds();
 
@@ -153,6 +155,11 @@ public class ReadLumpInEdgeListTask implements Task {
             }
             System.out.println();
         }*/
+
+        VoteChunk vc = new VoteChunk(m_vertexCnt,edges);
+        chunkService.create().create(myNodeID,vc);
+        chunkService.put().put(vc);
+        //System.out.println(vc.getID());
 
         /*LocalNonDanglingChunks ndChunks = new LocalNonDanglingChunks(localNonDanglingChunks.stream().mapToLong(i -> i).toArray());
         LocalDanglingChunks dChunks = new LocalDanglingChunks(localDanglingChunks.stream().mapToLong(i -> i).toArray());
