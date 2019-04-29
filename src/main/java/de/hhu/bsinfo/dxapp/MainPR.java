@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
+import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxram.app.AbstractApplication;
 //import de.hhu.bsinfo.dxram.app.Application;
 import de.hhu.bsinfo.dxram.boot.BootService;
@@ -62,7 +63,7 @@ public class MainPR extends AbstractApplication {
         MasterSlaveComputeService computeService = getService(MasterSlaveComputeService.class);
         JobService jobService = getService(JobService.class);
 
-
+        ArrayList<Short> connectedSlaves = computeService.getStatusMaster((short) 0).getConnectedSlaves();
 
         /*IntegerChunk rdyCnt = new IntegerChunk();
         chunkService.create().create(bootService.getNodeID(),rdyCnt);
@@ -128,16 +129,22 @@ public class MainPR extends AbstractApplication {
         /*VoteChunk voteChunk = new VoteChunk(N);
         chunkService.create().create(bootService.getNodeID(),voteChunk);
         chunkService.put().put(voteChunk);*/
-        VoteChunk[] voteChunks = new VoteChunk[computeService.getStatusMaster((short) 0).getConnectedSlaves().size()];
+        VoteChunk[] voteChunks = new VoteChunk[connectedSlaves.size()];
         //long[] voteChunkIDs = new long[computeService.getStatusMaster((short) 0).getConnectedSlaves().size()];
         int k = 0;
-        for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
+        /*for (short nodeID : computeService.getStatusMaster((short) 0).getConnectedSlaves()) {
             VoteChunk chunk = new VoteChunk(N);
             chunkService.create().create(nodeID,chunk);
             chunkService.put().put(chunk);
             voteChunks[k] = chunk;
             //System.out.println(voteChunks[k].getID() + " " + chunk.getPRsum());
             k++;
+        }*/
+
+        for (int i = 0; i < connectedSlaves.size(); i++) {
+            System.out.println(ChunkID.toHexString(ChunkID.getChunkID(connectedSlaves.get(i),localVertexCnt(N,i,connectedSlaves.size()) + 1)));
+            voteChunks[i] = new VoteChunk(ChunkID.getChunkID(connectedSlaves.get(i),localVertexCnt(N,i,connectedSlaves.size())));
+            System.out.println(voteChunks[i].getID());
         }
 
         //System.out.println("nid: " + bootService.getNodeID() + " VERTEX COUNT: " + N);
@@ -240,13 +247,16 @@ public class MainPR extends AbstractApplication {
 
         ArrayList<Short> slaves = computeService.getStatusMaster((short)0).getConnectedSlaves();
         double memUsage = 0.0;
+        int l = 0;
+        long edgeCnt = 0;
         for (short slave : slaves){
             memUsage += chunkService.status().getStatus(slave).getHeapStatus().getUsedSize().getMBDouble();
+            edgeCnt += voteChunks[l].getEdgeCnt();
         }
 
         //chunkService.get().get(edgeCnt);
         //System.out.println("EdgeCnt:" + edgeCnt.get_value());
-        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,filename,N,1,DAMPING_FACTOR,THRESHOLD,inputTime,iterationTimesArr,memUsage,roundPRerrArr,locality,meanInDeg);
+        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,filename,N,edgeCnt,DAMPING_FACTOR,THRESHOLD,inputTime,iterationTimesArr,memUsage,roundPRerrArr,locality,meanInDeg);
         jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();
 
@@ -265,6 +275,15 @@ public class MainPR extends AbstractApplication {
         outDir.mkdir();
         String ret = new String(PrOutDir + "/" + out);
         return ret;
+    }
+
+    private int localVertexCnt(int p_totalVertexCnt, int p_slaveID, int p_numSlaves){
+        int mod = p_totalVertexCnt % p_numSlaves;
+        double div = (double)p_totalVertexCnt/(double)p_numSlaves;
+        if(p_slaveID < mod){
+            return (int) Math.ceil(div);
+        }
+        return (int) Math.floor(div);
     }
 
 

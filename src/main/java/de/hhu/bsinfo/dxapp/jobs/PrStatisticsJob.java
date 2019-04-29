@@ -19,7 +19,7 @@ public class PrStatisticsJob extends AbstractJob {
     private String m_outDir;
     private String m_graphInput;
     private int m_vertexCount;
-    private int m_edgeCount;
+    private long m_edgeCount;
     private double m_damp;
     private double m_thr;
     private long m_InputTime;
@@ -32,7 +32,7 @@ public class PrStatisticsJob extends AbstractJob {
     public PrStatisticsJob() {
     }
 
-    public PrStatisticsJob(String p_outDir, String p_graphInput, int p_vertexCount, int p_edgeCount ,double p_damp, double p_thr ,long p_InputTime,
+    public PrStatisticsJob(String p_outDir, String p_graphInput, int p_vertexCount, long p_edgeCount ,double p_damp, double p_thr ,long p_InputTime,
             long[] p_ExecutionTimes, double p_memUsage, double[] p_PRerrs, double p_locality, int p_meanIndeg) {
         m_outDir = p_outDir;
         m_graphInput = p_graphInput;
@@ -111,7 +111,7 @@ public class PrStatisticsJob extends AbstractJob {
         m_outDir = p_importer.readString(m_outDir);
         m_graphInput = p_importer.readString(m_graphInput);
         m_vertexCount = p_importer.readInt(m_vertexCount);
-        m_edgeCount = p_importer.readInt(m_edgeCount);
+        m_edgeCount = p_importer.readLong(m_edgeCount);
         m_damp = p_importer.readDouble(m_damp);
         m_thr = p_importer.readDouble(m_thr);
         m_InputTime = p_importer.readLong(m_InputTime);
@@ -128,7 +128,7 @@ public class PrStatisticsJob extends AbstractJob {
         p_exporter.writeString(m_outDir);
         p_exporter.writeString(m_graphInput);
         p_exporter.writeInt(m_vertexCount);
-        p_exporter.writeInt(m_edgeCount);
+        p_exporter.writeLong(m_edgeCount);
         p_exporter.writeDouble(m_damp);
         p_exporter.writeDouble(m_thr);
         p_exporter.writeLong(m_InputTime);
@@ -141,7 +141,7 @@ public class PrStatisticsJob extends AbstractJob {
 
     @Override
     public int sizeofObject() {
-        return super.sizeofObject() + ObjectSizeUtil.sizeofString(m_outDir) + ObjectSizeUtil.sizeofString(m_graphInput) + Integer.BYTES * 3
-                + Long.BYTES + ObjectSizeUtil.sizeofLongArray(m_ExecutionTimes) + Double.BYTES * 4 + ObjectSizeUtil.sizeofDoubleArray(m_PRerrs);
+        return super.sizeofObject() + ObjectSizeUtil.sizeofString(m_outDir) + ObjectSizeUtil.sizeofString(m_graphInput) + Integer.BYTES * 2
+                + Long.BYTES * 2 + ObjectSizeUtil.sizeofLongArray(m_ExecutionTimes) + Double.BYTES * 4 + ObjectSizeUtil.sizeofDoubleArray(m_PRerrs);
     }
 }

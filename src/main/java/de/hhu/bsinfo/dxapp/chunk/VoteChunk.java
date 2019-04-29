@@ -13,7 +13,7 @@ public class VoteChunk extends AbstractChunk {
     private double m_PRsum;
     private long m_edgeCnt;
 
-    public VoteChunk(int p_vertexCnt){
+    public VoteChunk(int p_vertexCnt, long p_edgeCnt){
         super();
         m_PRerr = 0.0;
         m_PRsum = 1/(double) p_vertexCnt;

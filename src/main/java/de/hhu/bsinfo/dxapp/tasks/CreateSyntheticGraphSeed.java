@@ -8,6 +8,7 @@ import java.util.Random;
 
 import de.hhu.bsinfo.dxapp.chunk.IntegerChunk;
 import de.hhu.bsinfo.dxapp.chunk.Vertex;
+import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxram.chunk.ChunkLocalService;
@@ -66,7 +67,6 @@ public class CreateSyntheticGraphSeed implements Task {
         int cnt = 0;
         int edges = 0;
 
-        System.out.println(Arrays.toString(slaveLocalVertexCnts));
         for (int i = 0; i < slaveIDs.length; i++) {
             for (int j = 0; j < slaveLocalVertexCnts[i]; j++) {
                 if(mySlaveIndex == i){
@@ -81,15 +81,13 @@ public class CreateSyntheticGraphSeed implements Task {
                 if(indeg >= m_vertexCnt){
                     indeg = m_vertexCnt - 1;
                 }
-                System.out.print(j + " :: ");
+                edges +=  indeg;
                 while(k < indeg) {
                     long randCID = randCID(j + 1, m_locality, random, i, slaveIDs, slaveLocalVertexCnts);
-                    System.out.print(ChunkID.toHexString(randCID) + " ");
                     if (randCIDs.add(randCID)) {
                         if (ChunkID.getCreatorID(randCID) == myNodeID) {
                             int lid = (int) ChunkID.getLocalID(randCID) - 1;
-                            System.out.print(lid + " ");
-                            if (vertices[lid] == null) {/**irgendwas falsch wenn ungerade**/
+                            if (vertices[lid] == null) {
                                 vertices[lid] = new Vertex();
                             }
                             vertices[lid].increment_outDeg();
@@ -98,9 +96,7 @@ public class CreateSyntheticGraphSeed implements Task {
                             vertices[j].addInEdge(randCID);
                         }
                         k++;
-                        edges++;
                     }
-                    System.out.println();
                 }
             }
         }
@@ -116,6 +112,11 @@ public class CreateSyntheticGraphSeed implements Task {
             }
             System.out.println();
         }
+
+        VoteChunk vc = new VoteChunk(m_vertexCnt,edges);
+        chunkService.create().create(myNodeID,vc);
+        chunkService.put().put(vc);
+        System.out.println(vc.getID());
 
         return 0;
     }
