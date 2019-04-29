@@ -55,10 +55,10 @@ public class CreateSyntheticGraphSeed implements Task {
         Vertex[] vertices = new Vertex[slaveLocalVertexCnts[mySlaveIndex]];
 
         Random random;
-        //Random edgerand;
+        Random indgree = new Random();
         if (m_randomSeed != 0){
             random = new Random(m_randomSeed);
-            //edgerand = new Random(m_randomSeed+1);
+            indgree = new Random(m_randomSeed+1);
         } else {
             random = new Random();
         }
@@ -76,7 +76,7 @@ public class CreateSyntheticGraphSeed implements Task {
 
                 HashSet<Long> randCIDs = new HashSet<>();
                 int k = 0;
-                int indeg = getExpRandNumber(random);
+                int indeg = getExpRandNumber(indgree);
                 if(indeg >= m_vertexCnt){
                     indeg = m_vertexCnt - 1;
                 }
@@ -167,14 +167,14 @@ public class CreateSyntheticGraphSeed implements Task {
 
 
 
-        /*for (int i = 0; i < vertices.length; i++) {
+        for (int i = 0; i < vertices.length; i++) {
             System.out.print(ChunkID.toHexString(vertices[i].getID()) + " " + vertices[i].getOutDeg() + " ++ ");
 
             for (int j = 0; j < vertices[i].getM_inEdges().length; j++) {
                 System.out.print(ChunkID.toHexString(vertices[i].getM_inEdges()[j]) + " ");
             }
             System.out.println();
-        }*/
+        }
 
         return 0;
     }
