@@ -126,6 +126,10 @@ public class MainPR extends AbstractApplication {
         }
 
         long inputTime = stopwatch.getTime();
+        double memUsage = 0.0;
+        long edgeCnt = 0;
+        System.out.println("GRAPH INPUT DONE...");
+
         /*VoteChunk voteChunk = new VoteChunk(N);
         chunkService.create().create(bootService.getNodeID(),voteChunk);
         chunkService.put().put(voteChunk);*/
@@ -145,8 +149,13 @@ public class MainPR extends AbstractApplication {
             //System.out.println(ChunkID.getChunkID(connectedSlaves.get(i),localVertexCnt(N,i,connectedSlaves.size()) +1));
             voteChunks[i] = new VoteChunk(ChunkID.getChunkID(connectedSlaves.get(i),localVertexCnt(N,i,connectedSlaves.size()) + 1));
             //System.out.println(voteChunks[i].getID());
+            memUsage += chunkService.status().getStatus(connectedSlaves.get(i)).getHeapStatus().getUsedSize().getMBDouble();
+            edgeCnt += voteChunks[i].getEdgeCnt();
         }
 
+        System.out.println("VERTICES:\t" + N);
+        System.out.println("EDGES:\t" + memUsage);
+        System.out.println("Memory:\t" + edgeCnt);
         //System.out.println("nid: " + bootService.getNodeID() + " VERTEX COUNT: " + N);
 
         RunLumpPrRoundTask Run1 = new RunLumpPrRoundTask(N,DAMPING_FACTOR,0,false);
@@ -245,17 +254,17 @@ public class MainPR extends AbstractApplication {
         double[] roundPRerrArr = roundPRerr.stream().mapToDouble(i -> i).toArray();
         long[] iterationTimesArr = iterationTimes.stream().mapToLong(i -> i).toArray();
 
-        ArrayList<Short> slaves = computeService.getStatusMaster((short)0).getConnectedSlaves();
-        double memUsage = 0.0;
-        int l = 0;
-        long edgeCnt = 0;
+
+        /*int l = 0;
+
         for (short slave : slaves){
             memUsage += chunkService.status().getStatus(slave).getHeapStatus().getUsedSize().getMBDouble();
             edgeCnt += voteChunks[l].getEdgeCnt();
-        }
+        }*/
 
         //chunkService.get().get(edgeCnt);
         //System.out.println("EdgeCnt:" + edgeCnt.get_value());
+        System.out.println("EdgeCnt:" + edgeCnt);
         PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,filename,N,edgeCnt,DAMPING_FACTOR,THRESHOLD,inputTime,iterationTimesArr,memUsage,roundPRerrArr,locality,meanInDeg);
         jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();
