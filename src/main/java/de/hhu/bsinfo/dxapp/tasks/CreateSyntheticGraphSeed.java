@@ -1,28 +1,23 @@
 package de.hhu.bsinfo.dxapp.tasks;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
-import de.hhu.bsinfo.dxapp.chunk.IntegerChunk;
 import de.hhu.bsinfo.dxapp.chunk.Vertex;
 import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
-import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
-import de.hhu.bsinfo.dxram.chunk.ChunkLocalService;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
-import de.hhu.bsinfo.dxram.job.AbstractJob;
 import de.hhu.bsinfo.dxram.ms.MasterSlaveComputeService;
 import de.hhu.bsinfo.dxram.ms.Signal;
 import de.hhu.bsinfo.dxram.ms.Task;
 import de.hhu.bsinfo.dxram.ms.TaskContext;
-import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
-import de.hhu.bsinfo.dxutils.RandomUtils;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
-import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
+
+/**
+ * Creates a synthetic Graph distributed over the Slave Peers
+ */
 
 public class CreateSyntheticGraphSeed implements Task {
 
@@ -30,23 +25,26 @@ public class CreateSyntheticGraphSeed implements Task {
     private double m_locality;
     private int m_inDegMean;
     private int m_randomSeed;
-    private long m_edgeCntCID;
 
     public CreateSyntheticGraphSeed() {}
 
+    /**
+     * @param p_vertexCnt Number of vertices in the Graph
+     * @param p_locality probability of drawing an edge from a vertex (Chunk) located on the same Node
+     * @param p_inDegMean Expected value of the exponential distribution from which to draw for the number of inedges
+     * @param p_randomSeed Seed for the Random variable (consistency among Slaves)
+     */
 
-    public CreateSyntheticGraphSeed(int p_vertexCnt, double p_locality, int p_inDegMean, long p_edgeCntCID ,int p_randomSeed){
+    public CreateSyntheticGraphSeed(int p_vertexCnt, double p_locality, int p_inDegMean, int p_randomSeed){
         m_vertexCnt = p_vertexCnt;
         m_inDegMean = p_inDegMean;
         m_locality = p_locality;
-        m_edgeCntCID = p_edgeCntCID;
         m_randomSeed = p_randomSeed;
     }
 
     @Override
     public int execute(TaskContext taskContext) {
         ChunkService chunkService = taskContext.getDXRAMServiceAccessor().getService(ChunkService.class);
-        MasterSlaveComputeService computeService = taskContext.getDXRAMServiceAccessor().getService(MasterSlaveComputeService.class);
 
         short[] slaveIDs = taskContext.getCtxData().getSlaveNodeIds();
         short mySlaveIndex = taskContext.getCtxData().getSlaveId();
@@ -58,13 +56,14 @@ public class CreateSyntheticGraphSeed implements Task {
 
         Random random;
         Random indgree = new Random();
+
         if (m_randomSeed != 0){
             random = new Random(m_randomSeed);
-            indgree = new Random(m_randomSeed+1);
+            indgree = new Random(m_randomSeed + 1);
         } else {
             random = new Random();
         }
-        int cnt = 0;
+
         int edges = 0;
 
         for (int i = 0; i < slaveIDs.length; i++) {
@@ -78,23 +77,31 @@ public class CreateSyntheticGraphSeed implements Task {
                 HashSet<Long> randCIDs = new HashSet<>();
                 int k = 0;
                 int indeg = getExpRandNumber(indgree);
+
                 if(indeg >= m_vertexCnt){
                     indeg = m_vertexCnt - 1;
                 }
+
                 edges +=  indeg;
+
                 while(k < indeg) {
                     long randCID = randCID(j + 1, m_locality, random, i, slaveIDs, slaveLocalVertexCnts);
+
                     if (randCIDs.add(randCID)) {
                         if (ChunkID.getCreatorID(randCID) == myNodeID) {
                             int lid = (int) ChunkID.getLocalID(randCID) - 1;
+
                             if (vertices[lid] == null) {
                                 vertices[lid] = new Vertex();
                             }
+
                             vertices[lid].increment_outDeg();
                         }
+
                         if (mySlaveIndex == i) {
                             vertices[j].addInEdge(randCID);
                         }
+
                         k++;
                     }
                 }
@@ -104,85 +111,27 @@ public class CreateSyntheticGraphSeed implements Task {
         chunkService.create().create(myNodeID,vertices);
         chunkService.put().put(vertices);
 
-        for (int i = 0; i < vertices.length; i++) {
+        /*for (int i = 0; i < vertices.length; i++) {
             System.out.print(ChunkID.toHexString(vertices[i].getID()) + " " + vertices[i].getOutDeg() + " ++ ");
 
             for (int j = 0; j < vertices[i].getM_inEdges().length; j++) {
                 System.out.print(ChunkID.toHexString(vertices[i].getM_inEdges()[j]) + " ");
             }
             System.out.println();
-        }
-        //System.out.println(edges);
+        }*/
+
         VoteChunk vc = new VoteChunk(m_vertexCnt,edges);
         chunkService.create().create(myNodeID,vc);
         chunkService.put().put(vc);
-        //System.out.println(vc.getID());
 
         return 0;
     }
 
-    private long CIDfromGID(long p_gid, ArrayList<Short> p_slaveIDs, int[] p_slaveLocalCnts){
-        int count = 0;
-        long lid = p_gid;
-        int slaveIndex = 0;
-        for (int i = 0; i < p_slaveLocalCnts.length; i++) {
-            count += p_slaveLocalCnts[i];
-            if(p_gid >= count){
-                lid = lid - p_slaveLocalCnts[i];
-                slaveIndex = i;
-            }
-        }
-        lid += 1;
-        short nid = p_slaveIDs.get(slaveIndex);
-        return ChunkID.getChunkID(nid,lid);
-    }
-
-    private long randGID(int p_Id, Random p_random, double p_locality, ArrayList<Short> p_slaveIDs, int p_mySlaveID, int[] p_slaveLocalCnts){
-
-        ArrayList<Integer> otherSlaveIndx = new ArrayList<>();
-        for (int i = 0; i < p_slaveIDs.size(); i++) {
-            if(i != p_mySlaveID){
-                otherSlaveIndx.add(i);
-            }
-        }
-        if(p_slaveIDs.size() == 1){
-            otherSlaveIndx.add(p_mySlaveID);
-        }
-
-        int[] cuts = new int[p_slaveLocalCnts.length + 1];
-        cuts[0] = 0;
-        for (int i = 1; i < cuts.length; i++) {
-            cuts[i] = cuts[i - 1] + p_slaveLocalCnts[i - 1];
-        }
-        int start = cuts[p_mySlaveID];
-        int end = cuts[p_mySlaveID + 1];
-        System.out.println(start + " " + end);
-        int otherNodeIdx;
-        boolean otherNode = false;
-        long gid;
-        if(p_random.nextDouble() <= p_locality){
-            gid = (long) (p_random.nextDouble() * (end - start) + start);
-        } else {
-            otherNodeIdx = p_random.nextInt(otherSlaveIndx.size());
-            if(otherNodeIdx != p_mySlaveID){
-                otherNode = true;
-            }
-            start = cuts[otherNodeIdx];
-            end = cuts[otherNodeIdx + 1];
-            gid = (long) (p_random.nextDouble() * (end - start) + start);
-        }
-        System.out.println(start + " " +end);
-        while (localIndex(gid,p_slaveIDs,p_slaveLocalCnts) == p_Id && !otherNode){
-            gid = (long) (p_random.nextDouble() * (end - start) + start);
-        }
-        return  gid;
-    }
-
     private long randCID(int p_Id, double p_locality, Random p_random, int p_mySlaveID ,short[] p_slaveIDs, int[] p_slaveLocalCnts){
-
         short nid;
         boolean otherID = false;
         int index = p_mySlaveID;
+
         if(p_random.nextDouble() <= p_locality){
             nid = p_slaveIDs[p_mySlaveID];
         } else {
@@ -192,11 +141,9 @@ public class CreateSyntheticGraphSeed implements Task {
         }
 
         long lid = p_random.nextInt(p_slaveLocalCnts[index]) + 1;
-        //long lid = localIndex(gid,p_slaveIDs,p_slaveLocalCnts);
 
         while (lid == p_Id && !otherID){
             lid = p_random.nextInt(p_slaveLocalCnts[index]) + 1;
-            //lid = localIndex(gid,p_slaveIDs,p_slaveLocalCnts);
         }
 
         return ChunkID.getChunkID(nid, lid);
@@ -223,46 +170,11 @@ public class CreateSyntheticGraphSeed implements Task {
         return ret;
     }
 
-    private int getIndex(ArrayList<Short> p_slaveIDs, short p_nid){
-        for (int i = 0; i < p_slaveIDs.size(); i++) {
-            if(p_slaveIDs.get(i) == p_nid){
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private int globalIndex(long p_cid, ArrayList<Short> p_slaveIDs, int[] p_slaveLocalCnts){
-        short nid = ChunkID.getCreatorID(p_cid);
-        long lid = ChunkID.getLocalID(p_cid);
-
-        int index = getIndex(p_slaveIDs, nid);
-        int count = 0;
-        for (int i = 0; i < index; i++) {
-            count += p_slaveLocalCnts[i];
-        }
-        return count + (int) lid - 1;
-    }
-
-    private long localIndex(long gid, ArrayList<Short> p_slaveIDs, int[] p_slaveLocalCnts){
-        int count = 0;
-        long lid = gid;
-        for (int i = 0; i < p_slaveLocalCnts.length; i++) {
-            count += p_slaveLocalCnts[i];
-            if(gid >= count){
-                lid = lid - p_slaveLocalCnts[i];
-            }
-        }
-        return lid;
-
-    }
-
     @Override
     public void exportObject(Exporter exporter) {
         exporter.writeInt(m_vertexCnt);
         exporter.writeInt(m_inDegMean);
         exporter.writeDouble(m_locality);
-        exporter.writeLong(m_edgeCntCID);
         exporter.writeInt(m_randomSeed);
     }
 
@@ -271,18 +183,16 @@ public class CreateSyntheticGraphSeed implements Task {
         m_vertexCnt = importer.readInt(m_vertexCnt);
         m_inDegMean = importer.readInt(m_inDegMean);
         m_locality = importer.readDouble(m_locality);
-        m_edgeCntCID = importer.readLong(m_edgeCntCID);
         m_randomSeed = importer.readInt(m_randomSeed);
     }
 
     @Override
     public int sizeofObject() {
-        return Integer.BYTES * 3 + Double.BYTES + Long.BYTES;
+        return Integer.BYTES * 3 + Double.BYTES;
     }
 
 
     @Override
     public void handleSignal(Signal signal) {
-
     }
 }

@@ -3,15 +3,10 @@ package de.hhu.bsinfo.dxapp.tasks;
 import de.hhu.bsinfo.dxapp.chunk.Vertex;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxram.boot.BootService;
-import de.hhu.bsinfo.dxram.chunk.ChunkLocalService;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
-import de.hhu.bsinfo.dxapp.chunk.PageRankInVertex;
-import de.hhu.bsinfo.dxram.ms.MasterSlaveComputeService;
 import de.hhu.bsinfo.dxram.ms.Signal;
 import de.hhu.bsinfo.dxram.ms.Task;
 import de.hhu.bsinfo.dxram.ms.TaskContext;
-import de.hhu.bsinfo.dxram.nameservice.NameserviceEntryStr;
-import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
 import de.hhu.bsinfo.dxutils.NodeID;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
@@ -19,32 +14,33 @@ import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import java.math.BigDecimal;
 
+/**
+ * Task to write the final PageRank values to File
+ */
+
 public class PRInfoTask implements Task {
 
-    String m_outDir;
-    int m_round;
-    boolean m_synthetic;
+    private String m_outDir;
+    private int m_round;
+    private boolean m_synthetic;
 
     public PRInfoTask(){
     }
+
+    /**
+     * @param p_outDir Directory to write the files
+     * @param p_round which PageRank Variable to read
+     * @param p_synthetic true if synthetic Graph created with CreatSyntheticGraphSeed Task
+     */
 
     public PRInfoTask(String p_outDir, int p_round, boolean p_synthetic){
         m_outDir = p_outDir;
@@ -53,27 +49,27 @@ public class PRInfoTask implements Task {
     }
 
     @Override
-    public int execute(TaskContext p_ctx) {
-        ChunkService chunkService = p_ctx.getDXRAMServiceAccessor().getService(ChunkService.class);
-        BootService bootService = p_ctx.getDXRAMServiceAccessor().getService(BootService.class);
+    public int execute(TaskContext taskContext) {
+        ChunkService chunkService = taskContext.getDXRAMServiceAccessor().getService(ChunkService.class);
+        BootService bootService = taskContext.getDXRAMServiceAccessor().getService(BootService.class);
+
         String outPath = m_outDir + "/" + NodeID.toHexStringShort(bootService.getNodeID()) + ".pageRank";
         System.out.println(outPath);
         File outFile = new File(outPath);
+
         try {
             outFile.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Path p = Paths.get(outPath);
 
-        short mySlaveNodeID = p_ctx.getCtxData().getOwnNodeId();
+        Path p = Paths.get(outPath);
 
         Iterator<Long> localchunks = chunkService.cidStatus().getAllLocalChunkIDRanges(bootService.getNodeID()).iterator();
         localchunks.next();
-
         Vertex[] localVertices = new Vertex[(int)chunkService.status().getStatus(bootService.getNodeID()).getLIDStoreStatus().getCurrentLIDCounter() - 1];
+
         for (int i = 0; i < localVertices.length; i++) {
-            //localVertices[i] = new Vertex(ChunkID.getChunkID(mySlaveNodeID,(short) i + 1));
             localVertices[i] = new Vertex(localchunks.next());
         }
 
@@ -83,13 +79,11 @@ public class PRInfoTask implements Task {
         {
             Stream.of(localVertices).forEach(localVertex -> {
                 try {
-                    //printInfo(localVertex, writer);
                     if (!m_synthetic){
                         writer.write(localVertex.get_name() + " " + BigDecimal.valueOf(localVertex.getPageRank(m_round)).toPlainString() + "\n");
 
                     } else {
                         writer.write(ChunkID.toHexString(localVertex.getID()) + " " + BigDecimal.valueOf(localVertex.getPageRank(m_round)).toPlainString() + "\n");
-
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -100,14 +94,6 @@ public class PRInfoTask implements Task {
         }
 
         return 0;
-    }
-
-    public void printInfo(Vertex vertex, Writer writer) throws IOException {
-        writer.write(vertex.get_name() + " - " + ChunkID.toHexString(vertex.getID()) + " - " + vertex.getOutDeg() + " : ");
-        for (int i = 0; i < vertex.getM_inEdges().length; i++) {
-            writer.write(ChunkID.toHexString(vertex.getM_inEdges()[i]) + " ");
-        }
-        writer.write("\n");
     }
 
     @Override

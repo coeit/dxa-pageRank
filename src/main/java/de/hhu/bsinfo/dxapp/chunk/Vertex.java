@@ -5,11 +5,14 @@ import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
 import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 
+/**
+ * Chunk Object to save a Vertex from the Graph
+ */
+
 public class Vertex extends AbstractChunk {
-    //private int[] m_inEdges = new int[0];
+
     private long[] m_inEdges = new long[0];
     private double[] m_pageRank = new double[2];
     private int m_outDeg = 0;

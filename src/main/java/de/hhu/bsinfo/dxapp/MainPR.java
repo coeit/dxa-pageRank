@@ -8,12 +8,9 @@ import java.util.Date;
 import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxram.app.AbstractApplication;
-//import de.hhu.bsinfo.dxram.app.Application;
 import de.hhu.bsinfo.dxram.boot.BootService;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
-import de.hhu.bsinfo.dxapp.chunk.IntegerChunk;
 import de.hhu.bsinfo.dxram.engine.DXRAMVersion;
-//import de.hhu.bsinfo.dxram.function.PRInputFunction;
 import de.hhu.bsinfo.dxram.generated.BuildConfig;
 import de.hhu.bsinfo.dxapp.jobs.*;
 import de.hhu.bsinfo.dxram.job.*;
@@ -44,7 +41,7 @@ public class MainPR extends AbstractApplication {
 
         if (p_args.length < 6){
             System.out.println("Not enough Arguments ... shutting down");
-            System.out.println("Arguments: int vertexcnt double dampingfactor double errorthreshold int maxrounds boolean printPageRanks (String graphfile) / (double locality int MeanIndegree (int randomSeed))");
+            System.out.println("Arguments: int vertexcnt double dampingfactor double errorthreshold int maxrounds boolean printPageRanks (String graphfile) / (double locality int MeanIndegree int randomSeed)");
 
             signalShutdown();
         }
@@ -87,7 +84,7 @@ public class MainPR extends AbstractApplication {
         int meanInDeg = 0;
         if(p_args.length == 6) {
             filename = p_args[5];
-            ReadLumpInEdgeListTask readLumpInEdgeListTask = new ReadLumpInEdgeListTask(filename, N, 1);
+            ReadLumpInEdgeListTask readLumpInEdgeListTask = new ReadLumpInEdgeListTask(filename, N);
             TaskScript inputTaskScript = new TaskScript(readLumpInEdgeListTask);
             TaskScriptState inputState = computeService.submitTaskScript(inputTaskScript, (short) 0);
             stopwatch.start();
@@ -104,17 +101,13 @@ public class MainPR extends AbstractApplication {
             CreateSyntheticGraphSeed createSyntheticGraph;
             locality = Double.parseDouble(p_args[5]);
             meanInDeg = Integer.parseInt(p_args[6]);
-
-            stopwatch.start();
-            if(p_args.length == 8){
-                createSyntheticGraph = new CreateSyntheticGraphSeed(N, locality, meanInDeg, 1, Integer.parseInt(p_args[7]));
-            } else {
-                createSyntheticGraph = new CreateSyntheticGraphSeed(N,locality, meanInDeg, 1, 0);
-            }
-
+            int randomSeed = Integer.parseInt(p_args[7]);
+            createSyntheticGraph = new CreateSyntheticGraphSeed(N, locality, meanInDeg, randomSeed);
             TaskScript inputTaskScript = new TaskScript(createSyntheticGraph);
+            stopwatch.start();
             TaskScriptState inputState = computeService.submitTaskScript(inputTaskScript, (short) 0);
             stopwatch.start();
+
             while (!inputState.hasTaskCompleted()) {
                 try {
                     Thread.sleep(100);
@@ -122,11 +115,12 @@ public class MainPR extends AbstractApplication {
 
                 }
             }
+
             stopwatch.stop();
         }
 
         long inputTime = stopwatch.getTime();
-        double memUsage = 0.0;
+        long memUsage = 0;
         long edgeCnt = 0;
         System.out.println("GRAPH INPUT DONE...");
 
@@ -266,6 +260,7 @@ public class MainPR extends AbstractApplication {
         //chunkService.get().get(edgeCnt);
         //System.out.println("EdgeCnt:" + edgeCnt.get_value());
         //System.out.println("EdgeCnt:" + edgeCnt);
+        double memUseMB = (double) memUsage / Math.pow(1024,2);
         PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,filename,N,edgeCnt,DAMPING_FACTOR,THRESHOLD,inputTime,iterationTimesArr,memUsage,roundPRerrArr,locality,meanInDeg);
         jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();

@@ -3,55 +3,50 @@ package de.hhu.bsinfo.dxapp.tasks;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 
-import de.hhu.bsinfo.dxapp.chunk.IntegerChunk;
-import de.hhu.bsinfo.dxapp.chunk.LocalDanglingChunks;
-import de.hhu.bsinfo.dxapp.chunk.LocalNonDanglingChunks;
 import de.hhu.bsinfo.dxapp.chunk.Vertex;
 import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
-import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxram.chunk.ChunkLocalService;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
-import de.hhu.bsinfo.dxram.ms.MasterSlaveComputeService;
 import de.hhu.bsinfo.dxram.ms.Signal;
 import de.hhu.bsinfo.dxram.ms.Task;
 import de.hhu.bsinfo.dxram.ms.TaskContext;
-import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
 import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
+
+/**
+ * Reads an edgelist file into Chunks
+ */
 
 public class ReadLumpInEdgeListTask implements Task {
 
     private String m_file;
     private int m_vertexCnt;
-    private long m_edgeCntCID;
 
     public ReadLumpInEdgeListTask(){}
 
-    public ReadLumpInEdgeListTask(String p_file, int p_vertexCnt, long p_edgeCntCID){
+    /**
+     * @param p_file File to Read
+     * @param p_vertexCnt Total number of vertices in the file
+     */
+
+    public ReadLumpInEdgeListTask(String p_file, int p_vertexCnt){
         m_file = p_file;
         m_vertexCnt = p_vertexCnt;
-        m_edgeCntCID = p_edgeCntCID;
     }
 
     @Override
     public int execute(TaskContext taskContext) {
         ChunkService chunkService = taskContext.getDXRAMServiceAccessor().getService(ChunkService.class);
         ChunkLocalService chunkLocalService = taskContext.getDXRAMServiceAccessor().getService(ChunkLocalService.class);
-        MasterSlaveComputeService computeService = taskContext.getDXRAMServiceAccessor().getService(MasterSlaveComputeService.class);
-        NameserviceService nameService = taskContext.getDXRAMServiceAccessor().getService(NameserviceService.class);
 
         short mySlaveID = taskContext.getCtxData().getSlaveId();
         short myNodeID = taskContext.getCtxData().getOwnNodeId();
-        System.out.println("myID:" + mySlaveID);
         short[] slaveIDs = taskContext.getCtxData().getSlaveNodeIds();
-
         int[] outDegrees = new int[m_vertexCnt];
         Vertex[] localVertices = new Vertex[localVertexCnt(m_vertexCnt,mySlaveID,slaveIDs.length)];
-        System.out.println("LocalVertices: " + localVertices.length);
         int vertexNum = 0;
         int localVertexCount = 0;
         int edges = 0;
@@ -60,6 +55,7 @@ public class ReadLumpInEdgeListTask implements Task {
 
             while ((line = br.readLine()) != null){
                 String[] split = line.split(" ");
+
                 if (vertexNum % slaveIDs.length == mySlaveID){
                     localVertices[localVertexCount] = new Vertex(vertexNum + 1, m_vertexCnt);
                     localVertexCount++;
@@ -73,6 +69,7 @@ public class ReadLumpInEdgeListTask implements Task {
                 for (int i = 0; i < split.length; i++) {
                     outDegrees[Integer.parseInt(split[i]) - 1]++;
                 }
+
                 edges += split.length;
                 vertexNum++;
             }
@@ -86,21 +83,16 @@ public class ReadLumpInEdgeListTask implements Task {
         localVertexCount = 0;
         vertexNum = 0;
         int inVertex;
-        ArrayList<Long> localDanglingChunks = new ArrayList<>();
-        ArrayList<Long> localNonDanglingChunks = new ArrayList<>();
         try(BufferedReader br = new BufferedReader(new FileReader(m_file))){
             String line;
 
             while ((line = br.readLine()) != null){
                 if (vertexNum % slaveIDs.length == mySlaveID){
-
                     localVertices[localVertexCount].setOutDeg(outDegrees[vertexNum]);
                     localVertices[localVertexCount].invokeVertexPR(m_vertexCnt);
-
                     String[] split = line.split(" ");
-                    if (outDegrees[vertexNum] != 0){
-                        localNonDanglingChunks.add(correspondingChunkID(vertexNum + 1, slaveIDs));
 
+                    if (outDegrees[vertexNum] != 0){
                         if (Integer.parseInt(split[0]) == 0){
                             vertexNum++;
                             localVertexCount++;
@@ -109,13 +101,12 @@ public class ReadLumpInEdgeListTask implements Task {
 
                         for (int i = 0; i < split.length; i++) {
                             inVertex = Integer.parseInt(split[i]);
+
                             if (outDegrees[inVertex - 1] != 0){
                                 localVertices[localVertexCount].addInEdge(correspondingChunkID(inVertex,slaveIDs));
                             }
                         }
                     } else {
-                        localDanglingChunks.add(correspondingChunkID(vertexNum + 1, slaveIDs));
-
                         if (Integer.parseInt(split[0]) == 0){
                             localVertexCount++;
                             vertexNum++;
@@ -129,23 +120,17 @@ public class ReadLumpInEdgeListTask implements Task {
                     }
                     localVertexCount++;
                 }
-
-
                 vertexNum++;
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         System.out.println("Vertices created!");
         chunkLocalService.createLocal().create(localVertices);
         chunkService.put().put(localVertices);
         System.out.println("Chunks created!");
-
-        IntegerChunk edgeCnt = new IntegerChunk(m_edgeCntCID);
-        chunkService.get().get(edgeCnt, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
-        edgeCnt.increment(edges);
-        chunkService.put().put(edgeCnt, ChunkLockOperation.WRITE_LOCK_REL_POST_OP);
 
         /*for (int i = 0; i < localVertices.length; i++) {
             System.out.print(localVertices[i].get_name() + " " + ChunkID.toHexString(localVertices[i].getID()) + " " + localVertices[i].getOutDeg() + " ++ ");
@@ -159,35 +144,6 @@ public class ReadLumpInEdgeListTask implements Task {
         VoteChunk vc = new VoteChunk(m_vertexCnt,edges);
         chunkService.create().create(myNodeID,vc);
         chunkService.put().put(vc);
-        //System.out.println(vc.getID());
-
-        /*LocalNonDanglingChunks ndChunks = new LocalNonDanglingChunks(localNonDanglingChunks.stream().mapToLong(i -> i).toArray());
-        LocalDanglingChunks dChunks = new LocalDanglingChunks(localDanglingChunks.stream().mapToLong(i -> i).toArray());
-
-        chunkLocalService.createLocal().create(ndChunks);
-        nameService.register(ndChunks,mySlaveID + "nd");
-        chunkService.put().put(ndChunks);
-        //System.out.println(ndChunks.getID());
-
-        chunkLocalService.createLocal().create(dChunks);
-        nameService.register(dChunks,mySlaveID + "d");
-        chunkService.put().put(dChunks);
-
-
-        System.out.println("ChunkLists created!");
-        System.out.println("NonDangling: " + localNonDanglingChunks.size() + ", Dangling: " + localDanglingChunks.size());
-        */
-        /*System.out.println("NonDangling:");
-        for (int i = 0; i < ndChunks.getLocalNonDanglingChunks().length; i++) {
-            System.out.print(ChunkID.toHexString(ndChunks.getLocalNonDanglingChunks()[i]) + " ");
-        }
-        System.out.println();
-
-        System.out.println("Dangling:");
-        for (int i = 0; i < dChunks.getLocalDanglingChunks().length; i++) {
-            System.out.print(ChunkID.toHexString(dChunks.getLocalDanglingChunks()[i]) + " ");
-        }
-        System.out.println();*/
 
         return 0;
     }
@@ -214,21 +170,19 @@ public class ReadLumpInEdgeListTask implements Task {
     }
 
     @Override
-    public void exportObject(Exporter p_exporter) {
-        p_exporter.writeString(m_file);
-        p_exporter.writeInt(m_vertexCnt);
-        p_exporter.writeLong(m_edgeCntCID);
+    public void exportObject(Exporter exporter) {
+        exporter.writeString(m_file);
+        exporter.writeInt(m_vertexCnt);
     }
 
     @Override
-    public void importObject(Importer p_importer) {
-        m_file = p_importer.readString(m_file);
-        m_vertexCnt = p_importer.readInt(m_vertexCnt);
-        m_edgeCntCID = p_importer.readLong(m_edgeCntCID);
+    public void importObject(Importer importer) {
+        m_file = importer.readString(m_file);
+        m_vertexCnt = importer.readInt(m_vertexCnt);
     }
 
     @Override
     public int sizeofObject() {
-        return ObjectSizeUtil.sizeofString(m_file) + Integer.BYTES + Long.BYTES;
+        return ObjectSizeUtil.sizeofString(m_file) + Integer.BYTES;
     }
 }
