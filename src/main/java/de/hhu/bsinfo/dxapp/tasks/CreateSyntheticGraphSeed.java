@@ -68,21 +68,21 @@ public class CreateSyntheticGraphSeed implements Task {
 
         for (int i = 0; i < slaveIDs.length; i++) {
             for (int j = 0; j < slaveLocalVertexCnts[i]; j++) {
-                if(mySlaveIndex == i){
-                    if (vertices[j] == null){
-                        vertices[j] = new Vertex();
-                    }
-                }
-
-                HashSet<Long> randCIDs = new HashSet<>();
-                int k = 0;
                 int indeg = getExpRandNumber(indgree);
 
                 if(indeg >= m_vertexCnt){
                     indeg = m_vertexCnt - 1;
                 }
 
-                edges +=  indeg;
+                if(mySlaveIndex == i){
+                    if (vertices[j] == null){
+                        vertices[j] = new Vertex();
+                    }
+                    edges += indeg;
+                }
+
+                HashSet<Long> randCIDs = new HashSet<>();
+                int k = 0;
 
                 while(k < indeg) {
                     long randCID = randCID(j + 1, m_locality, random, i, slaveIDs, slaveLocalVertexCnts);
