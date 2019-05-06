@@ -132,6 +132,10 @@ public class CreateSyntheticGraphSeed implements Task {
         boolean otherID = false;
         int index = p_mySlaveID;
 
+        if(p_slaveIDs.length == 1){
+            p_locality = 1;
+        }
+
         if(p_random.nextDouble() <= p_locality){
             nid = p_slaveIDs[p_mySlaveID];
         } else {

@@ -261,7 +261,7 @@ public class MainPR extends AbstractApplication {
         //System.out.println("EdgeCnt:" + edgeCnt.get_value());
         //System.out.println("EdgeCnt:" + edgeCnt);
         double memUseMB = (double) memUsage / Math.pow(1024,2);
-        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,filename,N,edgeCnt,DAMPING_FACTOR,THRESHOLD,inputTime,iterationTimesArr,memUsage,roundPRerrArr,locality,meanInDeg);
+        PrStatisticsJob prStatisticsJob = new PrStatisticsJob(outDir,filename,N,edgeCnt,DAMPING_FACTOR,THRESHOLD,inputTime,iterationTimesArr,memUseMB,roundPRerrArr,locality,meanInDeg);
         jobService.pushJobRemote(prStatisticsJob, computeService.getStatusMaster((short) 0).getConnectedSlaves().get(0));
         jobService.waitForAllJobsToFinish();
 
