@@ -111,14 +111,14 @@ public class CreateSyntheticGraphSeed implements Task {
         chunkService.create().create(myNodeID,vertices);
         chunkService.put().put(vertices);
 
-        /*for (int i = 0; i < vertices.length; i++) {
+        for (int i = 0; i < vertices.length; i++) {
             System.out.print(ChunkID.toHexString(vertices[i].getID()) + " " + vertices[i].getOutDeg() + " ++ ");
 
             for (int j = 0; j < vertices[i].getM_inEdges().length; j++) {
                 System.out.print(ChunkID.toHexString(vertices[i].getM_inEdges()[j]) + " ");
             }
             System.out.println();
-        }*/
+        }
 
         VoteChunk vc = new VoteChunk(m_vertexCnt,edges);
         chunkService.create().create(myNodeID,vc);
