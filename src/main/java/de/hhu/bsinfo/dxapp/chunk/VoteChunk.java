@@ -3,9 +3,10 @@ package de.hhu.bsinfo.dxapp.chunk;
 import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
-import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 
-import jdk.nashorn.internal.objects.annotations.Getter;
+/**
+ * Chunk to store Metadata
+ */
 
 public class VoteChunk extends AbstractChunk {
 
