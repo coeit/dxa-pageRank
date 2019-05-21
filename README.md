@@ -15,7 +15,7 @@ Licensed under the [GNU General Public License](LICENSE.md).
 - to deploy DXRAM instances via cdepl clone the [repository](https://github.com/hhu-bsinfo/cdepl) and follow the documentation [here](https://github.com/hhu-bsinfo/cdepl/blob/master/README.md).
 
 ## dxa-pageRank
-- clone the repository and build with:
+- clone the repository and build with (after building DXRAM):
 ```
 build.sh
 ```
@@ -35,8 +35,10 @@ dxa-pageRanks needs the following parameters in this order to run correctly:
 - Threshold: (double) Error Threshold when the Algorithm converges
 - max Rounds: (int) maximum Number of pageRank Iterations
 - print pageRanks: (boolean) Create the output Files for the final pageRank values
+
 Either (Graphfile):
 - Graphfile: (String) Path to the Graphfile
+
 Or (Synthetic Graph):
 - Locality: (double) Degree of grap partioning
 - mean indegree: (int) Expected value of the exponential distribution of indegrees
