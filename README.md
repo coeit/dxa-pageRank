@@ -48,6 +48,7 @@ Example call from DXterminal:
 ```
 apprun ~/dxram/plugins/dxa-pageRank.jar 1000000 0.85 1e-5 50 true 0.6 6 21
 ```
+will create a synthetic graph during runtime with 1 Million vertices, a mean indegree of 6, a locality of 60% and run the PageRank algorithm with damping factor 0.85 and convergence Threshold 1e-5 for a maximum of 50 iterations.
 
 # Graph Input Format
 List of incoming vertices. Ordered numerically, starting from 1 (line 1 is vertex 1). 0 means no incoming edges.
