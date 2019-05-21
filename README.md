@@ -2,10 +2,6 @@
 This DXRAM application provides a pageRank implementaion for the in-memory key-value Store 
 [DXRAM](https://github.com/hhu-bsinfo/dxram/).
 
-# License
-Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems.
-Licensed under the [GNU General Public License](LICENSE.md).
-
 # Installation
 ## DXRAM / DXapps / DXterminal
 - clone the [DXRAM](https://github.com/hhu-bsinfo/dxram/) repository and follow the documentation [here](https://github.com/hhu-bsinfo/dxram/blob/master/doc/QuickStart.md). dxa-pageRank is working with version 0.7.0
