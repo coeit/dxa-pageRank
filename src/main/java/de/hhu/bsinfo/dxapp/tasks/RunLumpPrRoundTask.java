@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.DoubleAdder;
 import java.util.stream.Stream;
 
 import de.hhu.bsinfo.dxapp.chunk.Vertex;
-import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
+import de.hhu.bsinfo.dxapp.chunk.MetaChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxram.boot.BootService;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
@@ -64,9 +64,9 @@ public class RunLumpPrRoundTask implements Task {
 
         chunkService.get().get(localVertices);
 
-        VoteChunk voteChunk = new VoteChunk(ChunkID.getChunkID(mySlaveNodeID,localVertices.length + 1));
-        chunkService.get().get(voteChunk);
-        double danglingPR = voteChunk.getPRsum();
+        MetaChunk metaChunk = new MetaChunk(ChunkID.getChunkID(mySlaveNodeID,localVertices.length + 1));
+        chunkService.get().get(metaChunk);
+        double danglingPR = metaChunk.getPRsum();
 
         if(!m_calcDanglingPR){
             Stream.of(localVertices).parallel().forEach(localVertex -> {
@@ -81,9 +81,9 @@ public class RunLumpPrRoundTask implements Task {
                 }
             });
         }
-        voteChunk.setPRsum(m_PRSum.sum());
-        voteChunk.setPRerr(m_PRErr.sum());
-        chunkService.put().put(voteChunk);
+        metaChunk.setPRsum(m_PRSum.sum());
+        metaChunk.setPRerr(m_PRErr.sum());
+        chunkService.put().put(metaChunk);
         return 0;
     }
 
@@ -110,8 +110,6 @@ public class RunLumpPrRoundTask implements Task {
         if(m_calcDanglingPR){
             p_vertex.setPageRank(m_round);
         }
-
-        //System.out.println(p_vertex.get_name() + " " + ChunkID.toHexString(p_vertex.getID()) + ": " + p_vertex.getPageRank(Math.abs(m_round - 1)) + " " + p_vertex.getPageRank(m_round));
 
         p_chunkService.put().put(p_vertex);
 

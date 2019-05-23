@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
+import de.hhu.bsinfo.dxapp.chunk.MetaChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxram.app.AbstractApplication;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
@@ -40,8 +40,6 @@ public class MainPR extends AbstractApplication {
         if (p_args.length < 6){
             System.out.println("Not enough Arguments ... shutting down");
             System.out.println("Arguments: int vertexcnt double dampingfactor double errorthreshold int maxrounds boolean printPageRanks (String graphfile) / (double locality int MeanIndegree int randomSeed)");
-
-            signalShutdown();
         }
 
         int N = Integer.parseInt(p_args[0]);
@@ -62,12 +60,16 @@ public class MainPR extends AbstractApplication {
         String filename = "SYNTHETIC";
         double locality = 0.0;
         int meanInDeg = 0;
+
+        /**Graph Input (Either File or Synthetic)**/
+
         if(p_args.length == 6) {
             filename = p_args[5];
             ReadLumpInEdgeListTask readLumpInEdgeListTask = new ReadLumpInEdgeListTask(filename, N);
             TaskScript inputTaskScript = new TaskScript(readLumpInEdgeListTask);
             TaskScriptState inputState = computeService.submitTaskScript(inputTaskScript, (short) 0);
             stopwatch.start();
+
             while (!inputState.hasTaskCompleted()) {
                 try {
                     Thread.sleep(100);
@@ -103,13 +105,13 @@ public class MainPR extends AbstractApplication {
         long memUsage = 0;
         long edgeCnt = 0;
         System.out.println("GRAPH INPUT DONE...");
-        VoteChunk[] voteChunks = new VoteChunk[connectedSlaves.size()];
+        MetaChunk[] metaChunks = new MetaChunk[connectedSlaves.size()];
 
         for (int i = 0; i < connectedSlaves.size(); i++) {
-            voteChunks[i] = new VoteChunk(ChunkID.getChunkID(connectedSlaves.get(i),localVertexCnt(N,i,connectedSlaves.size()) + 1));
-            chunkService.get().get(voteChunks[i]);
+            metaChunks[i] = new MetaChunk(ChunkID.getChunkID(connectedSlaves.get(i),localVertexCnt(N,i,connectedSlaves.size()) + 1));
+            chunkService.get().get(metaChunks[i]);
             memUsage += chunkService.status().getStatus(connectedSlaves.get(i)).getHeapStatus().getUsedSize().getBytes();
-            edgeCnt += voteChunks[i].getEdgeCnt();
+            edgeCnt += metaChunks[i].getEdgeCnt();
         }
 
         System.out.println("VERTICES: " + N);
@@ -130,6 +132,8 @@ public class MainPR extends AbstractApplication {
         ArrayList<Long> iterationTimes = new ArrayList<>();
         TaskScriptState state;
 
+        /**PageRank Iterations**/
+
         for (int i = 0; i < MAX_ROUNDS; i++) {
             danglingPR = 1;
             PRerr = 0;
@@ -149,18 +153,18 @@ public class MainPR extends AbstractApplication {
                 }
             }
 
-            chunkService.get().get(voteChunks);
+            chunkService.get().get(metaChunks);
 
-            for (VoteChunk voteChunk : voteChunks) {
-                PRerr += voteChunk.getPRerr();
-                danglingPR = danglingPR - voteChunk.getPRsum();
+            for (MetaChunk metaChunk : metaChunks) {
+                PRerr += metaChunk.getPRerr();
+                danglingPR = danglingPR - metaChunk.getPRsum();
             }
 
-            for (VoteChunk voteChunk : voteChunks) {
-                voteChunk.setPRsum(danglingPR);
+            for (MetaChunk metaChunk : metaChunks) {
+                metaChunk.setPRsum(danglingPR);
             }
 
-            chunkService.put().put(voteChunks);
+            chunkService.put().put(metaChunks);
             stopwatch.stop();
 
             roundPRerr.add(PRerr);
@@ -178,6 +182,8 @@ public class MainPR extends AbstractApplication {
 
         }
 
+        /**Restore dangling PageRanks**/
+
         RunLumpPrRoundTask calcDanglingPR = new RunLumpPrRoundTask(N,DAMPING_FACTOR,NumRounds % 2,true);
         TaskScript taskScriptCalcDanglingPR = new TaskScript(calcDanglingPR);
         state = computeService.submitTaskScript(taskScriptCalcDanglingPR,(short) 0);
@@ -189,6 +195,8 @@ public class MainPR extends AbstractApplication {
 
             }
         }
+
+        /**print OutputFiles**/
 
         String outDir = createOutputDirs();
 

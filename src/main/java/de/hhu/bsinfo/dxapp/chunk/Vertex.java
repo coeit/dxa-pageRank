@@ -38,11 +38,6 @@ public class Vertex extends AbstractChunk {
         m_pageRank[1] = 1/(double) N;
     }
 
-    public void increment_outDeg(int p_num){
-        m_outDeg += p_num;
-
-    }
-
     public void increment_outDeg(){
         m_outDeg++;
     }
@@ -63,16 +58,8 @@ public class Vertex extends AbstractChunk {
 
     }
 
-    public void addInEdges(final long[] p_neighbors){
-        m_inEdges = p_neighbors;
-    }
-
     public void setPageRank(int p_round){
         m_pageRank[p_round] = m_pageRank[Math.abs(p_round - 1)];
-    }
-
-    public void calcPageRank(int N, double D, double p_sum, int p_round){
-        m_pageRank[p_round] = (1 - D)/(double) N + D * p_sum;
     }
 
     public void calcLumpPageRank(int N, double D, double p_sum, double p_danglingPR ,int p_round){

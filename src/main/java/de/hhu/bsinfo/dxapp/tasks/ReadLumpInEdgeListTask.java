@@ -5,7 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import de.hhu.bsinfo.dxapp.chunk.Vertex;
-import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
+import de.hhu.bsinfo.dxapp.chunk.MetaChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxram.chunk.ChunkLocalService;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
@@ -132,16 +132,7 @@ public class ReadLumpInEdgeListTask implements Task {
         chunkService.put().put(localVertices);
         System.out.println("Chunks created!");
 
-        /*for (int i = 0; i < localVertices.length; i++) {
-            System.out.print(localVertices[i].get_name() + " " + ChunkID.toHexString(localVertices[i].getID()) + " " + localVertices[i].getOutDeg() + " ++ ");
-
-            for (int j = 0; j < localVertices[i].getM_inEdges().length; j++) {
-                System.out.print(ChunkID.toHexString(localVertices[i].getM_inEdges()[j]) + " ");
-            }
-            System.out.println();
-        }*/
-
-        VoteChunk vc = new VoteChunk(m_vertexCnt,edges);
+        MetaChunk vc = new MetaChunk(m_vertexCnt,edges);
         chunkService.create().create(myNodeID,vc);
         chunkService.put().put(vc);
 

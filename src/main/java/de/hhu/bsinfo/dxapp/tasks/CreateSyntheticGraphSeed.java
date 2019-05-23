@@ -1,14 +1,12 @@
 package de.hhu.bsinfo.dxapp.tasks;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 
 import de.hhu.bsinfo.dxapp.chunk.Vertex;
-import de.hhu.bsinfo.dxapp.chunk.VoteChunk;
+import de.hhu.bsinfo.dxapp.chunk.MetaChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
-import de.hhu.bsinfo.dxram.ms.MasterSlaveComputeService;
 import de.hhu.bsinfo.dxram.ms.Signal;
 import de.hhu.bsinfo.dxram.ms.Task;
 import de.hhu.bsinfo.dxram.ms.TaskContext;
@@ -111,16 +109,7 @@ public class CreateSyntheticGraphSeed implements Task {
         chunkService.create().create(myNodeID,vertices);
         chunkService.put().put(vertices);
 
-        /*for (int i = 0; i < vertices.length; i++) {
-            System.out.print(ChunkID.toHexString(vertices[i].getID()) + " " + vertices[i].getOutDeg() + " ++ ");
-
-            for (int j = 0; j < vertices[i].getM_inEdges().length; j++) {
-                System.out.print(ChunkID.toHexString(vertices[i].getM_inEdges()[j]) + " ");
-            }
-            System.out.println();
-        }*/
-
-        VoteChunk vc = new VoteChunk(m_vertexCnt,edges);
+        MetaChunk vc = new MetaChunk(m_vertexCnt,edges);
         chunkService.create().create(myNodeID,vc);
         chunkService.put().put(vc);
 
