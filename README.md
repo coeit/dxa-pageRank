@@ -3,9 +3,9 @@ This DXRAM application provides a pageRank implementaion for the in-memory key-v
 [DXRAM](https://github.com/hhu-bsinfo/dxram/).
 
 # Installation
-## DXRAM / DXapps / DXTerm
+## DXRAM / DXApps / DXTerm
 - clone the [DXRAM](https://github.com/hhu-bsinfo/dxram/) repository and follow the documentation [here](https://github.com/hhu-bsinfo/dxram/blob/master/doc/QuickStart.md). dxa-pageRank is working with version 0.7.0
-- optionally clone the [DXapps](https://github.com/hhu-bsinfo/dxapps) repository and follow the instructions [here](https://github.com/hhu-bsinfo/dxram/blob/master/doc/Applications.md) on how to build and deploy. Build the terminal Application to deploy applications via the Terminal. Instructions [here](https://github.com/hhu-bsinfo/dxapps/blob/master/dxa-terminal/README.md)
+- optionally clone the [DXApps](https://github.com/hhu-bsinfo/dxapps) repository and follow the instructions [here](https://github.com/hhu-bsinfo/dxram/blob/master/doc/Applications.md) on how to build and deploy. Build the terminal Application to deploy applications via the Terminal. Instructions [here](https://github.com/hhu-bsinfo/dxapps/blob/master/dxa-terminal/README.md)
 
 ## cdepl
 - to deploy DXRAM instances via cdepl clone the [repository](https://github.com/hhu-bsinfo/cdepl) and follow the documentation [here](https://github.com/hhu-bsinfo/cdepl/blob/master/README.md).
