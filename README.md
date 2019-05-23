@@ -3,7 +3,7 @@ This DXRAM application provides a pageRank implementaion for the in-memory key-v
 [DXRAM](https://github.com/hhu-bsinfo/dxram/).
 
 # Installation
-## DXRAM / DXapps / DXterminal
+## DXRAM / DXapps / DXTerm
 - clone the [DXRAM](https://github.com/hhu-bsinfo/dxram/) repository and follow the documentation [here](https://github.com/hhu-bsinfo/dxram/blob/master/doc/QuickStart.md). dxa-pageRank is working with version 0.7.0
 - optionally clone the [DXapps](https://github.com/hhu-bsinfo/dxapps) repository and follow the instructions [here](https://github.com/hhu-bsinfo/dxram/blob/master/doc/Applications.md) on how to build and deploy. Build the terminal Application to deploy applications via the Terminal. Instructions [here](https://github.com/hhu-bsinfo/dxapps/blob/master/dxa-terminal/README.md)
 
@@ -40,7 +40,7 @@ Or (Synthetic Graph):
 - mean indegree: (int) Expected value of the exponential distribution of indegrees
 - random Seed: (int) random Seed for the Graph creation
 
-Example call from DXterminal:
+Example call from DXTerm:
 ```
 apprun de.hhu.bsinfo.dxapp.MainPR 1000000 0.85 1e-5 50 true 0.6 6 21
 ```
